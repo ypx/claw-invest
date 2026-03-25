@@ -8,9 +8,7 @@ services:
     envVars:
       - key: CLAW_SECRET
         generateValue: true
+      - key: DATA_DIR
+        value: /opt/render/project/src
       - key: PYTHON_VERSION
         value: 3.11.0
-    disk:
-      name: claw-data
-      mountPath: /data
-      sizeGB: 1

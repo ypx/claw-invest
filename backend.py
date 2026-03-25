@@ -37,8 +37,8 @@ SECRET_KEY = os.getenv("CLAW_SECRET", "claw-super-secret-key-change-in-prod-2026
 ALGORITHM  = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24h
 
-# 数据库路径：优先使用 /data（Render磁盘），否则使用本地
-data_dir = "/data" if os.path.exists("/data") else os.path.dirname(__file__)
+# 数据库路径：优先使用环境变量，否则使用本地
+data_dir = os.getenv("DATA_DIR", os.path.dirname(__file__))
 DB_PATH = os.path.join(data_dir, "claw.db")
 
 # ──────────────────────────────────────────────
