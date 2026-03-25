@@ -5,4 +5,4 @@ passlib==1.7.4
 python-multipart==0.0.6
 pydantic==1.10.13
 bcrypt==4.1.2
-cryptography==41.0.8
+cryptography==42.0.8
