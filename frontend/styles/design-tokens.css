@@ -1,0 +1,274 @@
+/**
+ * Claw 投资决策中心 - 设计令牌
+ * Design Tokens for Claw Investment Center
+ * 
+ * 版本: v1.0
+ * 用途: 统一设计系统的基础变量
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   色彩系统 - Colors
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 品牌色 Brand Colors ── */
+  --gradient-brand: linear-gradient(135deg, #388bfd 0%, #a371f7 100%);
+  --brand-gradient: linear-gradient(135deg, #388bfd 0%, #a371f7 100%);
+  
+  /* 主色 - 科技蓝 */
+  --primary-50:  #e6f0ff;
+  --primary-100: #cce0ff;
+  --primary-200: #99c2ff;
+  --primary-300: #66a3ff;
+  --primary-400: #3385ff;
+  --primary-500: #388bfd;
+  --primary-600: #2a6fd4;
+  --primary-700: #1f53aa;
+  --primary-800: #153880;
+  --primary-900: #0a1c55;
+  
+  /* 辅助色 - 紫罗兰 */
+  --secondary-500: #a371f7;
+  --secondary-600: #8b5cf6;
+  
+  /* ── 功能色 Semantic Colors ── */
+  /* 上涨/成功 - 中国红 */
+  --up: #f85149;
+  --success: #f85149;
+  --success-500: #f85149;
+  --success-100: rgba(248, 81, 73, 0.1);
+  --success-border: rgba(248, 81, 73, 0.3);
+  
+  /* 下跌/危险 - 绿色 */
+  --down: #3fb950;
+  --danger: #3fb950;
+  --danger-500: #3fb950;
+  --danger-100: rgba(63, 185, 80, 0.1);
+  --danger-border: rgba(63, 185, 80, 0.3);
+  
+  /* 警告 - 琥珀 */
+  --warning: #d29922;
+  --warning-500: #d29922;
+  --warning-100: rgba(210, 153, 34, 0.1);
+  --warning-border: rgba(210, 153, 34, 0.3);
+  
+  /* 信息 - 天蓝 */
+  --info: #58a6ff;
+  --info-500: #58a6ff;
+  --info-100: rgba(88, 166, 255, 0.1);
+  --info-border: rgba(88, 166, 255, 0.3);
+  
+  /* 强调色 */
+  --accent-primary: #58a6ff;
+  --accent-secondary: #a371f7;
+  
+  /* ── 中性色 Neutral Colors ── */
+  /* 背景色 */
+  --bg-primary:   #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary:  #1c2230;
+  --bg-elevated:  #21262d;
+  --bg-hover:     #21262d;
+  --bg-input:     #0d1117;
+  --bg-overlay:   rgba(0, 0, 0, 0.7);
+  --bg-accent-subtle: rgba(56, 139, 253, 0.1);
+  --bg-success-subtle: rgba(63, 185, 80, 0.1);
+  
+  /* 旧版兼容 */
+  --bg-page:      #0d1117;
+  --bg-sidebar:   #161b22;
+  --bg-card:      #161b22;
+  --bg-card2:     #1c2230;
+  
+  /* 边框色 */
+  --border-default: #30363d;
+  --border-subtle:  #21262d;
+  --border-accent:  rgba(56, 139, 253, 0.3);
+  --border-success: rgba(63, 185, 80, 0.3);
+  --border-focus:   #388bfd;
+  
+  /* 旧版兼容 */
+  --border:       #30363d;
+  --border-light: #21262d;
+  
+  /* 文字色 */
+  --text-primary:   #e6edf3;
+  --text-secondary: #c9d1d9;
+  --text-tertiary:  #8b949e;
+  --text-inverse:   #0d1117;
+  
+  /* 旧版兼容 */
+  --text-muted:     #7d8590;
+  --text-dim:       #484f58;
+  
+  /* ── 行业分类色 Sector Colors ── */
+  --sector-tech:     #388bfd;
+  --sector-finance:  #a371f7;
+  --sector-health:   #f85149;
+  --sector-consumer: #3fb950;
+  --sector-energy:   #d29922;
+  --sector-industry: #f0883e;
+  --sector-others:   #7d8590;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   字体系统 - Typography
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* 字体族 */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hirano Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  
+  /* 字号 */
+  --font-size-xs:   10px;
+  --font-size-sm:   11px;
+  --font-size-base: 12px;
+  --font-size-md:   13px;
+  --font-size-lg:   14px;
+  --font-size-xl:   15px;
+  --font-size-2xl:  16px;
+  --font-size-3xl:  18px;
+  --font-size-4xl:  20px;
+  --font-size-5xl:  24px;
+  --font-size-6xl:  28px;
+  
+  /* 字重 */
+  --font-normal:   400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+  
+  /* 行高 */
+  --leading-tight:  1.25;
+  --leading-snug:   1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose:  2;
+  
+  /* 预设字体样式 */
+  --text-h1: 700 24px/1.3 var(--font-primary);
+  --text-h2: 600 18px/1.4 var(--font-primary);
+  --text-h3: 600 15px/1.4 var(--font-primary);
+  --text-h4: 600 13px/1.5 var(--font-primary);
+  --text-body: 400 14px/1.6 var(--font-primary);
+  --text-small: 400 12px/1.5 var(--font-primary);
+  --text-xsmall: 500 11px/1.4 var(--font-primary);
+  --text-tiny: 600 10px/1.3 var(--font-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   间距系统 - Spacing
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* 基础间距（4px 倍数） */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  
+  /* 布局尺寸 */
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 64px;
+  --header-height: 56px;
+  --container-max-width: 1440px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   圆角系统 - Border Radius
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --radius-none: 0;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   10px;
+  --radius-2xl:  12px;
+  --radius-3xl:  16px;
+  --radius-full: 9999px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   阴影系统 - Shadows
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* 暗色主题阴影 */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md:  0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg:  0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl:  0 20px 25px rgba(0, 0, 0, 0.6);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.7);
+  
+  /* 光晕效果 */
+  --glow-blue:  0 0 20px rgba(56, 139, 253, 0.3);
+  --glow-green: 0 0 20px rgba(63, 185, 80, 0.3);
+  --glow-red:   0 0 20px rgba(248, 81, 73, 0.3);
+  --glow-purple: 0 0 20px rgba(163, 113, 247, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   过渡动画 - Transitions
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* 时长 */
+  --duration-instant: 0ms;
+  --duration-fast:    150ms;
+  --duration-normal:  200ms;
+  --duration-slow:    300ms;
+  --duration-slower:  500ms;
+  
+  /* 缓动函数 */
+  --ease-linear:    linear;
+  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:       cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce:    cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-spring:    cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* 预设 */
+  --transition-fast:   all var(--duration-fast) var(--ease-in-out);
+  --transition-normal: all var(--duration-normal) var(--ease-in-out);
+  --transition-slow:   all var(--duration-slow) var(--ease-in-out);
+  --transition-bounce: all var(--duration-normal) var(--ease-bounce);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   响应式断点 - Breakpoints
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Z-Index 层级 - Z-Index Scale
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --z-base:       0;
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-fixed:      300;
+  --z-modal-backdrop: 400;
+  --z-modal:      500;
+  --z-popover:    600;
+  --z-tooltip:    700;
+  --z-toast:      800;
+}
