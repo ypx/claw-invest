@@ -1,0 +1,4311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claw · 投资决策中心</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Design Tokens -->
+  <style>
+    :root {
+      /* ── Light Warm Theme ── */
+      
+      /* Background Colors */
+      --bg-primary: #f7f3ef;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #faf7f4;
+      --bg-elevated: #f2ede8;
+      --bg-hover: rgba(180,120,60,0.06);
+      
+      /* Text Colors */
+      --text-primary: #2c2420;
+      --text-secondary: #7a6a60;
+      --text-tertiary: #a89a90;
+      
+      /* Border Colors */
+      --border-default: #e8ddd5;
+      --border-subtle: #f0e8e0;
+      
+      /* Accent Colors — 暖色系 */
+      --accent-primary: #c0622a;       /* 暖橙红 */
+      --accent-secondary: #7c5cbf;     /* 淡紫 */
+      --success: #2e8b57;              /* 墨绿（跌色） */
+      --danger: #d94f2a;               /* 红橙（涨色） */
+      --warning: #b07d1a;              /* 琥珀黄 */
+      --info: #2a7ab8;                 /* 钢蓝 */
+      
+      /* Transitions */
+      --transition-fast: all 0.15s ease;
+      --transition-normal: all 0.2s ease;
+      
+      /* Border Radius */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-full: 9999px;
+      
+      /* Shadows — 浅色模式用柔和暖阴影 */
+      --shadow-sm: 0 1px 3px rgba(100,60,30,0.08);
+      --shadow-md: 0 4px 12px rgba(100,60,30,0.10);
+      --shadow-xl: 0 8px 32px rgba(100,60,30,0.12), 0 2px 8px rgba(100,60,30,0.08);
+      
+      /* Subtle Backgrounds */
+      --bg-accent-subtle: rgba(192,98,42,0.08);
+      --bg-success-subtle: rgba(46,139,87,0.08);
+      --bg-danger-subtle: rgba(217,79,42,0.08);
+      --bg-warning-subtle: rgba(176,125,26,0.08);
+      
+      /* Colored Borders */
+      --border-accent: rgba(192,98,42,0.25);
+      --border-success: rgba(46,139,87,0.25);
+      --border-danger: rgba(217,79,42,0.25);
+      --border-warning: rgba(176,125,26,0.25);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    
+    /* Layout */
+    #sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-default);
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #main { margin-left: 240px; min-height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar-logo {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .logo-text { font-weight: 600; font-size: 18px; }
+    
+    .logo-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 8px;
+      background: var(--bg-accent-subtle);
+      color: var(--accent-primary);
+      border-radius: 12px;
+    }
+    
+    .sidebar-section { padding: 16px 12px 8px; }
+    
+    .sidebar-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      margin: 2px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 14px;
+      text-decoration: none;
+      transition: var(--transition-fast);
+    }
+    
+    .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--bg-accent-subtle); color: var(--accent-primary); font-weight: 600; }
+    .nav-item i { width: 20px; text-align: center; }
+    
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: var(--danger);
+      color: white;
+    }
+    
+    /* Topbar */
+    #topbar {
+      height: 64px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    .topbar-title { font-weight: 600; font-size: 16px; }
+    
+    .market-ticker {
+      display: flex;
+      gap: 20px;
+      margin-left: auto;
+    }
+    
+    .ticker-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .ticker-label { color: var(--text-secondary); }
+    .ticker-val { font-weight: 600; }
+    .ticker-chg { font-weight: 600; }
+    .ticker-up { color: var(--danger); }
+    .ticker-down { color: var(--success); }
+    
+    /* Page */
+    .page { display: none; padding: 28px 28px 40px; }
+    .page.active { display: block; }
+    
+    /* Cards */
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .card-title { font-weight: 600; font-size: 15px; }
+    
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    
+    .kpi-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    
+    .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; letter-spacing: 0.2px; }
+    .kpi-value { font-size: 26px; font-weight: 700; line-height: 1.2; }
+    .kpi-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .kpi-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+    .kpi-change.neutral { color: var(--text-secondary); font-weight: 400; }
+    .kpi-up { color: var(--danger); }
+    .kpi-down { color: var(--success); }
+    
+    /* Section Header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    /* Page-level section header (bigger) */
+    .page > .section-header .section-title {
+      font-size: 16px;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+    
+    .section-title i { color: var(--text-secondary); font-size: 13px; }
+    
+    /* Tables */
+    .table-wrap { overflow-x: auto; }
+    
+    table { width: 100%; border-collapse: collapse; }
+    
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-default);
+      white-space: nowrap;
+    }
+    
+    td {
+      padding: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    tr:hover { background: var(--bg-hover); }
+    
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    
+    .badge-success { background: var(--bg-success-subtle); color: var(--success); border: 1px solid var(--border-success); }
+    .badge-danger { background: var(--bg-danger-subtle); color: var(--danger); border: 1px solid var(--border-danger); }
+    .badge-warning { background: var(--bg-warning-subtle); color: var(--warning); border: 1px solid var(--border-warning); }
+    .badge-info { background: var(--bg-accent-subtle); color: var(--accent-primary); border: 1px solid var(--border-accent); }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition-fast);
+    }
+    
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+    
+    .btn-primary:hover { filter: brightness(1.08); }
+    
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+    
+    .btn-secondary:hover { background: var(--bg-hover); }
+    
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+    
+    .btn-ghost:hover { color: var(--text-primary); }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border-default);
+      margin-bottom: 16px;
+    }
+    
+    .tab {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition-fast);
+    }
+    
+    .tab:hover { color: var(--text-primary); }
+    .tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
+    
+    /* Form Elements */
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    .form-group { margin-bottom: 16px; }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    /* Modal */
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    
+    .modal-body { padding: 20px; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-default);
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Mobile */
+    .hamburger-btn {
+      display: none;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-size: 15px;
+    }
+    
+    #mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+    
+    #mobile-overlay.show { display: block; }
+    
+    /* ========== Mobile Responsive ========== */
+    @media (max-width: 768px) {
+      .hamburger-btn { display: flex; }
+      #sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+      #sidebar.open { transform: translateX(0); }
+      #main { margin-left: 0; width: 100%; max-width: 100vw; overflow-x: hidden; }
+      
+      /* 防止页面整体溢出 */
+      body { overflow-x: hidden; }
+      
+      /* 确保所有卡片和容器不溢出 */
+      .card, .kpi-card, .card-sm {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      /* Page padding 缩小 */
+      .page { padding: 16px 16px 24px; }
+      
+      /* Topbar 调整 */
+      #topbar { padding: 0 16px; height: 56px; }
+      .topbar-title { font-size: 15px; margin-left: 40px; }
+      
+      /* KPI 2列 - 修复右侧留白 */
+      .kpi-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 12px; 
+        margin-bottom: 16px; 
+        width: 100%;
+      }
+      .kpi-card { 
+        padding: 14px 16px; 
+        min-width: 0; /* 防止溢出 */
+        overflow: hidden;
+      }
+      .kpi-value { 
+        font-size: 20px; 
+        word-break: break-all;
+      }
+      .kpi-label { font-size: 11px; }
+      .kpi-row {
+        gap: 8px;
+      }
+      .kpi-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      
+      /* 所有 grid 变单列 */
+      .grid-2, .grid-3, .grid-4, .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; gap: 16px; }
+      
+      /* 卡片 padding 缩小 */
+      .card { padding: 16px; }
+      
+      /* 隐藏市场 ticker */
+      .market-ticker { display: none; }
+      
+      /* 表格横向滚动 */
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .data-table { min-width: 600px; font-size: 12px; }
+      .data-table th, .data-table td { padding: 10px 8px; }
+      
+      /* 期权统计改为横条列表 */
+      .opt-stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+      }
+      .opt-stat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+      }
+      .opt-stat-label {
+        font-size: 12px;
+        margin-bottom: 0;
+      }
+      .opt-stat-value { 
+        font-size: 16px; 
+      }
+      
+      /* Tab 按钮换行适配 */
+      .tsla-tab-bar, .manage-tab-bar { flex-wrap: wrap; gap: 6px; }
+      .tsla-tab, .manage-tab { padding: 8px 12px; font-size: 12px; }
+      
+      /* Modal 全屏 */
+      .modal-card {
+        max-width: 100%;
+        width: calc(100% - 32px);
+        margin: 16px;
+        max-height: calc(100vh - 32px);
+      }
+      
+      /* 弹窗 Toast 宽度调整 */
+      .toast { max-width: calc(100vw - 32px); left: 16px; right: 16px; }
+      
+      /* 表单输入框 */
+      .form-input, .form-select { font-size: 16px; /* 防止 iOS 缩放 */ }
+      
+      /* 持仓管理表格 */
+      #holdings-body td, #h-opt-body td { white-space: nowrap; }
+      
+      /* 期权卡片改为横条列表 */
+      #options-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+      }
+      .option-card {
+        padding: 12px 14px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 16px;
+      }
+      .option-card .option-header {
+        margin-bottom: 0;
+        flex: 1;
+        min-width: 120px;
+      }
+      .option-card .option-symbol {
+        font-size: 15px;
+      }
+      .option-card .option-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        min-width: 100px;
+      }
+      .option-card .option-key {
+        color: var(--text-secondary);
+        font-size: 11px;
+      }
+      .option-card .option-val {
+        font-weight: 600;
+      }
+      .option-card .option-prob-bar {
+        flex: 1;
+        min-width: 150px;
+        margin-top: 0;
+      }
+      .option-card .option-recommend {
+        width: 100%;
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-subtle);
+      }
+      
+      /* 持仓明细页面卡片修复 */
+      .card-sm .card-value {
+        font-size: 20px;
+        word-break: break-all;
+      }
+      
+      /* 确保内容不溢出 */
+      .kpi-card, .card, .card-sm {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      
+      /* 持仓明细 Summary Bar 修复 - 2x2网格 */
+      #page-holdings .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      #page-holdings .card-sm {
+        padding: 14px;
+      }
+      #page-holdings .card-sm .card-title {
+        font-size: 11px;
+      }
+      #page-holdings .card-sm .card-value {
+        font-size: 18px;
+      }
+      
+      /* TSLA页面KPI修复 - 2x2网格 */
+      #page-tsla .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      #page-tsla .kpi-card {
+        padding: 14px;
+      }
+      #page-tsla .kpi-card .kpi-value {
+        font-size: 18px;
+      }
+      #page-tsla .kpi-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+      
+      /* 市场行情页面KPI修复 - 2x2网格 */
+      #page-market .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      #page-market .kpi-card {
+        padding: 14px;
+      }
+      #page-market .kpi-card .kpi-value {
+        font-size: 18px;
+      }
+      #page-market .kpi-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+      
+      /* 持仓管理页面期权统计修复 - 2x2网格 */
+      #opt-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      #opt-stats-row .kpi-card {
+        padding: 14px;
+      }
+      #opt-stats-row .kpi-value {
+        font-size: 18px;
+      }
+      #opt-stats-row .kpi-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      /* 小屏手机 */
+      .kpi-grid { grid-template-columns: 1fr; }
+      .page { padding: 12px 12px 20px; }
+      .card { padding: 14px; }
+      
+      /* 期权列表简化显示 */
+      #overview-opt-list > div > div {
+        flex-wrap: wrap;
+        gap: 4px 8px;
+      }
+      
+      /* Section header 按钮缩小 */
+      .section-action { padding: 4px 10px; font-size: 11px; }
+      
+      /* Tab 更紧凑 */
+      .tsla-tab, .manage-tab { padding: 6px 10px; font-size: 11px; }
+      
+      /* 更小的KPI数值 */
+      .kpi-value {
+        font-size: 18px;
+      }
+      .card-sm .card-value {
+        font-size: 18px;
+      }
+      
+      /* 小屏幕下单列显示 - 仅当空间实在不够时 */
+      #page-holdings .grid-4,
+      #page-tsla .grid-4,
+      #page-market .grid-4,
+      #opt-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      
+      #page-holdings .card-sm,
+      #page-tsla .kpi-card,
+      #page-market .kpi-card,
+      #opt-stats-row .kpi-card {
+        padding: 12px;
+      }
+      
+      /* 修复内联grid样式 */
+      [style*="grid-template-columns:1fr 1fr"],
+      [style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+      
+      /* 修复auto-fill网格 */
+      [style*="auto-fill"] {
+        grid-template-columns: 1fr !important;
+      }
+      
+      /* 更紧凑的卡片 */
+      .kpi-card {
+        padding: 12px 14px;
+      }
+      .kpi-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+      }
+    }
+    
+    /* Right alignment for table cells */
+    .right { text-align: right; }
+    
+    /* Grid layouts */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; }
+    
+    /* 期权统计网格 */
+    .opt-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .opt-stat-item {
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .opt-stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .opt-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .opt-stat-value.text-success { color: var(--success); }
+    .opt-stat-value.text-accent { color: var(--accent-primary); }
+    
+    @media (max-width: 1200px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 960px) {
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .grid-2-1 { grid-template-columns: 1fr; }
+      .grid-1-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .grid-4 { grid-template-columns: 1fr; }
+    }
+    
+    /* Page subtitle */
+    .page-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    
+    /* Alert items */
+    .alert-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .alert-item:last-child { border-bottom: none; }
+    
+    .alert-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    
+    .alert-dot.high { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+    .alert-dot.medium { background: var(--warning); box-shadow: 0 0 6px var(--warning); }
+    .alert-dot.low { background: var(--info); }
+    
+    .alert-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .alert-desc { font-size: 12px; color: var(--text-secondary); }
+    
+    /* News items */
+    .news-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .news-item:last-child { border-bottom: none; }
+    
+    .news-impact {
+      width: 4px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    
+    .news-impact.high { background: var(--danger); }
+    .news-impact.medium { background: var(--warning); }
+    .news-impact.low { background: var(--success); }
+    
+    .news-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .news-meta { font-size: 11px; color: var(--text-secondary); }
+    
+    /* Chips */
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-default);
+    }
+    
+    .chip.blue { background: var(--bg-accent-subtle); color: var(--accent-primary); border-color: var(--border-accent); }
+    .chip.green { background: var(--bg-success-subtle); color: var(--success); border-color: var(--border-success); }
+    .chip.red { background: var(--bg-danger-subtle); color: var(--danger); border-color: var(--border-danger); }
+    .chip.purple { background: rgba(124,92,191,0.1); color: var(--accent-secondary); border-color: rgba(124,92,191,0.25); }
+    .chip.yellow { background: var(--bg-warning-subtle); color: var(--warning); border-color: var(--border-warning); }
+    
+    /* Health pills */
+    .health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .health-pill.high { background: var(--bg-success-subtle); color: var(--success); }
+    .health-pill.mid { background: var(--bg-warning-subtle); color: var(--warning); }
+    .health-pill.low { background: var(--bg-danger-subtle); color: var(--danger); }
+    
+    /* Progress ring */
+    .progress-ring-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .progress-ring-text {
+      position: absolute;
+      text-align: center;
+    }
+    
+    .progress-ring-text .val { font-size: 22px; font-weight: 700; }
+    .progress-ring-text .lbl { font-size: 11px; color: var(--text-secondary); }
+    
+    /* Progress bar */
+    .progress-bar-wrap { margin-bottom: 10px; }
+    
+    .progress-bar-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    
+    .progress-bar-label { font-size: 12px; color: var(--text-secondary); }
+    .progress-bar-val { font-size: 12px; font-weight: 600; }
+    
+    .progress-bar-track {
+      height: 6px;
+      background: var(--bg-elevated);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+    
+    /* Option cards */
+    .option-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 16px 18px;
+      transition: all 0.2s;
+    }
+    
+    .option-card:hover { border-color: var(--info); transform: translateY(-1px); }
+    
+    .option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .option-symbol { font-size: 16px; font-weight: 800; }
+    
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    
+    .option-key { color: var(--text-secondary); }
+    .option-val { font-weight: 600; }
+    
+    .option-prob-bar { margin-top: 10px; }
+    
+    .option-recommend {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    
+    .option-type {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(124,92,191,0.1);
+      color: var(--accent-secondary);
+      border: 1px solid rgba(124,92,191,0.25);
+    }
+    
+    /* User card */
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      margin-top: auto;
+      border-top: 1px solid var(--border-default);
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: white;
+    }
+    
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--text-secondary); }
+    
+    /* TSLA specific */
+    .tsla-tab-content { display: none; }
+    .tsla-tab-content.active { display: block; }
+    
+    /* Metric rows */
+    .metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { font-size: 12px; color: var(--text-secondary); }
+    .metric-value { font-size: 13px; font-weight: 600; }
+    
+    /* Heatmap */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+    }
+    
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    
+    /* Live dot */
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,139,87,0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(46,139,87,0); }
+    }
+    
+    /* Status colors for text */
+    .up { color: var(--danger); }
+    .down { color: var(--success); }
+    .neutral { color: var(--text-secondary); }
+  </style>
+  
+  <!-- Page Specific Styles -->
+  <style>
+    /* ── 页面特定补充样式 ─────────────────────────────────── */
+    
+    /* KPI row layout with icon */
+    .kpi-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    /* Section Action Button */
+    .section-action {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: var(--radius-md);
+      transition: var(--transition-fast);
+    }
+    .section-action:hover { color: var(--accent-primary); background: var(--bg-hover); }
+    
+    /* Card variants */
+    .card-sm {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+    .card-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+    .card-value { font-size: 24px; font-weight: 700; }
+    .card-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    
+    /* Topbar actions */
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .live-label { font-size: 12px; color: var(--text-secondary); }
+    
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: var(--transition-fast);
+    }
+    .icon-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+    
+    /* Sidebar footer */
+    .sidebar-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-default);
+      padding: 8px 0;
+    }
+    
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border-default);
+      margin: 16px 0;
+    }
+    
+    /* Alert Badge */
+    .alert-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+      padding: 0 7px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-right: 6px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .alert-badge.high { background: var(--bg-danger-subtle); color: var(--danger); }
+    .alert-badge.medium { background: var(--bg-warning-subtle); color: var(--warning); }
+    .alert-badge.low { background: var(--bg-accent-subtle); color: var(--accent-primary); }
+    
+    /* Donut center */
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .donut-center .big { font-size: 28px; font-weight: 700; }
+    .donut-center .small { font-size: 11px; color: var(--text-secondary); }
+    
+    /* 图表容器 */
+    .chart-container {
+      position: relative;
+      height: 200px;
+      margin-top: 16px;
+    }
+    
+    /* ── 统一 Tab 标签页样式 ── */
+    /* Container */
+    .tsla-tab-bar, .manage-tab-bar {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border-default);
+      margin-bottom: 20px;
+      padding-bottom: 0;
+    }
+    
+    /* Tab button */
+    .tsla-tab, .manage-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    
+    .tsla-tab i, .manage-tab i {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    
+    .tsla-tab:hover, .manage-tab:hover {
+      color: var(--text-primary);
+    }
+    
+    .tsla-tab.active, .manage-tab.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+      font-weight: 600;
+    }
+    
+    .tsla-tab.active i, .manage-tab.active i {
+      opacity: 1;
+    }
+    
+    /* 内容标签页 */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-tertiary);
+    }
+    
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    /* 边距工具类 */
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    
+    /* 模态框 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .modal-overlay.show { display: flex; }
+    
+    .modal-content {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      max-width: 480px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: none; }
+    }
+    
+    .modal-header {
+      padding: 24px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--text-tertiary);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-close:hover { color: var(--text-primary); background: var(--bg-hover); }
+    
+    .modal-body {
+      padding: 20px 24px;
+    }
+    
+    .modal-footer {
+      padding: 0 24px 24px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    /* KPI icon button styles */
+    .nav-badge.blue { background: rgba(88,166,255,.2); color: var(--accent-primary); }
+    
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      z-index: 2000;
+      font-size: 13px;
+      animation: toastIn 0.3s ease;
+      max-width: 360px;
+    }
+    
+    .toast.success { border-color: var(--border-success); color: var(--success); }
+    .toast.error { border-color: var(--border-danger); color: var(--danger); }
+    
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Health score ring */
+    .score-ring { transform: rotate(-90deg); }
+    .score-ring-bg { fill: none; stroke: var(--border-default); stroke-width: 10; }
+    .score-ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    
+    /* Option filter buttons */
+    .opt-filter-btn.active { background: var(--info) !important; color: #fff !important; border-color: var(--info) !important; }
+    
+    /* Manage tab content */
+    .manage-tab-content { display: none; }
+    .manage-tab-content.active { display: block; }
+    
+    /* 表单组 */
+    .form-group { margin-bottom: 20px; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    
+    /* 状态标签 */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    
+    .status-open { background: rgba(90, 138, 106, 0.1); color: var(--success); }
+    .status-open::before { background: var(--success); }
+    
+    .status-closed { background: rgba(107, 140, 174, 0.1); color: var(--info); }
+    .status-closed::before { background: var(--info); }
+    
+    .status-expired { background: rgba(138, 138, 138, 0.1); color: var(--text-tertiary); }
+    .status-expired::before { background: var(--text-tertiary); }
+    
+    .status-assigned { background: rgba(196, 163, 90, 0.1); color: var(--warning); }
+    .status-assigned::before { background: var(--warning); }
+    
+    /* 实时指示器 */
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--success);
+    }
+    
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(90, 138, 106, 0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(90, 138, 106, 0); }
+    }
+    
+    /* 最后更新时间 */
+    .last-update {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+    
+    /* 健康度评分 */
+    .health-score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    
+    .health-high { background: rgba(90, 138, 106, 0.1); color: var(--success); }
+    .health-mid { background: rgba(196, 163, 90, 0.1); color: var(--warning); }
+    .health-low { background: rgba(196, 92, 72, 0.1); color: var(--danger); }
+    
+    /* 响应式表格 */
+    @media (max-width: 768px) {
+      .data-table {
+        font-size: 13px;
+      }
+      
+      .data-table th,
+      .data-table td {
+        padding: 12px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 移动端汉堡菜单 -->
+<button class="hamburger-btn" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
+<div id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">C</div>
+    <span class="logo-text">Claw</span>
+    <span class="logo-badge">BETA</span>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">概览</div>
+    <a class="nav-item active" data-page="overview" onclick="navigate('overview',this)">
+      <i class="fa fa-chart-pie"></i> 投资总览
+    </a>
+    <a class="nav-item" data-page="holdings" onclick="navigate('holdings',this)">
+      <i class="fa fa-layer-group"></i> 持仓明细
+    </a>
+    <a class="nav-item" data-page="health" onclick="navigate('health',this)">
+      <i class="fa fa-heart-pulse"></i> 健康评估
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">策略</div>
+    <a class="nav-item" data-page="options" onclick="navigate('options',this)">
+      <i class="fa fa-sliders"></i> 期权策略
+      <span class="nav-badge blue">3</span>
+    </a>
+    <a class="nav-item" data-page="tsla" onclick="navigate('tsla',this)">
+      <i class="fa fa-bolt"></i> TSLA 专项监控
+      <span class="nav-badge" style="background:rgba(248,81,73,.2);color:var(--danger)">热</span>
+    </a>
+    <a class="nav-item" data-page="alerts" onclick="navigate('alerts',this)">
+      <i class="fa fa-bell"></i> 风险预警
+      <span class="nav-badge">2</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">管理</div>
+    <a class="nav-item" data-page="manage" onclick="navigate('manage',this)">
+      <i class="fa fa-pen-to-square"></i> 持仓管理
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">市场</div>
+    <a class="nav-item" data-page="market" onclick="navigate('market',this)">
+      <i class="fa fa-globe"></i> 市场行情
+    </a>
+    <a class="nav-item" data-page="news" onclick="navigate('news',this)">
+      <i class="fa fa-newspaper"></i> 资讯动态
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="dash-avatar">Z</div>
+      <div>
+        <div class="user-name" id="dash-username">Z</div>
+        <div class="user-role" id="dash-role">美股个人投资者</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;padding:4px 4px 0">
+      <button id="admin-entry" onclick="location.href='/admin'" style="display:none;flex:1;padding:7px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--danger)">
+        <i class="fa fa-shield-halved"></i> 管理后台
+      </button>
+      <button onclick="doLogout()" style="flex:1;padding:7px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-secondary);transition:all .15s" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
+        <i class="fa fa-right-from-bracket"></i> 退出
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div id="main">
+
+  <!-- ── Topbar ── -->
+  <header id="topbar">
+    <div class="topbar-title" id="topbar-title">投资总览</div>
+    <div class="market-ticker" id="market-ticker">
+      <div class="ticker-item">
+        <span class="ticker-label">SPX</span>
+        <span class="ticker-val" id="t-spx">5,234</span>
+        <span class="ticker-chg up" id="t-spx-c">+0.8%</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">NDX</span>
+        <span class="ticker-val" id="t-ndx">16,345</span>
+        <span class="ticker-chg up" id="t-ndx-c">+1.2%</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">VIX</span>
+        <span class="ticker-val" id="t-vix">14.2</span>
+        <span class="ticker-chg down" id="t-vix-c">-2.1%</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="live-dot"></div>
+      <span class="live-label">实时</span>
+      <button class="icon-btn" onclick="refreshData()" title="刷新数据"><i class="fa fa-rotate"></i></button>
+      <span id="last-update" style="font-size:11px;color:var(--text-tertiary);">更新中…</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════ PAGE: OVERVIEW ═══════════════ -->
+  <div class="page active" id="page-overview">
+
+    <!-- KPI Row -->
+    <div class="grid-4 mb-16">
+      <div class="kpi-card" style="--accent-color:var(--info)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">总资产</div>
+            <div class="kpi-value" id="kpi-total">$105,381</div>
+            <div class="kpi-change up" id="kpi-total-chg"><i class="fa fa-arrow-up"></i> +13.5%</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--bg-accent-subtle);color:var(--accent-primary)">
+            <i class="fa fa-wallet"></i>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--success)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">浮盈</div>
+            <div class="kpi-value" id="kpi-gain">+$7,873</div>
+            <div class="kpi-change up" id="kpi-gain-chg"><i class="fa fa-arrow-up"></i> 本月</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--bg-success-subtle);color:var(--success)">
+            <i class="fa fa-arrow-trend-up"></i>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--warning)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">现金储备</div>
+            <div class="kpi-value" id="kpi-cash">$39,187</div>
+            <div class="kpi-change neutral" id="kpi-cash-chg"><i class="fa fa-circle-info"></i> 59.2% 占比</div>
+          </div>
+          <div class="kpi-icon" style="background:rgba(210,153,34,.12);color:var(--warning)">
+            <i class="fa fa-coins"></i>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--accent-secondary)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">健康评分</div>
+            <div class="kpi-value" id="kpi-health">81.2</div>
+            <div class="kpi-change down" id="kpi-health-chg"><i class="fa fa-shield-check"></i> 良好</div>
+          </div>
+          <div class="kpi-icon" style="background:rgba(163,113,247,.12);color:var(--accent-secondary)">
+            <i class="fa fa-heart-pulse"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid-2-1 mb-16">
+      <!-- Performance Chart -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title"><i class="fa fa-chart-line"></i> 持仓市值走势</div>
+          <div style="display:flex;gap:6px">
+            <span class="chip blue">本月</span>
+            <span class="chip">3月</span>
+          </div>
+        </div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="chart-performance"></canvas>
+        </div>
+      </div>
+
+      <!-- Allocation Donut -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title"><i class="fa fa-chart-donut"></i> 资产配置</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="position:relative;width:160px;height:160px">
+            <canvas id="chart-allocation"></canvas>
+            <div class="donut-center">
+              <span class="big">8</span>
+              <span class="small">持仓</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;margin-top:12px" id="alloc-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 期权持仓摘要 -->
+    <div class="card mb-16" id="overview-options-bar">
+      <div class="section-header" style="margin-bottom:12px">
+        <div class="section-title"><i class="fa fa-file-contract" style="color:var(--success)"></i> 期权持仓摘要</div>
+        <button class="section-action" onclick="navigate('manage', document.querySelector('[data-page=manage]')); setTimeout(()=>switchManageTab('options',document.querySelector('[data-mtab=options]')),100)">管理期权 <i class="fa fa-chevron-right"></i></button>
+      </div>
+      <div class="opt-stats-grid" id="overview-opt-stats">
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">持仓中合约</div>
+          <div class="opt-stat-value" id="ov-opt-open">—</div>
+        </div>
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">待收权利金</div>
+          <div class="opt-stat-value text-success" id="ov-opt-premium">—</div>
+        </div>
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">已实现盈亏</div>
+          <div class="opt-stat-value" id="ov-opt-realized">—</div>
+        </div>
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">胜率</div>
+          <div class="opt-stat-value text-accent" id="ov-opt-winrate">—</div>
+        </div>
+      </div>
+      <div id="overview-opt-list" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Holdings Top + Alerts Row -->
+    <div class="grid-2-1">
+      <!-- Top Holdings -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title"><i class="fa fa-ranking-star"></i> 持仓概况</div>
+          <button class="section-action" onclick="navigate('holdings', document.querySelector('[data-page=holdings]'))">全部 <i class="fa fa-chevron-right"></i></button>
+        </div>
+        <div class="table-wrap">
+          <table id="top-holdings-table">
+            <thead>
+              <tr>
+                <th>股票</th>
+                <th class="right">持仓价值</th>
+                <th class="right">涨跌</th>
+                <th class="right">评分</th>
+              </tr>
+            </thead>
+            <tbody id="top-holdings-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Alerts Summary -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title"><i class="fa fa-bell"></i> 风险预警</div>
+          <button class="section-action" onclick="navigate('alerts', document.querySelector('[data-page=alerts]'))">全部 <i class="fa fa-chevron-right"></i></button>
+        </div>
+        <div id="overview-alerts"></div>
+
+        <div class="divider"></div>
+
+        <div class="section-title" style="margin-bottom:12px"><i class="fa fa-lightbulb"></i> AI 建议</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="overview-recs"></div>
+      </div>
+    </div>
+
+  </div><!-- /page-overview -->
+
+  <!-- ═══════════════ PAGE: HOLDINGS ═══════════════ -->
+  <div class="page" id="page-holdings">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-layer-group"></i> 持仓明细</div>
+      <span class="chip green" id="holdings-count">8 个持仓</span>
+    </div>
+    <p class="page-subtitle">基于你的实际持仓数据，含成本、浮盈和健康评分。</p>
+
+    <!-- Summary Bar -->
+    <div class="grid-4 mb-16">
+      <div class="card card-sm">
+        <div class="card-title">总资产（含现金）</div>
+        <div class="card-value" id="h-total">$0</div>
+        <div class="card-sub" id="h-total-sub"><span class="chip">计算中…</span></div>
+      </div>
+      <div class="card card-sm">
+        <div class="card-title">持仓总市值</div>
+        <div class="card-value" id="h-invested">$66,194</div>
+        <div class="card-sub" id="h-invested-sub"><span class="chip green">+13.5%</span> 总回报</div>
+      </div>
+      <div class="card card-sm">
+        <div class="card-title">浮动盈亏</div>
+        <div class="card-value" id="h-gain" style="color:var(--danger)">+$7,873</div>
+        <div class="card-sub"><i class="fa fa-circle-check" style="color:var(--success)"></i> 全部盈利</div>
+      </div>
+      <div class="card card-sm">
+        <div class="card-title">现金储备</div>
+        <div class="card-value" id="h-cash">$0</div>
+        <div class="card-sub" id="h-cash-sub"><span class="chip">占比 0%</span></div>
+      </div>
+    </div>
+
+    <!-- Holdings Table -->
+    <div class="card mb-16">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>股票</th>
+              <th class="right">股数</th>
+              <th class="right">成本价</th>
+              <th class="right">现价</th>
+              <th class="right">市值</th>
+              <th class="right">浮盈/亏</th>
+              <th class="right">涨跌幅</th>
+              <th class="right">占比</th>
+              <th class="right">健康</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sector Chart -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title"><i class="fa fa-chart-bar"></i> 行业分布</div>
+        </div>
+        <div class="chart-container" style="height:200px">
+          <canvas id="chart-sector"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title"><i class="fa fa-scale-balanced"></i> 仓位权重</div>
+        </div>
+        <div id="position-bars"></div>
+      </div>
+    </div>
+
+    <!-- 期权持仓摘要 -->
+    <div class="card mt-16" id="holdings-options-bar" style="margin-top:16px">
+      <div class="section-header" style="margin-bottom:12px">
+        <div class="section-title"><i class="fa fa-file-contract" style="color:var(--success)"></i> 期权持仓</div>
+        <button class="section-action" onclick="navigate('manage', document.querySelector('[data-page=manage]')); setTimeout(()=>switchManageTab('options',document.querySelector('[data-mtab=options]')),100)">管理期权 <i class="fa fa-chevron-right"></i></button>
+      </div>
+      <div class="opt-stats-grid" id="holdings-opt-stats">
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">持仓中合约</div>
+          <div class="opt-stat-value" id="h-opt-open">—</div>
+        </div>
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">待收权利金</div>
+          <div class="opt-stat-value text-success" id="h-opt-premium">—</div>
+        </div>
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">已实现盈亏</div>
+          <div class="opt-stat-value" id="h-opt-realized">—</div>
+        </div>
+        <div class="opt-stat-item">
+          <div class="opt-stat-label">历史胜率</div>
+          <div class="opt-stat-value text-accent" id="h-opt-winrate">—</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>标的</th>
+              <th>类型</th>
+              <th class="right">行权价</th>
+              <th class="right">到期日</th>
+              <th class="right">合约数</th>
+              <th class="right">权利金/股</th>
+              <th class="right">盈亏</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="h-opt-body">
+            <tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:20px">暂无期权记录</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /page-holdings -->
+
+  <!-- ═══════════════ PAGE: HEALTH ═══════════════ -->
+  <div class="page" id="page-health">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-heart-pulse"></i> 投资组合健康评估</div>
+      <span class="chip green">综合评分 81.2</span>
+    </div>
+    <p class="page-subtitle">基于分散度、风险控制、现金管理等6个维度的综合评估。</p>
+
+    <div class="grid-1-2 mb-16">
+      <!-- Score Overview -->
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+        <div style="position:relative;width:180px;height:180px">
+          <canvas id="chart-health-ring"></canvas>
+          <div class="donut-center">
+            <span style="font-size:36px;font-weight:800;color:var(--success)" id="health-score-big">81.2</span>
+            <span style="font-size:12px;color:var(--text-secondary)">综合评分</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center" id="health-chips"></div>
+      </div>
+
+      <!-- Metric Bars -->
+      <div class="card">
+        <div class="section-title mb-16">各维度评分</div>
+        <div id="health-bars"></div>
+      </div>
+    </div>
+
+    <!-- Strengths & Weaknesses -->
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px;color:var(--success)">
+          <i class="fa fa-circle-check"></i> 优势
+        </div>
+        <div id="health-strengths"></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px;color:var(--warning)">
+          <i class="fa fa-triangle-exclamation"></i> 待改进
+        </div>
+        <div id="health-weaknesses"></div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card">
+      <div class="section-title" style="margin-bottom:14px;color:var(--accent-primary)">
+        <i class="fa fa-wand-magic-sparkles"></i> AI 优化建议
+      </div>
+      <div id="health-recs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px"></div>
+    </div>
+  </div><!-- /page-health -->
+
+  <!-- ═══════════════ PAGE: OPTIONS ═══════════════ -->
+  <div class="page" id="page-options">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-sliders"></i> Sell Put 期权策略</div>
+      <span class="chip purple">专属策略体系</span>
+    </div>
+    <p class="page-subtitle">专为保守型投资者设计，利用高现金比例执行 Sell Put 策略，以低风险方式增加现金流。</p>
+
+    <!-- Strategy Principles -->
+    <div class="card mb-16" style="border-color:rgba(163,113,247,.3);background:rgba(163,113,247,.05)">
+      <div class="section-title" style="margin-bottom:12px;color:var(--accent-secondary)">
+        <i class="fa fa-book-open"></i> Sell Put 核心原则
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">适用条件</div>
+          <div style="font-size:13px">VIX 20-35 区间 · 高概率 OTM · 目标获利 25-50% 了结</div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">仓位原则</div>
+          <div style="font-size:13px">单笔不超过账户 5% · 保持充足现金作保证金</div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">风险管理</div>
+          <div style="font-size:13px">亏损超过 2x 权利金止损 · 避开财报前两周</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options Cards -->
+    <div class="grid-3" id="options-grid"></div>
+
+    <!-- Options Chart -->
+    <div class="card" style="margin-top:16px">
+      <div class="section-title" style="margin-bottom:14px">
+        <i class="fa fa-chart-bar"></i> 年化收益对比
+      </div>
+      <div class="chart-container" style="height:200px">
+        <canvas id="chart-options"></canvas>
+      </div>
+    </div>
+  </div><!-- /page-options -->
+
+  <!-- ═══════════════ PAGE: ALERTS ═══════════════ -->
+  <div class="page" id="page-alerts">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-bell"></i> 风险预警中心</div>
+      <span class="chip red" id="alert-count">2 高风险</span>
+    </div>
+    <p class="page-subtitle">实时监控投资组合风险，提供行动建议。</p>
+
+    <div class="grid-2-1">
+      <!-- Alert List -->
+      <div class="card">
+        <div id="alerts-list"></div>
+      </div>
+
+      <!-- Risk Radar -->
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px">
+          <i class="fa fa-radar"></i> 风险雷达
+        </div>
+        <div class="chart-container" style="height:240px">
+          <canvas id="chart-radar"></canvas>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-alerts -->
+
+  <!-- ═══════════════ PAGE: MARKET ═══════════════ -->
+  <div class="page" id="page-market">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-globe"></i> 市场行情</div>
+      <span class="chip green">市场 · 乐观</span>
+    </div>
+    <p class="page-subtitle">宏观市场指标与 VIX 恐惧指数监控。</p>
+
+    <div class="grid-4 mb-16">
+      <div class="kpi-card">
+        <div class="kpi-label">S&P 500</div>
+        <div class="kpi-value" id="m-sp500">5,234</div>
+        <div class="kpi-change up" id="m-sp500-c"><i class="fa fa-arrow-up"></i> +0.8%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">NASDAQ</div>
+        <div class="kpi-value" id="m-nasdaq">16,345</div>
+        <div class="kpi-change up" id="m-nasdaq-c"><i class="fa fa-arrow-up"></i> +1.2%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">VIX 恐惧指数</div>
+        <div class="kpi-value" id="m-vix">14.2</div>
+        <div class="kpi-change down" id="m-vix-c"><i class="fa fa-arrow-down"></i> -2.1%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">市场情绪</div>
+        <div class="kpi-value" id="m-sentiment" style="font-size:20px">乐观</div>
+        <div class="kpi-change down"><i class="fa fa-face-smile"></i> 低恐惧区间</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px"><i class="fa fa-chart-area"></i> VIX 趋势</div>
+        <div class="chart-container" style="height:200px">
+          <canvas id="chart-vix"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px"><i class="fa fa-info-circle"></i> 市场解读</div>
+        <div id="market-interpretation">
+          <div class="alert-item">
+            <div class="alert-dot low"></div>
+            <div>
+              <div class="alert-title">VIX 低于 20：市场平稳</div>
+              <div class="alert-desc">当前 VIX 14.2，处于低恐惧区间，期权卖方获益较小。建议等待 VIX 20-35 区间再执行 Sell Put 策略。</div>
+            </div>
+          </div>
+          <div class="alert-item">
+            <div class="alert-dot medium"></div>
+            <div>
+              <div class="alert-title">关注 FOMC 会议</div>
+              <div class="alert-desc">下周美联储会议将公布利率决议，科技股对利率敏感，建议在会议前保持较高现金仓位。</div>
+            </div>
+          </div>
+          <div class="alert-item">
+            <div class="alert-dot low"></div>
+            <div>
+              <div class="alert-title">AI 行业周期：安装期</div>
+              <div class="alert-desc">根据投资框架分析：当前处于 AI 技术革命安装期，估值泡沫正常，NVDA/GOOGL/AMZN 长期逻辑不变。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-market -->
+
+  <!-- ═══════════════ PAGE: NEWS ═══════════════ -->
+  <div class="page" id="page-news">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-newspaper"></i> 资讯动态</div>
+      <span class="chip blue" id="news-count">3 条</span>
+    </div>
+    <p class="page-subtitle">与你持仓相关的最新市场资讯。</p>
+
+    <div class="grid-2-1">
+      <div class="card">
+        <div id="news-list"></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px"><i class="fa fa-tag"></i> 关注标的</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="watched-symbols"></div>
+        <div class="divider"></div>
+        <div class="section-title" style="margin-bottom:12px"><i class="fa fa-chart-line"></i> 影响评级说明</div>
+        <div class="metric-row">
+          <span class="alert-badge high">高</span>
+          <span class="metric-label">直接影响持仓，需关注</span>
+        </div>
+        <div class="metric-row">
+          <span class="alert-badge medium">中</span>
+          <span class="metric-label">间接影响，密切跟踪</span>
+        </div>
+        <div class="metric-row">
+          <span class="alert-badge low">低</span>
+          <span class="metric-label">边际影响，了解即可</span>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-news -->
+
+  <!-- ═══════════════ PAGE: TSLA ═══════════════ -->
+  <div class="page" id="page-tsla">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-bolt" style="color:var(--danger)"></i> TSLA 特斯拉专项情报</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="chip red">重点仓位</span>
+        <button onclick="loadTslaIntel()" style="padding:5px 12px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:11px;color:var(--text-secondary)"><i class="fa fa-rotate"></i> 刷新</button>
+      </div>
+    </div>
+    <p class="page-subtitle">不只是数据——深度解析特斯拉的护城河、业务增长点和长期持有逻辑，辅助 Sell Put 决策。</p>
+
+    <!-- TSLA KPI 行 -->
+    <div class="grid-4 mb-16">
+      <div class="kpi-card" style="--accent-color:var(--danger)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">TSLA 现价</div>
+            <div class="kpi-value" id="tsla-price">$383.64</div>
+            <div class="kpi-change up" id="tsla-price-chg"><i class="fa fa-arrow-up"></i> +9.6%（持仓）</div>
+          </div>
+          <div class="kpi-icon" style="background:rgba(248,81,73,.12);color:var(--danger)"><i class="fa fa-bolt"></i></div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--success)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">持仓市值</div>
+            <div class="kpi-value" id="tsla-value">$9,591</div>
+            <div class="kpi-change neutral" id="tsla-shares-info"><i class="fa fa-layer-group"></i> 25 股</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--bg-success-subtle);color:var(--success)"><i class="fa fa-dollar-sign"></i></div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--accent-secondary)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">期权持仓</div>
+            <div class="kpi-value" id="tsla-opt-count">—</div>
+            <div class="kpi-change neutral" id="tsla-opt-pnl">未平仓权利金</div>
+          </div>
+          <div class="kpi-icon" style="background:rgba(163,113,247,.12);color:var(--accent-secondary)"><i class="fa fa-coins"></i></div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent-color:var(--warning)">
+        <div class="kpi-row">
+          <div>
+            <div class="kpi-label">业务健康度</div>
+            <div class="kpi-value" style="color:var(--warning)">强</div>
+            <div class="kpi-change neutral"><i class="fa fa-shield-check"></i> 多引擎驱动</div>
+          </div>
+          <div class="kpi-icon" style="background:rgba(210,153,34,.12);color:var(--warning)"><i class="fa fa-rocket"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 导航 -->
+    <div class="tsla-tab-bar">
+      <button class="tsla-tab active" data-tab="moat" onclick="switchTslaTab('moat',this)"><i class="fa fa-shield-halved"></i> 护城河</button>
+      <button class="tsla-tab" data-tab="outlook" onclick="switchTslaTab('outlook',this)"><i class="fa fa-binoculars"></i> 业务前景</button>
+      <button class="tsla-tab" data-tab="sellput" onclick="switchTslaTab('sellput',this)"><i class="fa fa-bolt"></i> Sell Put 指南</button>
+      <button class="tsla-tab" data-tab="calc" onclick="switchTslaTab('calc',this)"><i class="fa fa-calculator"></i> 收益计算器</button>
+    </div>
+
+    <!-- Tab: 护城河 -->
+    <div class="tsla-tab-content" id="tsla-tab-moat" style="display:block">
+      <div style="margin-bottom:12px;font-size:13px;color:var(--text-secondary)">
+        特斯拉的竞争优势来自多个相互强化的飞轮——以下是支持长期持有的核心理由：
+      </div>
+      <div id="tsla-moat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+    </div>
+
+    <!-- Tab: 业务前景 -->
+    <div class="tsla-tab-content" id="tsla-tab-outlook" style="display:none">
+      <div id="tsla-outlook-list" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+
+    <!-- Tab: Sell Put 指南 -->
+    <div class="tsla-tab-content" id="tsla-tab-sellput" style="display:none">
+      <div id="tsla-sellput-content"></div>
+    </div>
+
+    <!-- Tab: 计算器 -->
+    <div class="tsla-tab-content" id="tsla-tab-calc" style="display:none">
+      <div class="card" style="border-color:var(--border-accent)">
+        <div class="section-title" style="margin-bottom:16px;color:var(--accent-primary)">
+          <i class="fa fa-calculator"></i> Sell Put 收益计算器
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">行权价 ($)</label>
+            <input id="calc-strike" type="number" value="380" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px" oninput="calcPut()">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">权利金/股 ($)</label>
+            <input id="calc-premium" type="number" value="3.20" step="0.1" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px" oninput="calcPut()">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">合约数量</label>
+            <input id="calc-contracts" type="number" value="1" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px" oninput="calcPut()">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">到期天数</label>
+            <input id="calc-days" type="number" value="30" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px" oninput="calcPut()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px">
+          <div class="card" style="padding:12px">
+            <div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">最大收益</div>
+            <div id="calc-max-profit" style="font-size:18px;font-weight:800;color:var(--success)">$320</div>
+          </div>
+          <div class="card" style="padding:12px">
+            <div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">所需保证金</div>
+            <div id="calc-margin" style="font-size:18px;font-weight:800;color:var(--accent-primary)">$38,000</div>
+          </div>
+          <div class="card" style="padding:12px">
+            <div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">年化收益率</div>
+            <div id="calc-annual" style="font-size:18px;font-weight:800;color:var(--warning)">12.5%</div>
+          </div>
+          <div class="card" style="padding:12px">
+            <div style="font-size:10px;color:var(--text-secondary);margin-bottom:4px">盈亏平衡价</div>
+            <div id="calc-breakeven" style="font-size:18px;font-weight:800;color:var(--text-primary)">$376.80</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:12px;background:var(--bg-accent-subtle);border:1px solid var(--border-accent);border-radius:8px;font-size:12px;color:var(--text-secondary)" id="calc-advice">
+          <i class="fa fa-info-circle"></i> 填入参数后，计算器会自动更新
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-tsla -->
+
+
+  <!-- ═══════════════ PAGE: MANAGE ═══════════════ -->
+  <div class="page" id="page-manage">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-pen-to-square"></i> 持仓管理</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="openAddHolding()" id="btn-add-holding" style="background:var(--info);color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">
+          <i class="fa fa-plus"></i> <span id="add-btn-label">添加持仓</span>
+        </button>
+      </div>
+    </div>
+    <p class="page-subtitle">管理你的正股持仓和期权仓位，所有数据保存至数据库，刷新不丢失。</p>
+
+    <!-- 持仓管理 Tab -->
+    <div class="manage-tab-bar">
+      <button class="manage-tab active" data-mtab="stock" onclick="switchManageTab('stock',this)"><i class="fa fa-chart-line"></i> 正股持仓</button>
+      <button class="manage-tab" data-mtab="options" onclick="switchManageTab('options',this)"><i class="fa fa-sliders"></i> 期权持仓</button>
+      <button class="manage-tab" data-mtab="settings" onclick="switchManageTab('settings',this)"><i class="fa fa-gear"></i> 设置</button>
+    </div>
+
+    <!-- Tab: 正股持仓 -->
+    <div class="manage-tab-content" id="mtab-stock" style="display:block">
+      <div class="card mb-16">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>股票</th>
+                <th class="right">股数</th>
+                <th class="right">成本价</th>
+                <th class="right">现价</th>
+                <th class="right">浮盈/亏</th>
+                <th class="right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="manage-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- 导入/导出 -->
+      <div class="card" style="border-color:var(--border-accent)">
+        <div class="section-title" style="margin-bottom:14px;color:var(--accent-primary)">
+          <i class="fa fa-file-import"></i> 数据导入 / 导出
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button onclick="exportHoldings()" style="padding:8px 16px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary)">
+            <i class="fa fa-download"></i> 导出 JSON
+          </button>
+          <label style="padding:8px 16px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary)">
+            <i class="fa fa-upload"></i> 导入 JSON
+            <input type="file" accept=".json" style="display:none" onchange="importHoldings(event)">
+          </label>
+          <div style="font-size:11px;color:var(--text-tertiary);align-self:center">
+            <i class="fa fa-info-circle"></i> 导出的 JSON 可直接导入恢复数据
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: 期权持仓 -->
+    <div class="manage-tab-content" id="mtab-options" style="display:none">
+      <!-- 期权统计 -->
+      <div class="grid-4 mb-16" id="opt-stats-row">
+        <div class="kpi-card" style="--accent-color:var(--success)">
+          <div class="kpi-row">
+            <div>
+              <div class="kpi-label">未平仓合约</div>
+              <div class="kpi-value" id="opt-stat-open">—</div>
+              <div class="kpi-change neutral">Sell Put 持仓中</div>
+            </div>
+            <div class="kpi-icon" style="background:var(--bg-success-subtle);color:var(--success)"><i class="fa fa-circle-dot"></i></div>
+          </div>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--accent-secondary)">
+          <div class="kpi-row">
+            <div>
+              <div class="kpi-label">未平仓权利金</div>
+              <div class="kpi-value" id="opt-stat-open-premium">—</div>
+              <div class="kpi-change neutral">最大可获收益</div>
+            </div>
+            <div class="kpi-icon" style="background:rgba(163,113,247,.12);color:var(--accent-secondary)"><i class="fa fa-coins"></i></div>
+          </div>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--info)">
+          <div class="kpi-row">
+            <div>
+              <div class="kpi-label">历史已实现盈亏</div>
+              <div class="kpi-value" id="opt-stat-realized">—</div>
+              <div class="kpi-change neutral">已平仓/到期</div>
+            </div>
+            <div class="kpi-icon" style="background:var(--bg-accent-subtle);color:var(--info)"><i class="fa fa-chart-line"></i></div>
+          </div>
+        </div>
+        <div class="kpi-card" style="--accent-color:var(--warning)">
+          <div class="kpi-row">
+            <div>
+              <div class="kpi-label">历史胜率</div>
+              <div class="kpi-value" id="opt-stat-winrate">—</div>
+              <div class="kpi-change neutral">盈利交易占比</div>
+            </div>
+            <div class="kpi-icon" style="background:rgba(210,153,34,.12);color:var(--warning)"><i class="fa fa-trophy"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 期权持仓过滤 + 列表 -->
+      <div class="card mb-16">
+        <div class="section-header" style="margin-bottom:14px">
+          <div class="section-title"><i class="fa fa-list"></i> 期权持仓记录</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="filterOptions('all')" class="opt-filter-btn active" data-filter="all" style="padding:4px 10px;background:var(--info);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">全部</button>
+            <button onclick="filterOptions('open')" class="opt-filter-btn" data-filter="open" style="padding:4px 10px;background:transparent;border:1px solid var(--border-default);border-radius:4px;cursor:pointer;font-size:11px;color:var(--text-secondary)">持仓中</button>
+            <button onclick="filterOptions('closed')" class="opt-filter-btn" data-filter="closed" style="padding:4px 10px;background:transparent;border:1px solid var(--border-default);border-radius:4px;cursor:pointer;font-size:11px;color:var(--text-secondary)">已平仓</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>标的</th>
+                <th>类型</th>
+                <th class="right">行权价</th>
+                <th class="right">到期日</th>
+                <th class="right">合约数</th>
+                <th class="right">权利金/股</th>
+                <th class="right">总收益</th>
+                <th>状态</th>
+                <th class="right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="opt-positions-body">
+              <tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:24px">暂无记录，点击「添加持仓」→ 期权 开始记录</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: 设置 -->
+    <div class="manage-tab-content" id="mtab-settings" style="display:none">
+      <div class="card mb-16">
+        <div class="section-title" style="margin-bottom:14px"><i class="fa fa-coins"></i> 现金与资产配置</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">现金持有量 ($)</label>
+            <input id="mgmt-cash" type="number" value="39187" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px">目标现金比例 (%)</label>
+            <input id="mgmt-target-cash" type="number" value="35" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px">
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button onclick="saveCashSettings()" style="width:100%;padding:9px;background:var(--info);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#fff">
+              <i class="fa fa-save"></i> 保存设置
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-manage -->
+
+  <!-- ═══ Modal：添加/编辑 正股持仓 ═══ -->
+  <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-tertiary);border:1px solid var(--border-default);border-radius:12px;padding:24px;width:min(480px,90vw);max-height:85vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-size:16px;font-weight:700" id="modal-title">添加持仓</div>
+        <button onclick="closeModal()" style="background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <input type="hidden" id="modal-mode" value="add">
+        <input type="hidden" id="modal-symbol-orig" value="">
+        <div>
+          <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">股票代码 *</label>
+          <input id="m-symbol" type="text" placeholder="如 TSLA" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px;text-transform:uppercase">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">公司名称</label>
+          <input id="m-name" type="text" placeholder="如 特斯拉" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">持有股数 *</label>
+            <input id="m-shares" type="number" placeholder="100" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">平均成本价 ($) *</label>
+            <input id="m-cost" type="number" step="0.01" placeholder="380.00" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">当前价格 ($)</label>
+          <input id="m-price" type="number" step="0.01" placeholder="留空则等于成本价" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+        </div>
+        <div style="background:var(--bg-accent-subtle);border:1px solid var(--border-accent);border-radius:8px;padding:12px;font-size:12px;color:var(--text-secondary)" id="modal-preview">
+          预览：<span id="modal-preview-text">-</span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="closeModal()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary)">取消</button>
+          <button id="modal-save-btn" onclick="saveHolding()" style="flex:1;padding:10px;background:var(--info);border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#fff">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Modal：添加期权持仓（开仓）═══ -->
+  <div id="opt-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-tertiary);border:1px solid var(--border-default);border-radius:12px;padding:24px;width:min(520px,90vw);max-height:85vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-size:16px;font-weight:700">📝 记录期权开仓</div>
+        <button onclick="closeOptModal()" style="background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">标的代码 *</label>
+            <input id="om-symbol" type="text" value="TSLA" placeholder="TSLA" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px;text-transform:uppercase">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">期权方向</label>
+            <select id="om-direction" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+              <option value="sell">Sell（卖出）</option>
+              <option value="buy">Buy（买入）</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">期权类型</label>
+            <select id="om-type" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+              <option value="put">Put（看跌期权）</option>
+              <option value="call">Call（看涨期权）</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">合约数量 *</label>
+            <input id="om-contracts" type="number" value="1" min="1" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" oninput="previewOptPnl()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">行权价 ($) *</label>
+            <input id="om-strike" type="number" step="0.5" placeholder="380" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" oninput="previewOptPnl()">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">到期日 *</label>
+            <input id="om-expiration" type="date" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">收取/支付权利金/股 ($) *</label>
+            <input id="om-premium" type="number" step="0.01" placeholder="3.20" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" oninput="previewOptPnl()">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">开仓时标的价格 ($)</label>
+            <input id="om-open-price" type="number" step="0.01" placeholder="383.64（可选）" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">备注（可选）</label>
+          <input id="om-note" type="text" placeholder="如：财报后开仓，等待时间价值衰减" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+        </div>
+        <!-- 实时预览 -->
+        <div id="opt-modal-preview" style="background:var(--bg-success-subtle);border:1px solid var(--border-success);border-radius:8px;padding:12px;font-size:12.5px">
+          <div style="font-weight:600;color:var(--success);margin-bottom:6px"><i class="fa fa-calculator"></i> 收益预览</div>
+          <div id="opt-preview-text" style="color:var(--text-secondary)">填入行权价、权利金和合约数后自动计算</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="closeOptModal()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary)">取消</button>
+          <button id="opt-modal-save-btn" onclick="saveOptionPosition()" style="flex:1;padding:10px;background:var(--success);border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#fff">📌 记录开仓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Modal：平仓/到期/行权 ═══ -->
+  <div id="close-opt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-tertiary);border:1px solid var(--border-default);border-radius:12px;padding:24px;width:min(420px,90vw)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:16px;font-weight:700">结束期权持仓</div>
+        <button onclick="closeCloseOptModal()" style="background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px">✕</button>
+      </div>
+      <input type="hidden" id="close-opt-id">
+      <div id="close-opt-info" style="padding:10px;background:var(--bg-elevated);border-radius:8px;font-size:13px;margin-bottom:16px;color:var(--text-secondary)"></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">结束方式</label>
+          <select id="close-opt-status" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" onchange="toggleClosePrice()">
+            <option value="closed">平仓（买回期权）</option>
+            <option value="expired">到期归零（权利金全收）</option>
+            <option value="assigned">被行权（需看正股）</option>
+          </select>
+        </div>
+        <div id="close-price-row">
+          <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:5px">平仓权利金/股 ($)（买回价格）</label>
+          <input id="close-opt-price" type="number" step="0.01" placeholder="如 1.50（平仓成本）" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px">
+        </div>
+        <div id="close-opt-pnl-preview" style="padding:10px;background:var(--bg-accent-subtle);border:1px solid var(--border-accent);border-radius:8px;font-size:13px"></div>
+        <div style="display:flex;gap:10px">
+          <button onclick="closeCloseOptModal()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary)">取消</button>
+          <button onclick="submitCloseOption()" style="flex:1;padding:10px;background:var(--danger);border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#fff">确认结束</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const API = '';  // 使用相对路径，兼容所有访问方式
+let dashData = null;
+let charts = {};
+let currentManageTab = 'stock';
+
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const PAGE_TITLES = {
+  overview: '投资总览',
+  holdings: '持仓明细',
+  health: '健康评估',
+  options: '期权策略',
+  tsla: 'TSLA 专项监控',
+  alerts: '风险预警',
+  manage: '持仓管理',
+  market: '市场行情',
+  news: '资讯动态'
+};
+
+function navigate(page, el, pushState = true) {
+  // 校验页面存在
+  if (!document.getElementById('page-' + page)) page = 'overview';
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+
+  // 高亮侧边栏
+  const navEl = el || document.querySelector('[data-page=' + page + ']');
+  if (navEl) navEl.classList.add('active');
+
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[page] || page;
+
+  // Hash 路由：更新 URL，刷新可还原
+  if (pushState) {
+    history.pushState({ page }, '', '#/' + page);
+  }
+
+  // 切换到 TSLA 页时加载情报
+  if (page === 'tsla') {
+    setTimeout(loadTslaIntel, 50);
+  }
+
+  // 切换到投资总览或持仓明细：刷新期权摘要
+  if (page === 'overview' || page === 'holdings') {
+    setTimeout(loadOptionsOverview, 80);
+  }
+
+  // 切换到持仓管理：若数据是占位数据则立即刷新
+  if (page === 'manage') {
+    if (_isMockData) {
+      fetchData();  // 立即重新拉取真实数据
+    } else {
+      renderManage(); // 数据有效，直接重渲染最新状态
+    }
+    if (currentManageTab === 'options') {
+      setTimeout(loadOptionPositions, 50);
+    }
+  }
+
+  // 移动端：切页后关闭侧边栏
+  const sb = document.getElementById('sidebar');
+  if (sb.classList.contains('open')) toggleSidebar();
+}
+
+
+// 监听浏览器前进后退
+window.addEventListener('popstate', (e) => {
+  const page = (e.state && e.state.page) || getHashPage();
+  navigate(page, null, false);
+});
+
+function getHashPage() {
+  const hash = location.hash.replace('#/', '').split('?')[0];
+  return PAGE_TITLES[hash] ? hash : 'overview';
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+let token = localStorage.getItem('claw_token');
+
+function doLogout() {
+  localStorage.clear();
+  location.href = '/login';
+}
+
+function initUserUI() {
+  try {
+    const u = JSON.parse(localStorage.getItem('claw_user') || '{}');
+    if (u.username) {
+      document.getElementById('dash-avatar').textContent = u.username[0].toUpperCase();
+      document.getElementById('dash-username').textContent = u.username;
+      document.getElementById('dash-role').textContent = u.role === 'admin' ? '管理员' : '个人投资者';
+      if (u.role === 'admin') document.getElementById('admin-entry').style.display = '';
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════════
+function authHeaders() {
+  return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API + path, { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) });
+  if (res.status === 401) { location.href = '/login'; throw new Error('未登录'); }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '请求失败');
+  return data;
+}
+
+async function apiDelete(path) {
+  const res = await fetch(API + path, { method: 'DELETE', headers: authHeaders() });
+  if (res.status === 401) { location.href = '/login'; throw new Error('未登录'); }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '请求失败');
+  return data;
+}
+
+async function apiPatch(path, body) {
+  const res = await fetch(API + path, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(body) });
+  if (res.status === 401) { location.href = '/login'; throw new Error('未登录'); }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '请求失败');
+  return data;
+}
+
+// ═══════════════════════════════════════════════
+// DATA FETCH
+// ═══════════════════════════════════════════════
+let _fetchRetryTimer = null;
+let _isMockData = false;  // 标记当前是否在显示 mock 数据
+let _firstLoadComplete = false;  // 标记是否已完成首次加载
+let _isManualRefresh = false;  // 标记是否为手动刷新
+
+async function fetchData() {
+  try {
+    const headers = token ? { Authorization: 'Bearer ' + token } : {};
+    const res = await fetch(API + '/api/dashboard', { headers });
+    if (res.status === 401) { location.href = '/login'; return; }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    // 确认是真实数据（有 portfolio_holdings 且响应来自服务器）
+    dashData = data;
+    _isMockData = false;
+    _firstLoadComplete = true;
+    if (_fetchRetryTimer) { clearTimeout(_fetchRetryTimer); _fetchRetryTimer = null; }
+    renderAll();
+    document.getElementById('last-update').textContent = '刚刚更新';
+  } catch(e) {
+    console.warn('API 获取失败', e);
+    if (!dashData || _isMockData) {
+      // 首次加载失败：先显示加载中提示，3秒后自动重试
+      document.getElementById('last-update').textContent = '⚠ 连接中…';
+      if (!_isMockData) {
+        // 用轻量占位，不填假数据
+        _isMockData = true;
+        dashData = { ...MOCK_DATA, _is_placeholder: true };
+        renderAll();
+      }
+      // 3秒后自动重试
+      if (!_fetchRetryTimer) {
+        _fetchRetryTimer = setTimeout(() => {
+          _fetchRetryTimer = null;
+          fetchData();
+        }, 3000);
+      }
+    } else {
+      // 已有真实数据时，只更新状态文字
+      document.getElementById('last-update').textContent = '⚠ 刷新失败';
+      // 只在手动刷新时才显示 toast，自动刷新失败静默处理
+      if (_isManualRefresh) {
+        showToast('数据刷新失败，显示上次数据', 'error');
+      }
+    }
+  }
+}
+
+function refreshData() {
+  manualRefresh();
+}
+
+// ═══════════════════════════════════════════════
+// MOCK DATA (fallback)
+// ═══════════════════════════════════════════════
+const MOCK_DATA = {
+  portfolio_summary: {
+    total_value: 105380.93, cash_value: 39186.88, invested_value: 66194.05,
+    total_gain_loss: 7873.3, total_gain_loss_percent: 13.5,
+    cash_ratio: 59.2, target_cash_ratio: 35.0, health_score: 81.2,
+    positions_count: 8
+  },
+  portfolio_holdings: [
+    { symbol:'MSFT', name:'微软', shares:30, avg_cost:386.25, current_price:386.25, current_value:11587.5, gain_loss:0, gain_loss_percent:0, health_score:92 },
+    { symbol:'TSLA', name:'特斯拉', shares:25, avg_cost:350, current_price:383.64, current_value:9591, gain_loss:841, gain_loss_percent:9.6, health_score:75 },
+    { symbol:'META', name:'Meta', shares:20, avg_cost:480, current_price:512, current_value:10240, gain_loss:640, gain_loss_percent:6.7, health_score:82 },
+    { symbol:'GOOGL', name:'谷歌', shares:30, avg_cost:280, current_price:304.39, current_value:9131.7, gain_loss:731.7, gain_loss_percent:8.7, health_score:88 },
+    { symbol:'NVDA', name:'英伟达', shares:50, avg_cost:120, current_price:177.97, current_value:8898.5, gain_loss:2898.5, gain_loss_percent:48.3, health_score:85 },
+    { symbol:'AAPL', name:'苹果', shares:35, avg_cost:230, current_price:252.13, current_value:8824.55, gain_loss:774.55, gain_loss_percent:9.6, health_score:88 },
+    { symbol:'AMZN', name:'亚马逊', shares:30, avg_cost:184, current_price:212.36, current_value:6370.8, gain_loss:850.8, gain_loss_percent:15.4, health_score:90 },
+    { symbol:'IONQ', name:'IonQ', shares:100, avg_cost:12, current_price:15.5, current_value:1550, gain_loss:350, gain_loss_percent:29.2, health_score:70 }
+  ],
+  market_status: { sp500:5234.18, sp500_change:0.8, nasdaq:16345.27, nasdaq_change:1.2, vix:14.2, vix_change:-2.1, market_sentiment:'乐观' },
+  risk_alerts: [
+    { id:'r1', level:'high', title:'现金比例过高', description:'现金比例59.2% vs 目标35%，资金效率低', timestamp:'2h前', action:'优化现金使用，考虑sell put策略' },
+    { id:'r2', level:'high', title:'科技股集中度高', description:'科技行业占比50.7%，建议分散', timestamp:'3h前', action:'增加防御性行业配置' },
+    { id:'r3', level:'medium', title:'利率风险', description:'下周FOMC会议，关注市场反应', timestamp:'5h前', action:'保持现金，关注市场反应' }
+  ],
+  option_strategies: [
+    { symbol:'TSLA', type:'put', strike_price:380, expiration:'2026-04-24', premium:3.2, probability:68, annualized_return:12.5, recommendation:'高概率，适合sell put' },
+    { symbol:'NVDA', type:'put', strike_price:170, expiration:'2026-05-08', premium:2.8, probability:55, annualized_return:11.2, recommendation:'中等概率，风险可控' },
+    { symbol:'AAPL', type:'put', strike_price:245, expiration:'2026-04-17', premium:1.5, probability:72, annualized_return:9.8, recommendation:'保守策略，适合新手' }
+  ],
+  portfolio_health: {
+    overall_score: 81.2,
+    metrics: { diversification:92, risk_control:85, cash_management:45, sector_allocation:78, position_size:88, volatility:76 },
+    strengths: ['持仓分散度良好','风险控制措施到位','投资标的质量优秀'],
+    weaknesses: ['现金比例过高（59.2%）','科技股集中度过高','部分持仓估值偏高'],
+    recommendations: ['优化现金使用，考虑sell put策略','适当降低科技股仓位','增加防御性行业配置']
+  },
+  industry_distribution: { technology:50.7, consumer_cyclical:28.1, communication_services:14.2, industrials:7.0 },
+  news: [
+    { id:'n1', title:'NVDA发布新一代AI芯片，分析师一致上调目标价', summary:'英伟达宣布下一代Blackwell Ultra架构芯片投入生产，多家机构上调目标价至220-250美元。', source:'路透社', timestamp:'1小时前', impact:'high', related_symbols:['NVDA','AMD','INTC'] },
+    { id:'n2', title:'美联储会议纪要：通胀放缓，年内仍有降息空间', summary:'FOMC纪要显示官员对通胀路径更有信心，市场预期年内至少两次降息。', source:'华尔街日报', timestamp:'3小时前', impact:'medium', related_symbols:['所有股票'] },
+    { id:'n3', title:'TSLA Q1交付量同比增长21%，超市场预期', summary:'特斯拉第一季度交付约47.2万辆，超出分析师预期41万辆，股价盘前上涨5%。', source:'彭博社', timestamp:'5小时前', impact:'high', related_symbols:['TSLA','F','GM'] }
+  ]
+};
+
+// ═══════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════
+function renderAll() {
+  if (!dashData) return;
+  renderOverview();
+  renderHoldings();
+  renderHealth();
+  renderOptions();
+  renderAlerts();
+  renderMarket();
+  renderNews();
+  renderTsla();
+  renderManage();
+  // 异步加载期权摘要（不阻塞主渲染）
+  loadOptionsOverview();
+}
+
+// ─── Helpers ───────────────────────────────────
+function fmt$(v) { return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtPct(v) { return (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%'; }
+function updown(v) { return v >= 0 ? 'up' : 'down'; }
+
+// ═══════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════
+function renderOverview() {
+  const s = dashData.portfolio_summary;
+  const h = dashData.portfolio_health;
+  const alerts = dashData.risk_alerts;
+
+  // KPIs
+  document.getElementById('kpi-total').textContent = fmt$(s.total_value);
+  const totChg = document.getElementById('kpi-total-chg');
+  if (totChg) { totChg.className = 'kpi-change ' + updown(s.total_gain_loss_percent); totChg.innerHTML = `<i class="fa fa-arrow-${s.total_gain_loss_percent>=0?'up':'down'}"></i> ${fmtPct(s.total_gain_loss_percent)}`; }
+
+  document.getElementById('kpi-gain').textContent = (s.total_gain_loss >= 0 ? '+' : '') + fmt$(s.total_gain_loss);
+
+  document.getElementById('kpi-cash').textContent = fmt$(s.cash_value);
+  const cashChg = document.getElementById('kpi-cash-chg');
+  if (cashChg) { cashChg.innerHTML = `<i class="fa fa-circle-info"></i> ${s.cash_ratio ? s.cash_ratio.toFixed(1) : 0}% 占比`; }
+
+  document.getElementById('kpi-health').textContent = s.health_score;
+
+  // Market ticker
+  const m = dashData.market_status;
+  document.getElementById('t-spx').textContent = Number(m.sp500).toLocaleString('en-US');
+  document.getElementById('t-spx-c').textContent = fmtPct(m.sp500_change);
+  document.getElementById('t-ndx').textContent = Number(m.nasdaq).toLocaleString('en-US');
+  document.getElementById('t-ndx-c').textContent = fmtPct(m.nasdaq_change);
+  document.getElementById('t-vix').textContent = m.vix;
+  document.getElementById('t-vix-c').textContent = fmtPct(m.vix_change);
+
+  // Performance Line Chart
+  buildPerformanceChart();
+
+  // Allocation Donut
+  buildAllocationDonut();
+
+  // Top Holdings Table
+  const holdings = dashData.portfolio_holdings;
+  const total = holdings.reduce((a, h) => a + h.current_value, 0);
+  const tbody = document.getElementById('top-holdings-body');
+  tbody.innerHTML = '';
+  holdings.slice().sort((a,b) => b.current_value - a.current_value).forEach(h => {
+    const up = h.gain_loss_percent >= 0;
+    const hs = h.health_score;
+    const hClass = hs >= 85 ? 'high' : hs >= 70 ? 'mid' : 'low';
+    tbody.innerHTML += `<tr>
+      <td><div class="stock-symbol">${h.symbol}</div><div class="stock-name">${h.name}</div></td>
+      <td class="right">${fmt$(h.current_value)}</td>
+      <td class="right ${up?'up':'down'}">${fmtPct(h.gain_loss_percent)}</td>
+      <td class="right"><span class="health-pill ${hClass}">${h.health_score}</span></td>
+    </tr>`;
+  });
+
+  // Alerts Overview
+  const alertsEl = document.getElementById('overview-alerts');
+  alertsEl.innerHTML = '';
+  alerts.forEach(a => {
+    alertsEl.innerHTML += `
+      <div class="alert-item">
+        <div class="alert-dot ${a.level}"></div>
+        <div>
+          <div class="alert-title"><span class="alert-badge ${a.level}">${a.level==='high'?'高':a.level==='medium'?'中':'低'}</span>${a.title}</div>
+          <div class="alert-desc">${a.description}</div>
+        </div>
+      </div>`;
+  });
+
+  // Recommendations
+  const recsEl = document.getElementById('overview-recs');
+  recsEl.innerHTML = '';
+  h.recommendations.forEach(r => {
+    recsEl.innerHTML += `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg-accent-subtle);border-radius:6px;border:1px solid var(--bg-accent-subtle)">
+      <i class="fa fa-wand-magic-sparkles" style="color:var(--accent-primary);margin-top:1px;font-size:11px"></i>
+      <span style="font-size:12px">${r}</span>
+    </div>`;
+  });
+}
+
+function buildPerformanceChart() {
+  const ctx = document.getElementById('chart-performance').getContext('2d');
+  if (charts.performance) charts.performance.destroy();
+  const labels = ['3/10','3/12','3/14','3/17','3/19','3/21','3/24'];
+  const data   = [98200, 99100, 97800, 101200, 103400, 104900, 105381];
+  
+  // 创建渐变填充
+  const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+  gradient.addColorStop(0, 'rgba(192,98,42,0.20)');
+  gradient.addColorStop(0.6, 'rgba(192,98,42,0.06)');
+  gradient.addColorStop(1, 'rgba(192,98,42,0.00)');
+  
+  charts.performance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#c0622a',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#ffffff',
+        pointBorderColor: '#c0622a',
+        pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(44,36,32,0.9)',
+          titleColor: '#f0e8e0',
+          bodyColor: '#d0c0b0',
+          borderColor: 'rgba(192,98,42,0.4)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString() }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false },
+          ticks: { color: '#a89a90', font: { size: 11 } },
+          border: { display: false }
+        },
+        y: {
+          grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false },
+          ticks: { color: '#a89a90', font: { size: 11 }, callback: v => '$' + (v/1000).toFixed(0) + 'k' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function buildAllocationDonut() {
+  const ctx = document.getElementById('chart-allocation').getContext('2d');
+  if (charts.allocation) charts.allocation.destroy();
+  const holdings = dashData.portfolio_holdings;
+  const total = holdings.reduce((a, h) => a + h.current_value, 0);
+  // 精心设计的暖色系+对比色调色板
+  const colors = [
+    '#c0622a', // 暖橙红
+    '#2a7ab8', // 钢蓝
+    '#2e8b57', // 墨绿
+    '#b07d1a', // 琥珀
+    '#7c5cbf', // 淡紫
+    '#c94a6e', // 玫红
+    '#3a9e8e', // 青绿
+    '#e07b38', // 橙
+  ];
+  charts.allocation = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: holdings.map(h => h.symbol),
+      datasets: [{ 
+        data: holdings.map(h => h.current_value), 
+        backgroundColor: colors, 
+        borderColor: '#ffffff',
+        borderWidth: 3,
+        hoverBorderWidth: 3,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(44,36,32,0.9)',
+          titleColor: '#f0e8e0',
+          bodyColor: '#d0c0b0',
+          borderColor: 'rgba(192,98,42,0.4)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: { label: ctx => ` ${ctx.label}: ${(ctx.parsed/total*100).toFixed(1)}%` }
+        }
+      }
+    }
+  });
+  // Legend — 两列整齐布局
+  const leg = document.getElementById('alloc-legend');
+  leg.innerHTML = '';
+  holdings.forEach((h, i) => {
+    const pct = (h.current_value / total * 100).toFixed(1);
+    leg.innerHTML += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0">
+      <span style="width:8px;height:8px;border-radius:2px;background:${colors[i]};flex-shrink:0"></span>
+      <span style="font-size:11px;color:var(--text-secondary);flex:1">${h.symbol}</span>
+      <span style="font-size:11px;font-weight:700;color:var(--text-primary)">${pct}%</span>
+    </div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// HOLDINGS
+// ═══════════════════════════════════════════════
+function renderHoldings() {
+  const holdings = dashData.portfolio_holdings;
+  const total = holdings.reduce((a, h) => a + h.current_value, 0);
+  const s = dashData.portfolio_summary;
+
+  // 总资产（与投资总览一致）
+  if (document.getElementById('h-total')) {
+    document.getElementById('h-total').textContent = fmt$(s.total_value);
+    document.getElementById('h-total-sub').innerHTML = `<span class="chip ${s.total_gain_loss >= 0 ? 'green' : 'red'}">${fmtPct(s.total_gain_loss_percent)}</span> 总回报`;
+  }
+
+  document.getElementById('h-invested').textContent = fmt$(s.invested_value);
+  const hGainEl = document.getElementById('h-gain');
+  hGainEl.textContent = (s.total_gain_loss >= 0 ? '+' : '') + fmt$(s.total_gain_loss);
+  hGainEl.style.color = s.total_gain_loss >= 0 ? 'var(--success)' : 'var(--danger)';
+
+  // 现金储备
+  if (document.getElementById('h-cash')) {
+    document.getElementById('h-cash').textContent = fmt$(s.cash_value);
+    document.getElementById('h-cash-sub').innerHTML = `<span class="chip">占比 ${s.cash_ratio ? s.cash_ratio.toFixed(1) : 0}%</span>`;
+  }
+
+  document.getElementById('holdings-count').textContent = holdings.length + ' 个持仓';
+
+  // Table
+  const tbody = document.getElementById('holdings-body');
+  tbody.innerHTML = '';
+  holdings.sort((a,b) => b.current_value - a.current_value).forEach(h => {
+    const pct = (h.current_value / total * 100).toFixed(1);
+    const up = h.gain_loss_percent >= 0;
+    const hs = h.health_score;
+    const hClass = hs >= 85 ? 'high' : hs >= 70 ? 'mid' : 'low';
+    tbody.innerHTML += `<tr>
+      <td><div class="stock-symbol">${h.symbol}</div><div class="stock-name">${h.name}</div></td>
+      <td class="right">${h.shares}</td>
+      <td class="right">$${h.avg_cost.toFixed(2)}</td>
+      <td class="right">$${h.current_price.toFixed(2)}</td>
+      <td class="right">${fmt$(h.current_value)}</td>
+      <td class="right ${up?'up':'down'}">${(up?'+':'') + fmt$(h.gain_loss)}</td>
+      <td class="right ${up?'up':'down'}">${fmtPct(h.gain_loss_percent)}</td>
+      <td class="right">${pct}%</td>
+      <td class="right"><span class="health-pill ${hClass}">${h.health_score}</span></td>
+    </tr>`;
+  });
+
+  // Sector Bar Chart
+  buildSectorChart();
+
+  // Position Bars
+  const barsEl = document.getElementById('position-bars');
+  barsEl.innerHTML = '';
+  const colors = ['#c0622a','#2a7ab8','#2e8b57','#b07d1a','#7c5cbf','#c94a6e','#3a9e8e','#e07b38'];
+  holdings.sort((a,b) => b.current_value - a.current_value).forEach((h, i) => {
+    const pct = (h.current_value / total * 100).toFixed(1);
+    barsEl.innerHTML += `<div class="progress-bar-wrap">
+      <div class="progress-bar-header">
+        <span class="progress-bar-label">${h.symbol} · ${h.name}</span>
+        <span class="progress-bar-val">${pct}%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div>
+      </div>
+    </div>`;
+  });
+}
+
+function buildSectorChart() {
+  const ctx = document.getElementById('chart-sector').getContext('2d');
+  if (charts.sector) charts.sector.destroy();
+  const dist = dashData.industry_distribution;
+  charts.sector = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['科技', '消费周期', '通信服务', '工业'],
+      datasets: [{
+        data: [dist.technology, dist.consumer_cyclical, dist.communication_services, dist.industrials],
+        backgroundColor: ['#c0622a','#7c5cbf','#2e8b57','#b07d1a'],
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(44,36,32,0.9)',
+          titleColor: '#f0e8e0',
+          bodyColor: '#d0c0b0',
+          borderColor: 'rgba(192,98,42,0.4)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: { label: ctx => ` ${ctx.parsed.y}%` }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#a89a90', font: { size: 11 } }, border: { display: false } },
+        y: {
+          grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false },
+          ticks: { color: '#a89a90', font: { size: 11 }, callback: v => v + '%' },
+          border: { display: false },
+          max: 60
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH
+// ═══════════════════════════════════════════════
+function renderHealth() {
+  const h = dashData.portfolio_health;
+  document.getElementById('health-score-big').textContent = h.overall_score;
+
+  // Health ring
+  buildHealthRing(h.overall_score);
+
+  // Chips
+  const chipsEl = document.getElementById('health-chips');
+  chipsEl.innerHTML = '';
+  const statusMap = { overall: h.overall_score >= 80 ? '良好' : h.overall_score >= 60 ? '一般' : '警告' };
+  const chipCls = h.overall_score >= 80 ? 'green' : h.overall_score >= 60 ? 'yellow' : 'red';
+  chipsEl.innerHTML = `<span class="chip ${chipCls}">${statusMap.overall} · ${h.overall_score}</span>
+    <span class="chip blue">8 个持仓</span>
+    <span class="chip purple">保守型</span>`;
+
+  // Metric Bars
+  const barsEl = document.getElementById('health-bars');
+  const metricLabels = { diversification:'分散度', risk_control:'风险控制', cash_management:'现金管理', sector_allocation:'行业配置', position_size:'仓位控制', volatility:'波动率管理' };
+  barsEl.innerHTML = '';
+  Object.entries(h.metrics).forEach(([k, v]) => {
+    const color = v >= 80 ? 'var(--success)' : v >= 60 ? 'var(--warning)' : 'var(--danger)';
+    barsEl.innerHTML += `<div class="progress-bar-wrap">
+      <div class="progress-bar-header">
+        <span class="progress-bar-label">${metricLabels[k] || k}</span>
+        <span class="progress-bar-val" style="color:${color}">${v}</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width:${v}%;background:${color}"></div>
+      </div>
+    </div>`;
+  });
+
+  // Strengths
+  const strEl = document.getElementById('health-strengths');
+  strEl.innerHTML = '';
+  h.strengths.forEach(s => {
+    strEl.innerHTML += `<div class="metric-row">
+      <span style="font-size:12px"><i class="fa fa-check-circle" style="color:var(--success);margin-right:6px"></i>${s}</span>
+    </div>`;
+  });
+
+  // Weaknesses
+  const wkEl = document.getElementById('health-weaknesses');
+  wkEl.innerHTML = '';
+  h.weaknesses.forEach(w => {
+    wkEl.innerHTML += `<div class="metric-row">
+      <span style="font-size:12px"><i class="fa fa-triangle-exclamation" style="color:var(--warning);margin-right:6px"></i>${w}</span>
+    </div>`;
+  });
+
+  // Recommendations
+  const recEl = document.getElementById('health-recs');
+  recEl.innerHTML = '';
+  h.recommendations.forEach((r, i) => {
+    recEl.innerHTML += `<div style="padding:12px 14px;background:var(--bg-accent-subtle);border:1px solid var(--bg-accent-subtle);border-radius:8px">
+      <div style="font-size:11px;color:var(--accent-primary);font-weight:700;margin-bottom:4px">建议 ${i+1}</div>
+      <div style="font-size:13px">${r}</div>
+    </div>`;
+  });
+}
+
+function buildHealthRing(score) {
+  const ctx = document.getElementById('chart-health-ring').getContext('2d');
+  if (charts.healthRing) charts.healthRing.destroy();
+  // Chart.js 不支持 CSS 变量，需要直接用颜色值
+  const color = score >= 80 ? '#2e8b57' : score >= 60 ? '#b07d1a' : '#d94f2a';
+  charts.healthRing = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [score, 100-score],
+        backgroundColor: [color, '#ede8e3'],
+        borderColor: '#f7f3ef',
+        borderWidth: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '75%',
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      rotation: -90, circumference: 360
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// OPTIONS
+// ═══════════════════════════════════════════════
+function renderOptions() {
+  const opts = dashData.option_strategies;
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  opts.forEach(o => {
+    const color = o.probability >= 70 ? 'var(--success)' : o.probability >= 55 ? 'var(--warning)' : 'var(--danger)';
+    grid.innerHTML += `<div class="option-card">
+      <div class="option-header">
+        <span class="option-symbol">${o.symbol}</span>
+        <span class="option-type">SELL PUT</span>
+      </div>
+      <div class="option-row">
+        <span class="option-key">执行价</span>
+        <span class="option-val">$${o.strike_price}</span>
+      </div>
+      <div class="option-row">
+        <span class="option-key">到期日</span>
+        <span class="option-val">${o.expiration}</span>
+      </div>
+      <div class="option-row">
+        <span class="option-key">权利金</span>
+        <span class="option-val" style="color:var(--success)">$${o.premium}/股</span>
+      </div>
+      <div class="option-row">
+        <span class="option-key">年化收益</span>
+        <span class="option-val" style="color:var(--accent-primary)">${o.annualized_return}%</span>
+      </div>
+      <div class="option-prob-bar">
+        <div class="progress-bar-header">
+          <span class="option-key">盈利概率</span>
+          <span class="option-val" style="color:${color}">${o.probability}%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" style="width:${o.probability}%;background:${color}"></div>
+        </div>
+      </div>
+      <div class="option-recommend">${o.recommendation}</div>
+    </div>`;
+  });
+
+  // Options Bar Chart
+  buildOptionsChart(opts);
+}
+
+function buildOptionsChart(opts) {
+  const ctx = document.getElementById('chart-options').getContext('2d');
+  if (charts.options) charts.options.destroy();
+  charts.options = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: opts.map(o => o.symbol),
+      datasets: [
+        { label: '年化收益 %', data: opts.map(o => o.annualized_return), backgroundColor: '#c0622a', borderRadius: 6, yAxisID: 'y' },
+        { label: '盈利概率 %', data: opts.map(o => o.probability), backgroundColor: '#7c5cbf', borderRadius: 6, yAxisID: 'y2' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#a89a90', font: { size: 11 }, boxWidth: 12, padding: 12 } },
+        tooltip: {
+          backgroundColor: 'rgba(44,36,32,0.9)',
+          titleColor: '#f0e8e0',
+          bodyColor: '#d0c0b0',
+          borderColor: 'rgba(192,98,42,0.4)',
+          borderWidth: 1,
+          padding: 10,
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#a89a90', font: { size: 11 } }, border: { display: false } },
+        y: { grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false }, ticks: { color: '#a89a90', font: { size: 11 }, callback: v => v + '%' }, position: 'left', border: { display: false } },
+        y2: { grid: { display: false }, ticks: { color: '#a89a90', font: { size: 11 }, callback: v => v + '%' }, position: 'right', border: { display: false } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════════════════
+function renderAlerts() {
+  const alerts = dashData.risk_alerts;
+  const highCount = alerts.filter(a => a.level === 'high').length;
+  document.getElementById('alert-count').textContent = highCount + ' 高风险';
+
+  const listEl = document.getElementById('alerts-list');
+  listEl.innerHTML = '';
+  alerts.forEach(a => {
+    const levelZh = a.level === 'high' ? '高风险' : a.level === 'medium' ? '中风险' : '低风险';
+    listEl.innerHTML += `<div class="alert-item">
+      <div class="alert-dot ${a.level}"></div>
+      <div style="flex:1">
+        <div class="alert-title">
+          <span class="alert-badge ${a.level}">${levelZh}</span>${a.title}
+        </div>
+        <div class="alert-desc" style="margin:4px 0">${a.description}</div>
+        <div class="alert-action"><i class="fa fa-bolt"></i> 建议：${a.action}</div>
+      </div>
+      <div class="alert-time">${a.timestamp || '刚刚'}</div>
+    </div>`;
+  });
+
+  // Radar Chart
+  buildRadarChart();
+}
+
+function buildRadarChart() {
+  const ctx = document.getElementById('chart-radar').getContext('2d');
+  if (charts.radar) charts.radar.destroy();
+  const h = dashData.portfolio_health;
+  const metricLabels = ['分散度', '风险控制', '现金管理', '行业配置', '仓位控制', '波动管理'];
+  const vals = Object.values(h.metrics);
+  charts.radar = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: metricLabels,
+      datasets: [{
+        label: '当前评分',
+        data: vals,
+        backgroundColor: 'rgba(192,98,42,0.12)',
+        borderColor: '#c0622a',
+        pointBackgroundColor: '#ffffff',
+        pointBorderColor: '#c0622a',
+        pointBorderWidth: 2,
+        borderWidth: 2,
+        pointRadius: 4
+      }, {
+        label: '目标',
+        data: [90, 90, 90, 90, 90, 90],
+        backgroundColor: 'transparent',
+        borderColor: 'rgba(168,154,144,0.3)',
+        borderDash: [4, 4],
+        pointRadius: 0,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#a89a90', font: { size: 11 }, boxWidth: 12, padding: 12 } } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(180,120,60,0.10)' },
+          angleLines: { color: 'rgba(180,120,60,0.10)' },
+          pointLabels: { color: '#7a6a60', font: { size: 11 } },
+          ticks: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// MARKET
+// ═══════════════════════════════════════════════
+function renderMarket() {
+  const m = dashData.market_status;
+  document.getElementById('m-sp500').textContent = Number(m.sp500).toLocaleString('en-US');
+  document.getElementById('m-nasdaq').textContent = Number(m.nasdaq).toLocaleString('en-US');
+  document.getElementById('m-vix').textContent = m.vix;
+  document.getElementById('m-sentiment').textContent = m.market_sentiment;
+  document.getElementById('m-sp500-c').innerHTML = `<i class="fa fa-arrow-${m.sp500_change>=0?'up':'down'}"></i> ${fmtPct(m.sp500_change)}`;
+  document.getElementById('m-sp500-c').className = 'kpi-change ' + updown(m.sp500_change);
+  document.getElementById('m-nasdaq-c').innerHTML = `<i class="fa fa-arrow-${m.nasdaq_change>=0?'up':'down'}"></i> ${fmtPct(m.nasdaq_change)}`;
+  document.getElementById('m-nasdaq-c').className = 'kpi-change ' + updown(m.nasdaq_change);
+  document.getElementById('m-vix-c').innerHTML = `<i class="fa fa-arrow-${m.vix_change>=0?'up':'down'}"></i> ${fmtPct(m.vix_change)}`;
+  document.getElementById('m-vix-c').className = 'kpi-change ' + (m.vix_change >= 0 ? 'up' : 'down');
+  buildVixChart();
+}
+
+function buildVixChart() {
+  const ctx = document.getElementById('chart-vix').getContext('2d');
+  if (charts.vix) charts.vix.destroy();
+  const labels = ['3/10','3/12','3/14','3/17','3/19','3/21','3/24'];
+  const vixData = [22.1, 19.8, 18.3, 16.9, 15.4, 15.0, 14.2];
+  
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(124,92,191,0.15)');
+  gradient.addColorStop(1, 'rgba(124,92,191,0.00)');
+  
+  charts.vix = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'VIX',
+        data: vixData,
+        borderColor: '#7c5cbf',
+        backgroundColor: gradient,
+        borderWidth: 2.5, fill: true, tension: 0.4,
+        pointRadius: 4, pointHoverRadius: 6,
+        pointBackgroundColor: '#ffffff',
+        pointBorderColor: '#7c5cbf',
+        pointBorderWidth: 2,
+      }, {
+        label: 'VIX 20 警戒线',
+        data: Array(7).fill(20),
+        borderColor: 'rgba(217,79,42,0.5)',
+        borderDash: [5,5], borderWidth: 1.5,
+        pointRadius: 0, fill: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#a89a90', font: { size: 11 }, boxWidth: 12, padding: 12 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(44,36,32,0.9)',
+          titleColor: '#f0e8e0',
+          bodyColor: '#d0c0b0',
+          borderColor: 'rgba(124,92,191,0.4)',
+          borderWidth: 1,
+          padding: 10,
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false }, ticks: { color: '#a89a90', font: { size: 11 } }, border: { display: false } },
+        y: { grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false }, ticks: { color: '#a89a90', font: { size: 11 } }, border: { display: false } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// NEWS
+// ═══════════════════════════════════════════════
+function renderNews() {
+  const news = dashData.news;
+  document.getElementById('news-count').textContent = news.length + ' 条';
+
+  const listEl = document.getElementById('news-list');
+  listEl.innerHTML = '';
+  news.forEach(n => {
+    const tags = n.related_symbols.slice(0, 4).map(s => `<span class="news-tag">${s}</span>`).join('');
+    listEl.innerHTML += `<div class="news-item">
+      <div class="news-impact ${n.impact}"></div>
+      <div>
+        <div class="news-title">${n.title}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin:4px 0">${n.summary}</div>
+        <div class="news-meta">
+          <span>${n.source}</span>
+          <span>·</span>
+          <span>${n.timestamp}</span>
+          <span class="alert-badge ${n.impact}">${n.impact==='high'?'高影响':n.impact==='medium'?'中影响':'低影响'}</span>
+        </div>
+        <div class="news-tags" style="margin-top:6px">${tags}</div>
+      </div>
+    </div>`;
+  });
+
+  // Watched symbols
+  const symbols = ['MSFT','TSLA','GOOGL','NVDA','AAPL','AMZN','META','IONQ'];
+  const symEl = document.getElementById('watched-symbols');
+  symEl.innerHTML = symbols.map(s => `<span class="chip blue">${s}</span>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// AUTO REFRESH
+// ═══════════════════════════════════════════════
+let refreshInterval;
+
+function startAutoRefresh() {
+  refreshInterval = setInterval(() => {
+    _isManualRefresh = false;
+    fetchData();
+  }, 60000); // every 60s
+}
+
+// 手动刷新函数
+function manualRefresh() {
+  _isManualRefresh = true;
+  document.getElementById('last-update').textContent = '更新中…';
+  fetchData();
+}
+
+// ═══════════════════════════════════════════════
+// TSLA PAGE
+// ═══════════════════════════════════════════════
+function renderTsla() {
+  const holdings = dashData.portfolio_holdings || [];
+  const tsla = holdings.find(h => h.symbol === 'TSLA');
+  if (!tsla) return;
+
+  document.getElementById('tsla-price').textContent = fmt$(tsla.current_price);
+  document.getElementById('tsla-value').textContent = fmt$(tsla.current_value);
+  const chgEl = document.getElementById('tsla-price-chg');
+  chgEl.className = 'kpi-change ' + updown(tsla.gain_loss_percent);
+  chgEl.innerHTML = `<i class="fa fa-arrow-${tsla.gain_loss_percent>=0?'up':'down'}"></i> ${fmtPct(tsla.gain_loss_percent)}`;
+
+  // TSLA put option from strategy data
+  const opts = dashData.option_strategies || [];
+  const tslaOpt = opts.find(o => o.symbol === 'TSLA');
+  if (tslaOpt) {
+    const otmPct = ((tsla.current_price - tslaOpt.strike_price) / tslaOpt.strike_price * 100);
+    document.getElementById('tsla-otm').textContent = fmtPct(otmPct);
+    document.getElementById('tsla-premium').textContent = fmt$(tslaOpt.premium);
+    document.getElementById('calc-strike').value = tslaOpt.strike_price;
+    document.getElementById('calc-premium').value = tslaOpt.premium;
+  }
+  calcPut();
+
+  // TSLA price chart (simulated 30-day)
+  const ctx = document.getElementById('chart-tsla-price');
+  if (!ctx) return;
+  if (charts['tsla-price']) charts['tsla-price'].destroy();
+  const base = tsla.current_price * 0.88;
+  const labels = [], data = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+    const noise = (Math.random() - 0.48) * 8;
+    data.push(+(base + (tsla.current_price - base) * (29 - i) / 29 + noise).toFixed(2));
+  }
+  data[data.length - 1] = tsla.current_price;
+  
+  const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(217,79,42,0.18)');
+  gradient.addColorStop(1, 'rgba(217,79,42,0.00)');
+  
+  charts['tsla-price'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#d94f2a',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#ffffff',
+        pointHoverBorderColor: '#d94f2a',
+        pointHoverBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(44,36,32,0.9)',
+          titleColor: '#f0e8e0',
+          bodyColor: '#d0c0b0',
+          borderColor: 'rgba(217,79,42,0.4)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: { label: ctx => ' $' + ctx.parsed.y.toFixed(2) }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false }, ticks: { color: '#a89a90', maxTicksLimit: 6 }, border: { display: false } },
+        y: { grid: { color: 'rgba(180,120,60,0.08)', drawBorder: false }, ticks: { color: '#a89a90', callback: v => '$' + v }, border: { display: false } }
+      }
+    }
+  });
+}
+
+// ── Sell Put Calculator 已移至底部 calcPut() ──────────────────────────
+
+// ═══════════════════════════════════════════════
+// MANAGE PAGE
+// ═══════════════════════════════════════════════
+function renderManage() {
+  const holdings = (dashData && dashData.portfolio_holdings) ? dashData.portfolio_holdings : [];
+  const tbody = document.getElementById('manage-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  // 如果是占位/mock数据，显示加载中提示
+  if (_isMockData) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-secondary)"><i class="fa fa-spinner fa-spin"></i> 数据加载中，请稍候…</td></tr>';
+    return;
+  }
+
+  // 从当前数据填入现金设置
+  if (dashData && dashData.portfolio_summary) {
+    document.getElementById('mgmt-cash').value = (dashData.portfolio_summary.cash_value || 0).toFixed(2);
+    document.getElementById('mgmt-target-cash').value = dashData.portfolio_summary.target_cash_ratio || 35;
+  }
+
+  holdings.forEach(h => {
+    const gl = h.gain_loss != null ? h.gain_loss : (h.current_price - h.avg_cost) * h.shares;
+    const glPct = h.gain_loss_percent != null ? h.gain_loss_percent : ((h.current_price - h.avg_cost) / h.avg_cost * 100);
+    const glColor = gl >= 0 ? 'var(--success)' : 'var(--danger)';
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td><strong>${h.symbol}</strong> <span style="color:var(--text-secondary);font-size:11px">${h.name||''}</span></td>
+        <td class="right">${h.shares}</td>
+        <td class="right">${fmt$(h.avg_cost)}</td>
+        <td class="right">${fmt$(h.current_price)}</td>
+        <td class="right" style="color:${glColor}">${gl>=0?'+':''}${fmt$(Math.abs(gl))} (${fmtPct(glPct)})</td>
+        <td class="right">
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            <button onclick="editHolding('${h.symbol}')" style="padding:4px 10px;background:transparent;border:1px solid var(--border-default);border-radius:5px;cursor:pointer;font-size:11px;color:var(--text-secondary)">
+              <i class="fa fa-pencil"></i> 编辑
+            </button>
+            <button onclick="deleteHolding('${h.symbol}')" style="padding:4px 10px;background:transparent;border:1px solid rgba(248,81,73,.3);border-radius:5px;cursor:pointer;font-size:11px;color:var(--danger)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// 期权摘要：投资总览 & 持仓明细 共用
+// ═══════════════════════════════════════════════
+async function loadOptionsOverview() {
+  try {
+    const [posRes, statsRes] = await Promise.all([
+      fetch(API + '/api/options/positions', { headers: authHeaders() }),
+      fetch(API + '/api/options/stats', { headers: authHeaders() })
+    ]);
+    // 401 处理
+    if (posRes.status === 401 || statsRes.status === 401) {
+      location.href = '/login'; return;
+    }
+    if (!posRes.ok || !statsRes.ok) {
+      console.warn('期权摘要API异常', posRes.status, statsRes.status);
+      return;
+    }
+    const posData = await posRes.json();
+    const statsData = await statsRes.json();
+
+    const positions = posData.positions || [];
+    const summary = posData.summary || {};
+    const openPositions = positions.filter(p => p.status === 'open');
+
+    // 如果没有任何期权记录，显示空状态
+    if (positions.length === 0) {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('ov-opt-open', '0 张');
+      set('ov-opt-premium', '$0.00');
+      set('ov-opt-realized', '$0.00');
+      set('ov-opt-winrate', '—');
+      set('h-opt-open', '0 张');
+      set('h-opt-premium', '$0.00');
+      set('h-opt-realized', '$0.00');
+      set('h-opt-winrate', '—');
+      const ovList = document.getElementById('overview-opt-list');
+      if (ovList) ovList.innerHTML = `<div style="text-align:center;padding:12px;font-size:12px;color:var(--text-tertiary)"><i class="fa fa-file-contract" style="margin-right:6px;opacity:0.4"></i>暂无期权持仓，去「持仓管理 → 期权持仓」记录开仓</div>`;
+      const tbody = document.getElementById('h-opt-body');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:20px">暂无期权记录</td></tr>';
+      return;
+    }
+
+    // 显示数据
+    const realizedColor = statsData.total_realized_pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+
+    // 投资总览的4个数字
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const setColor = (id, color) => { const el = document.getElementById(id); if (el) el.style.color = color; };
+
+    set('ov-opt-open', summary.open_count + ' 张');
+    set('ov-opt-premium', '$' + (summary.total_open_premium || 0).toFixed(2));
+    set('ov-opt-realized', (statsData.total_realized_pnl >= 0 ? '+' : '') + '$' + Math.abs(statsData.total_realized_pnl || 0).toFixed(2));
+    setColor('ov-opt-realized', realizedColor);
+    set('ov-opt-winrate', statsData.total_trades > 0 ? statsData.win_rate + '%' : '—');
+
+    // 持仓明细的4个数字
+    set('h-opt-open', summary.open_count + ' 张');
+    set('h-opt-premium', '$' + (summary.total_open_premium || 0).toFixed(2));
+    set('h-opt-realized', (statsData.total_realized_pnl >= 0 ? '+' : '') + '$' + Math.abs(statsData.total_realized_pnl || 0).toFixed(2));
+    setColor('h-opt-realized', realizedColor);
+    set('h-opt-winrate', statsData.total_trades > 0 ? statsData.win_rate + '%' : '—');
+
+    // 投资总览：只展示持仓中的期权列表（最多3条）
+    const ovList = document.getElementById('overview-opt-list');
+    if (ovList && openPositions.length > 0) {
+      const statusColor = { open: 'var(--success)', closed: 'var(--accent-primary)', expired: 'var(--text-tertiary)', assigned: 'var(--warning)' };
+      ovList.innerHTML = `
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">当前持仓中</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${openPositions.slice(0, 5).map(p => `
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--bg-elevated);border-radius:6px;font-size:12px">
+              <strong style="color:var(--accent-primary);min-width:40px">${p.symbol}</strong>
+              <span style="color:var(--success);font-weight:600;min-width:70px">Sell ${p.option_type.toUpperCase()}</span>
+              <span style="color:var(--text-secondary)">$${p.strike_price} | 到期 ${p.expiration}</span>
+              <span style="margin-left:auto;color:var(--success);font-weight:700">${p.contracts}张 × $${p.premium.toFixed(2)}/股</span>
+              <span style="color:var(--success);font-weight:700">+$${p.total_premium_received.toFixed(2)}</span>
+            </div>
+          `).join('')}
+          ${openPositions.length > 5 ? `<div style="text-align:center;font-size:11px;color:var(--text-secondary)">还有 ${openPositions.length - 5} 条，点击"查看全部"</div>` : ''}
+        </div>
+      `;
+    }
+
+    // 持仓明细：完整期权表格
+    const tbody = document.getElementById('h-opt-body');
+    if (tbody) {
+      if (!positions.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:20px">暂无期权记录</td></tr>';
+        return;
+      }
+      const statusLabel = { open: '持仓中', closed: '已平仓', expired: '已到期', assigned: '已行权' };
+      const statusColor = { open: 'var(--success)', closed: 'var(--accent-primary)', expired: 'var(--text-tertiary)', assigned: 'var(--warning)' };
+      tbody.innerHTML = positions.map(p => {
+        const isOpen = p.status === 'open';
+        const pnl = isOpen ? p.total_premium_received : p.realized_pnl;
+        const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+        return `<tr>
+          <td><strong style="color:var(--accent-primary)">${p.symbol}</strong></td>
+          <td><span style="font-size:11px;font-weight:700;color:${p.direction==='sell'?'var(--success)':'var(--danger)'}">
+            ${p.direction==='sell'?'Sell':'Buy'} ${p.option_type.toUpperCase()}
+          </span></td>
+          <td class="right"><strong>$${p.strike_price.toFixed(1)}</strong></td>
+          <td class="right" style="font-size:12px">${p.expiration}</td>
+          <td class="right">${p.contracts}张</td>
+          <td class="right">$${p.premium.toFixed(2)}</td>
+          <td class="right" style="font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}</td>
+          <td><span style="font-size:11px;font-weight:600;color:${statusColor[p.status]||'var(--text-tertiary)'};background:var(--bg-tertiary);padding:2px 6px;border-radius:10px">${statusLabel[p.status]||p.status}</span></td>
+        </tr>`;
+      }).join('');
+    }
+  } catch(e) {
+    console.warn('期权摘要加载失败', e);
+  }
+}
+
+function openAddHolding() {
+  document.getElementById('modal-title').textContent = '添加持仓';
+  document.getElementById('modal-mode').value = 'add';
+  document.getElementById('m-symbol').value = '';
+  document.getElementById('m-name').value = '';
+  document.getElementById('m-shares').value = '';
+  document.getElementById('m-cost').value = '';
+  document.getElementById('m-price').value = '';
+  document.getElementById('m-symbol').disabled = false;
+  document.getElementById('modal-preview').style.display = 'none';
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function editHolding(symbol) {
+  const holdings = (dashData && dashData.portfolio_holdings) ? dashData.portfolio_holdings : [];
+  const h = holdings.find(x => x.symbol === symbol);
+  if (!h) return;
+  document.getElementById('modal-title').textContent = '编辑持仓 · ' + symbol;
+  document.getElementById('modal-mode').value = 'edit';
+  document.getElementById('modal-symbol-orig').value = symbol;
+  document.getElementById('m-symbol').value = h.symbol;
+  document.getElementById('m-name').value = h.name || '';
+  document.getElementById('m-shares').value = h.shares;
+  document.getElementById('m-cost').value = h.avg_cost;
+  document.getElementById('m-price').value = h.current_price;
+  document.getElementById('m-symbol').disabled = true;
+  document.getElementById('modal-preview').style.display = 'none';
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+async function saveHolding() {
+  const sym = document.getElementById('m-symbol').value.toUpperCase().trim();
+  const name = document.getElementById('m-name').value.trim() || sym;
+  const shares = parseFloat(document.getElementById('m-shares').value);
+  const cost = parseFloat(document.getElementById('m-cost').value);
+  const price = parseFloat(document.getElementById('m-price').value) || cost;
+  if (!sym || !shares || !cost) { alert('请填写股票代码、股数和成本价'); return; }
+
+  const saveBtn = document.getElementById('modal-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '保存中…'; }
+  try {
+    await apiPost('/api/portfolio/holdings', {
+      symbol: sym, name, shares, avg_cost: cost,
+      current_price: price, health_score: 80
+    });
+    closeModal();
+    showToast(sym + ' 已保存');
+    await fetchData();
+  } catch(e) {
+    showToast(e.message || '保存失败', 'error');
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '保存'; }
+  }
+}
+
+async function deleteHolding(symbol) {
+  if (!confirm('确定删除 ' + symbol + ' 的持仓记录？此操作不可撤销。')) return;
+  try {
+    await apiDelete('/api/portfolio/holdings/' + symbol);
+    showToast(symbol + ' 已删除');
+    await fetchData();
+  } catch(e) {
+    showToast(e.message || '删除失败', 'error');
+  }
+}
+
+async function saveCashSettings() {
+  const cash = parseFloat(document.getElementById('mgmt-cash').value) || 0;
+  const target = parseFloat(document.getElementById('mgmt-target-cash').value) || 35;
+  try {
+    await apiPatch('/api/user/profile', { cash, target_cash_ratio: target });
+    showToast('现金设置已保存，数据重新计算中…');
+    await fetchData();
+  } catch(e) {
+    showToast(e.message || '保存失败', 'error');
+  }
+}
+
+function exportHoldings() {
+  const holdings = (dashData && dashData.portfolio_holdings) ? dashData.portfolio_holdings : [];
+  const s = (dashData && dashData.portfolio_summary) ? dashData.portfolio_summary : {};
+  const data = {
+    holdings, cash: s.cash_value || 0,
+    target_cash_ratio: s.target_cash_ratio || 35,
+    exported_at: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'claw_holdings_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+async function importHoldings(e) {
+  const f = e.target.files[0]; if (!f) return;
+  e.target.value = '';
+  const r = new FileReader();
+  r.onload = async ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (!d.holdings || !Array.isArray(d.holdings)) { alert('格式错误：缺少 holdings 数组'); return; }
+      let ok = 0, fail = 0;
+      for (const h of d.holdings) {
+        try {
+          await apiPost('/api/portfolio/holdings', {
+            symbol: h.symbol, name: h.name || h.symbol,
+            shares: h.shares, avg_cost: h.avg_cost,
+            current_price: h.current_price || h.avg_cost,
+            health_score: h.health_score || 80
+          });
+          ok++;
+        } catch { fail++; }
+      }
+      if (d.cash != null) {
+        await apiPatch('/api/user/profile', { cash: d.cash, target_cash_ratio: d.target_cash_ratio || 35 });
+      }
+      await fetchData();
+      showToast('导入完成：' + ok + ' 条成功' + (fail > 0 ? '，' + fail + ' 条失败' : ''));
+    } catch(err) { alert('JSON 格式错误: ' + err.message); }
+  };
+  r.readAsText(f);
+}
+
+// ── Toast notification ──────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;padding:10px 18px;background:${type==='success'?'var(--success)':'var(--danger)'};color:#fff;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4)`;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2200);
+}
+
+// ─── Modal input preview ──────────────────────────
+document.addEventListener('input', e => {
+  if (['m-shares','m-cost','m-price'].includes(e.target.id)) {
+    const shares = parseFloat(document.getElementById('m-shares').value) || 0;
+    const cost = parseFloat(document.getElementById('m-cost').value) || 0;
+    const price = parseFloat(document.getElementById('m-price').value) || cost;
+    if (shares && cost) {
+      const val = (price * shares).toFixed(2);
+      const gl = ((price - cost) * shares).toFixed(2);
+      const glPct = (((price - cost) / cost) * 100).toFixed(1);
+      const prev = document.getElementById('modal-preview');
+      const prevText = document.getElementById('modal-preview-text');
+      prev.style.display = '';
+      prevText.innerHTML = `市值 <strong>$${parseFloat(val).toLocaleString()}</strong>，浮盈 <strong style="color:${gl>=0?'var(--success)':'var(--danger)'}">${gl>=0?'+':''}$${Math.abs(gl).toLocaleString()} (${glPct}%)</strong>`;
+    }
+  }
+});
+
+// ── Mobile Sidebar Toggle ──────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobile-overlay');
+  const isOpen = sb.classList.contains('open');
+  if (isOpen) {
+    sb.classList.remove('open');
+    overlay.style.display = 'none';
+  } else {
+    sb.classList.add('open');
+    overlay.style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  if (!token) { location.href = '/login'; return; }
+  initUserUI();
+  fetchData();
+  startAutoRefresh();
+  // 从URL hash恢复页面（刷新时还原）
+  const initPage = getHashPage();
+  navigate(initPage, null, false);
+  calcPut();
+});
+
+// ═══════════════════════════════════════════════
+// TSLA 情报页面
+// ═══════════════════════════════════════════════
+let tslaIntelData = null;
+
+function switchTslaTab(tab, btn) {
+  document.querySelectorAll('.tsla-tab').forEach(t => {
+    t.style.borderBottomColor = '';
+    t.style.color = '';
+    t.classList.remove('active');
+  });
+  document.querySelectorAll('.tsla-tab-content').forEach(c => c.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById('tsla-tab-' + tab).style.display = 'block';
+}
+
+async function loadTslaIntel() {
+  try {
+    const res = await fetch(API + '/api/tsla/intel', { headers: authHeaders() });
+    if (res.status === 401) { location.href = '/login'; return; }
+    tslaIntelData = await res.json();
+    renderTslaMoat(tslaIntelData.moat || []);
+    renderTslaOutlook(tslaIntelData.business_outlook || []);
+    renderTslaSellPut(tslaIntelData.sell_put_guide || {});
+    renderTslaOptStats();
+  } catch(e) {
+    console.error('TSLA intel load error:', e);
+  }
+}
+
+function renderTslaMoat(moat) {
+  const grid = document.getElementById('tsla-moat-grid');
+  if (!grid) return;
+  const levelColor = { '极强': 'var(--success)', '强': 'var(--accent-primary)', '中（兑现中）': 'var(--warning)', '中（早期）': 'var(--warning)' };
+  grid.innerHTML = moat.map(m => `
+    <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;background:var(--bg-tertiary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:${m.color}">
+            <i class="fa ${m.icon}"></i>
+          </div>
+          <span style="font-weight:600;font-size:14px">${m.title}</span>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${levelColor[m.level]||'var(--text-tertiary)'};background:var(--bg-tertiary);padding:2px 8px;border-radius:20px;white-space:nowrap">${m.level}</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin:0">${m.detail}</p>
+      <div style="font-size:11.5px;font-weight:600;color:${m.color};background:rgba(128,128,128,.06);border:1px solid var(--border-default);border-radius:6px;padding:6px 10px">
+        📊 ${m.data_point}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTslaOutlook(outlook) {
+  const list = document.getElementById('tsla-outlook-list');
+  if (!list) return;
+  const sentimentStyle = {
+    positive: { color: 'var(--success)', bg: 'var(--bg-success-subtle)', border: 'var(--border-success)', icon: '↑', label: '利好' },
+    neutral:  { color: 'var(--warning)', bg: 'rgba(210,153,34,.08)', border: 'rgba(210,153,34,.25)', icon: '→', label: '中性' },
+    negative: { color: 'var(--danger)', bg: 'rgba(248,81,73,.08)', border: 'rgba(248,81,73,.25)', icon: '↓', label: '风险' }
+  };
+  list.innerHTML = outlook.map(o => {
+    const s = sentimentStyle[o.sentiment] || sentimentStyle.neutral;
+    return `
+      <div style="background:${s.bg};border:1px solid ${s.border};border-radius:10px;padding:16px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <span style="font-size:11px;font-weight:700;color:${s.color};background:var(--bg-tertiary);padding:2px 8px;border-radius:4px;margin-right:8px">${o.horizon}</span>
+            <span style="font-weight:600;font-size:14px">${o.title}</span>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:${s.color};flex-shrink:0;margin-left:8px">${s.icon} ${s.label}</span>
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.65;margin:0 0 8px">${o.desc}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${o.tags.map(t => `<span style="font-size:11px;padding:2px 8px;background:rgba(128,128,128,.12);border-radius:20px;color:var(--text-secondary)">#${t}</span>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTslaSellPut(guide) {
+  const el = document.getElementById('tsla-sellput-content');
+  if (!el || !guide.why) return;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card" style="border-color:var(--border-success);background:var(--bg-success-subtle)">
+        <div style="font-weight:600;font-size:14px;color:var(--success);margin-bottom:10px"><i class="fa fa-lightbulb"></i> 为什么选 TSLA 做 Sell Put？</div>
+        <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.7;margin:0">${guide.why}</p>
+      </div>
+      <div class="card">
+        <div style="font-weight:600;font-size:14px;margin-bottom:12px"><i class="fa fa-list-check"></i> 操作要点</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${(guide.tips||[]).map((tip,i) => `
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:var(--bg-elevated);border-radius:6px">
+              <div style="width:20px;height:20px;background:var(--info);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${i+1}</div>
+              <span style="font-size:13px;color:var(--text-secondary);line-height:1.6">${tip}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ${guide.current_suggestion ? `
+        <div style="padding:14px 16px;background:var(--bg-accent-subtle);border:1px solid var(--border-accent);border-radius:10px;font-size:13.5px">
+          <i class="fa fa-crosshairs" style="color:var(--info)"></i> <strong>当前建议：</strong>${guide.current_suggestion}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderTslaOptStats() {
+  // 加载 TSLA 相关的期权统计
+  fetch(API + '/api/options/stats', { headers: authHeaders() })
+    .then(r => r.json())
+    .then(data => {
+      const tslaStats = (data.by_symbol || []).find(s => s.symbol === 'TSLA');
+      const openCount = document.getElementById('tsla-opt-count');
+      const openPnl = document.getElementById('tsla-opt-pnl');
+      if (tslaStats && openCount) {
+        openCount.textContent = tslaStats.open_count + ' 张';
+        if (openPnl) openPnl.textContent = tslaStats.open_count > 0 ? '持仓中' : `历史盈亏 $${tslaStats.realized_pnl.toFixed(2)}`;
+      } else if (openCount) {
+        openCount.textContent = '0 张';
+      }
+    }).catch(() => {});
+}
+
+// TSLA 页面在进入时加载情报（已通过 navigate 函数处理）
+
+
+// ═══════════════════════════════════════════════
+// 持仓管理 Tab 切换
+
+function switchManageTab(tab, btn) {
+  currentManageTab = tab;
+  document.querySelectorAll('.manage-tab').forEach(t => {
+    t.style.borderBottomColor = '';
+    t.style.color = '';
+    t.classList.remove('active');
+  });
+  document.querySelectorAll('.manage-tab-content').forEach(c => c.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById('mtab-' + tab).style.display = 'block';
+
+  // 切换添加按钮的行为
+  const addBtn = document.getElementById('btn-add-holding');
+  const addLabel = document.getElementById('add-btn-label');
+  if (tab === 'stock') {
+    addBtn.style.display = '';
+    addBtn.onclick = openAddHolding;
+    addBtn.style.background = 'var(--info)';
+    if (addLabel) addLabel.textContent = '添加持仓';
+  } else if (tab === 'options') {
+    addBtn.style.display = '';
+    addBtn.onclick = openOptModal;
+    addBtn.style.background = 'var(--success)';
+    if (addLabel) addLabel.textContent = '记录开仓';
+    loadOptionPositions();
+  } else {
+    addBtn.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 期权持仓功能
+// ═══════════════════════════════════════════════
+let allOptionPositions = [];
+let currentOptFilter = 'all';
+
+async function loadOptionPositions() {
+  try {
+    const data = await (await fetch(API + '/api/options/positions', { headers: authHeaders() })).json();
+    allOptionPositions = data.positions || [];
+    const summary = data.summary || {};
+    // 更新统计卡片
+    const el = id => document.getElementById(id);
+    if (el('opt-stat-open')) el('opt-stat-open').textContent = summary.open_count + ' 张';
+    if (el('opt-stat-open-premium')) el('opt-stat-open-premium').textContent = '$' + (summary.total_open_premium || 0).toFixed(2);
+    if (el('opt-stat-realized')) el('opt-stat-realized').textContent = '$' + (summary.total_realized_pnl || 0).toFixed(2);
+    // 胜率需要再调 stats 接口
+    fetch(API + '/api/options/stats', { headers: authHeaders() })
+      .then(r => r.json()).then(s => {
+        if (el('opt-stat-winrate')) el('opt-stat-winrate').textContent = s.win_rate + '%';
+      }).catch(() => {});
+    renderOptionPositions(allOptionPositions);
+  } catch(e) {
+    showToast('加载期权数据失败: ' + e.message, 'error');
+  }
+}
+
+function filterOptions(status) {
+  currentOptFilter = status;
+  document.querySelectorAll('.opt-filter-btn').forEach(b => {
+    const active = b.dataset.filter === status;
+    b.style.background = active ? 'var(--info)' : 'transparent';
+    b.style.color = active ? '#fff' : 'var(--text-secondary)';
+    b.style.border = active ? 'none' : '1px solid var(--border-default)';
+  });
+  const filtered = status === 'all' ? allOptionPositions : allOptionPositions.filter(p => p.status === status);
+  renderOptionPositions(filtered);
+}
+
+function renderOptionPositions(positions) {
+  const tbody = document.getElementById('opt-positions-body');
+  if (!tbody) return;
+  if (!positions.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:24px">暂无期权记录，点击「记录开仓」添加</td></tr>';
+    return;
+  }
+  const statusLabel = { open: '持仓中', closed: '已平仓', expired: '已到期', assigned: '已行权' };
+  const statusColor = { open: 'var(--success)', closed: 'var(--accent-primary)', expired: 'var(--text-tertiary)', assigned: 'var(--warning)' };
+  const dirLabel = { sell: 'Sell', buy: 'Buy' };
+  tbody.innerHTML = positions.map(p => {
+    const isOpen = p.status === 'open';
+    const pnl = isOpen ? p.total_premium_received : p.realized_pnl;
+    const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+    const typeStr = `${dirLabel[p.direction]||p.direction} ${p.option_type.toUpperCase()}`;
+    const typeColor = p.direction === 'sell' ? 'var(--success)' : 'var(--danger)';
+    return `
+      <tr>
+        <td><strong style="color:var(--info)">${p.symbol}</strong></td>
+        <td><span style="font-size:11.5px;font-weight:700;color:${typeColor};background:var(--bg-tertiary);padding:2px 7px;border-radius:4px">${typeStr}</span></td>
+        <td class="right"><strong>$${p.strike_price.toFixed(1)}</strong></td>
+        <td class="right" style="font-size:12px">${p.expiration}</td>
+        <td class="right">${p.contracts} 张<span style="font-size:10px;color:var(--text-secondary)">×100</span></td>
+        <td class="right">$${p.premium.toFixed(2)}</td>
+        <td class="right" style="font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}<div style="font-size:10px;color:var(--text-secondary)">${p.pnl_note}</div></td>
+        <td><span style="font-size:11px;font-weight:600;color:${statusColor[p.status]||'var(--text-tertiary)'};background:var(--bg-tertiary);padding:2px 7px;border-radius:20px">${statusLabel[p.status]||p.status}</span></td>
+        <td class="right">
+          <div style="display:flex;gap:4px;justify-content:flex-end">
+            ${isOpen ? `
+              <button onclick="openCloseOptModal('${p.id}', '${p.symbol} $${p.strike_price} ${p.option_type.toUpperCase()}', ${p.premium}, ${p.contracts})" style="padding:3px 8px;background:transparent;border:1px solid rgba(248,81,73,.3);border-radius:4px;cursor:pointer;font-size:11px;color:var(--danger)">
+                结束
+              </button>
+            ` : ''}
+            <button onclick="deleteOptPosition('${p.id}')" style="padding:3px 8px;background:transparent;border:1px solid var(--border-default);border-radius:4px;cursor:pointer;font-size:11px;color:var(--text-secondary)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openOptModal() {
+  // 重置表单
+  ['om-symbol','om-strike','om-expiration','om-premium','om-open-price','om-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { if(id==='om-symbol') el.value='TSLA'; else el.value=''; }
+  });
+  document.getElementById('om-direction').value = 'sell';
+  document.getElementById('om-type').value = 'put';
+  document.getElementById('om-contracts').value = '1';
+  document.getElementById('opt-preview-text').textContent = '填入行权价、权利金和合约数后自动计算';
+  document.getElementById('opt-modal-overlay').style.display = 'flex';
+}
+
+function closeOptModal() {
+  document.getElementById('opt-modal-overlay').style.display = 'none';
+}
+
+function previewOptPnl() {
+  const strike = parseFloat(document.getElementById('om-strike').value) || 0;
+  const premium = parseFloat(document.getElementById('om-premium').value) || 0;
+  const contracts = parseInt(document.getElementById('om-contracts').value) || 1;
+  const direction = document.getElementById('om-direction').value;
+  if (!strike || !premium) { return; }
+  const totalPremium = premium * contracts * 100;
+  const maxLoss = direction === 'sell' ? strike * contracts * 100 - totalPremium : totalPremium;
+  const annualized = '—（需填写到期日）';
+  const el = document.getElementById('opt-preview-text');
+  if (el) {
+    el.innerHTML = direction === 'sell'
+      ? `最大收益 <strong style="color:var(--success)">+$${totalPremium.toFixed(2)}</strong>（权利金全收） | 最大风险 <strong style="color:var(--danger)">-$${maxLoss.toFixed(2)}</strong>（被行权后需买入 ${contracts*100} 股）`
+      : `最大收益无限 | 最大亏损 <strong style="color:var(--danger)">-$${totalPremium.toFixed(2)}</strong>（权利金归零）`;
+  }
+}
+
+async function saveOptionPosition() {
+  const sym = document.getElementById('om-symbol').value.toUpperCase().trim();
+  const direction = document.getElementById('om-direction').value;
+  const optType = document.getElementById('om-type').value;
+  const contracts = parseInt(document.getElementById('om-contracts').value);
+  const strike = parseFloat(document.getElementById('om-strike').value);
+  const expiration = document.getElementById('om-expiration').value;
+  const premium = parseFloat(document.getElementById('om-premium').value);
+  const openPrice = parseFloat(document.getElementById('om-open-price').value) || 0;
+  const note = document.getElementById('om-note').value.trim();
+
+  if (!sym) { showToast('请输入标的代码', 'error'); return; }
+  if (!strike || strike <= 0) { showToast('请输入行权价', 'error'); return; }
+  if (!expiration) { showToast('请选择到期日', 'error'); return; }
+  if (!premium || premium <= 0) { showToast('请输入权利金', 'error'); return; }
+  if (!contracts || contracts <= 0) { showToast('合约数量至少为1', 'error'); return; }
+
+  const saveBtn = document.getElementById('opt-modal-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '保存中…'; }
+  try {
+    await apiPost('/api/options/positions', {
+      symbol: sym, option_type: optType, direction,
+      strike_price: strike, expiration, contracts,
+      premium, open_price: openPrice, note
+    });
+    closeOptModal();
+    showToast(`${direction === 'sell' ? 'Sell' : 'Buy'} ${sym} ${optType.toUpperCase()} $${strike} 已记录`);
+    loadOptionPositions();
+    renderTslaOptStats();
+    loadOptionsOverview();
+  } catch(e) {
+    showToast(e.message || '保存失败', 'error');
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '📌 记录开仓'; }
+  }
+}
+
+// 平仓 Modal
+let _closeOptData = {};
+
+function openCloseOptModal(posId, label, premium, contracts) {
+  _closeOptData = { posId, premium, contracts };
+  document.getElementById('close-opt-id').value = posId;
+  document.getElementById('close-opt-info').textContent = `持仓：${label} × ${contracts} 张 | 开仓权利金 $${premium}/股`;
+  document.getElementById('close-opt-price').value = '';
+  document.getElementById('close-opt-status').value = 'closed';
+  toggleClosePrice();
+  document.getElementById('close-opt-pnl-preview').textContent = '填写平仓权利金后预览盈亏';
+  document.getElementById('close-opt-modal').style.display = 'flex';
+}
+
+function closeCloseOptModal() {
+  document.getElementById('close-opt-modal').style.display = 'none';
+}
+
+function toggleClosePrice() {
+  const status = document.getElementById('close-opt-status').value;
+  const row = document.getElementById('close-price-row');
+  if (!row) return;
+  if (status === 'expired') {
+    row.style.display = 'none';
+    const { premium, contracts } = _closeOptData;
+    const total = (premium || 0) * (contracts || 1) * 100;
+    document.getElementById('close-opt-pnl-preview').innerHTML = `<strong style="color:var(--success)">到期归零，权利金全收：+$${total.toFixed(2)}</strong>`;
+  } else if (status === 'assigned') {
+    row.style.display = 'none';
+    document.getElementById('close-opt-pnl-preview').textContent = '被行权：需结合正股成本计算总盈亏';
+  } else {
+    row.style.display = '';
+    const closePrice = parseFloat(document.getElementById('close-opt-price').value) || 0;
+    const { premium, contracts } = _closeOptData;
+    if (closePrice > 0 && premium) {
+      const pnl = (premium - closePrice) * contracts * 100;
+      document.getElementById('close-opt-pnl-preview').innerHTML = pnl >= 0
+        ? `<strong style="color:var(--success)">预计盈利 +$${pnl.toFixed(2)}</strong>`
+        : `<strong style="color:var(--danger)">预计亏损 -$${Math.abs(pnl).toFixed(2)}</strong>`;
+    }
+  }
+}
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'close-opt-price') toggleClosePrice();
+});
+
+async function submitCloseOption() {
+  const posId = document.getElementById('close-opt-id').value;
+  const status = document.getElementById('close-opt-status').value;
+  let closePrice = parseFloat(document.getElementById('close-opt-price').value);
+  if (status === 'expired') closePrice = 0;
+  if (status === 'assigned') closePrice = 0;
+  if (status === 'closed' && (!closePrice && closePrice !== 0)) {
+    showToast('请输入平仓权利金', 'error'); return;
+  }
+  try {
+    const res = await fetch(API + '/api/options/positions/' + posId + '/close', {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ close_price: closePrice, status })
+    });
+    if (res.status === 401) { location.href = '/login'; return; }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || '操作失败');
+    closeCloseOptModal();
+    showToast('期权持仓已结束');
+    loadOptionPositions();
+    renderTslaOptStats();
+    loadOptionsOverview();
+  } catch(e) {
+    showToast(e.message || '操作失败', 'error');
+  }
+}
+
+async function deleteOptPosition(posId) {
+  if (!confirm('确定删除此期权记录？')) return;
+  try {
+    await apiDelete('/api/options/positions/' + posId);
+    showToast('已删除');
+    loadOptionPositions();
+    loadOptionsOverview();
+    renderTslaOptStats();
+  } catch(e) {
+    showToast(e.message || '删除失败', 'error');
+  }
+}
+
+// 计算器辅助函数
+function calcPut() {
+  const strike = parseFloat(document.getElementById('calc-strike')?.value) || 380;
+  const premium = parseFloat(document.getElementById('calc-premium')?.value) || 3.2;
+  const contracts = parseInt(document.getElementById('calc-contracts')?.value) || 1;
+  const days = parseInt(document.getElementById('calc-days')?.value) || 30;
+  const maxProfit = premium * 100 * contracts;
+  const margin = strike * 100 * contracts;
+  const annualReturn = (maxProfit / margin) * (365 / days) * 100;
+  const breakeven = strike - premium;
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('calc-max-profit', fmt$(maxProfit));
+  set('calc-margin', fmt$(margin));
+  set('calc-annual', annualReturn.toFixed(1) + '%');
+  set('calc-breakeven', fmt$(breakeven));
+  const advice = document.getElementById('calc-advice');
+  if (advice) {
+    advice.innerHTML = `<i class="fa fa-info-circle"></i> 盈亏平衡价 $${breakeven.toFixed(2)} — 若 TSLA 到期高于此价，期权盈利。保证金占用 ${((margin/100000)*100).toFixed(1)}% 的 $100,000 本金。`;
+  }
+}
+
+</script>
+</body>
+</html>
