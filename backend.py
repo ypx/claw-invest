@@ -24,7 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
 from jose import JWTError, jwt
 
 # ──────────────────────────────────────────────
@@ -224,14 +224,14 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
-    @field_validator("username")
+    @validator("username")
     @classmethod
     def username_ok(cls, v):
         if len(v) < 2 or len(v) > 20:
             raise ValueError("用户名长度 2-20 位")
         return v
 
-    @field_validator("password")
+    @validator("password")
     @classmethod
     def pw_ok(cls, v):
         if len(v) < 6:
@@ -266,14 +266,14 @@ class OptionPositionCreate(BaseModel):
     open_price: float = 0.0             # 开仓时标的价格
     note: str = ""                      # 备注
 
-    @field_validator("option_type")
+    @validator("option_type")
     @classmethod
     def type_ok(cls, v):
         if v not in ("put", "call"):
             raise ValueError("option_type 必须是 put 或 call")
         return v
 
-    @field_validator("direction")
+    @validator("direction")
     @classmethod
     def dir_ok(cls, v):
         if v not in ("sell", "buy"):
@@ -284,7 +284,7 @@ class OptionPositionClose(BaseModel):
     close_price: float                  # 平仓权利金（每股）
     status: str = "closed"             # closed / expired / assigned
 
-    @field_validator("status")
+    @validator("status")
     @classmethod
     def status_ok(cls, v):
         if v not in ("closed", "expired", "assigned"):
