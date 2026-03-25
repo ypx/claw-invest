@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "analyzed_for": "Z",
+    "analysis_date": "2026-03-24T07:21:43.811045",
+    "risk_profile": "conservative"
+  },
+  "portfolio_data": {
+    "total_value": 168984.65,
+    "stock_value": 64334.65,
+    "option_value": 4650.0,
+    "cash_value": 100000.0,
+    "total_cost": 60800.0,
+    "total_pnl": 8184.649999999994,
+    "total_pnl_percent": 13.5,
+    "asset_allocation": {
+      "stocks": 38.1,
+      "options": 2.8,
+      "cash": 59.2
+    },
+    "sector_distribution": {
+      "Technology": 50.7,
+      "Communication Services": 14.2,
+      "Consumer Cyclical": 28.1,
+      "Industrials": 7.0
+    },
+    "top_holdings": [
+      {
+        "rank": 1,
+        "type": "stock",
+        "name": "MSFT",
+        "value": 11587.5,
+        "pnl_percent": 7.3
+      },
+      {
+        "rank": 2,
+        "type": "stock",
+        "name": "TSLA",
+        "value": 9591.0,
+        "pnl_percent": 9.6
+      },
+      {
+        "rank": 3,
+        "type": "stock",
+        "name": "GOOGL",
+        "value": 9131.699999999999,
+        "pnl_percent": 8.7
+      },
+      {
+        "rank": 4,
+        "type": "stock",
+        "name": "NVDA",
+        "value": 8898.5,
+        "pnl_percent": 48.3
+      },
+      {
+        "rank": 5,
+        "type": "stock",
+        "name": "AAPL",
+        "value": 8824.55,
+        "pnl_percent": 9.6
+      }
+    ],
+    "stock_count": 8,
+    "option_count": 2
+  },
+  "health_analysis": {
+    "cash_analysis": {
+      "current_ratio": 59.2,
+      "target_ratio": 35.0,
+      "deviation": 24.2,
+      "status": "需要调整"
+    },
+    "concentration_analysis": {
+      "stock_count": 8,
+      "ideal_count": 8,
+      "status": "分散良好"
+    },
+    "sector_analysis": {
+      "sector_count": 4,
+      "status": "优秀"
+    },
+    "overall_health_score": 81.2
+  },
+  "risk_analysis": {
+    "volatility_risk": "低",
+    "concentration_risk": "低",
+    "liquidity_risk": "低",
+    "overall_risk_level": "低"
+  },
+  "recommendations": [
+    {
+      "category": "现金管理",
+      "priority": "中",
+      "action": "优化现金使用",
+      "reason": "现金比例(59.2%)高于目标(35.0%)",
+      "suggestion": "考虑使用部分现金进行sell put策略或分批买入优质标的"
+    }
+  ]
+}

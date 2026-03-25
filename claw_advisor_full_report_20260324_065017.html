@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claw Advisor 增强版 - 完整投资决策报告</title>
+    <style>
+        /* 基础样式（与之前相同） */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .header .date {
+            color: #3498db;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            flex-grow: 1;
+        }
+        
+        .section-badge {
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+        
+        .card-title h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+        
+        /* 具体组件的样式 */
+        .alert-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .alert-box.warning {
+            background: linear-gradient(135deg, #ffa726 0%, #ffb74d 100%);
+        }
+        
+        .alert-box.info {
+            background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
+        }
+        
+        .recommendation-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .recommendation-item.buy {
+            border-left-color: #2ecc71;
+        }
+        
+        .recommendation-item.sell-put {
+            border-left-color: #3498db;
+        }
+        
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .stock-symbol {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stock-price {
+            font-size: 1.3rem;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .score-high { background: #d4edda; color: #155724; }
+        .score-medium { background: #fff3cd; color: #856404; }
+        .score-low { background: #f8d7da; color: #721c24; }
+        
+        .operation-details {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .portfolio-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .metric-good { color: #2ecc71; }
+        .metric-warning { color: #f39c12; }
+        .metric-danger { color: #e74c3c; }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .portfolio-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* 动画 */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.9; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页头 -->
+        <div class="header">
+            <h1>🦅 Claw Advisor 增强版</h1>
+            <div class="subtitle">基于我的投资经验 + 你的保守偏好 | 完整决策分析报告</div>
+            <div class="date">2026年03月24日 06:50</div>
+        </div>
+        
+        <!-- 风险警报 -->
+        
+        <div class="section">
+            <div class="alert-box">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 1.5rem; margin-right: 10px;">🛑</div>
+                    <div style="font-size: 1.2rem; font-weight: bold;">紧急风险警报</div>
+                </div>
+                <p>发现 2 个紧急风险警报，请立即关注！</p>
+                <div style="margin-top: 15px;">
+                    <div style="margin-bottom: 8px;">• 组合潜在最大回撤极高(25.0%)，超过危险阈值(20%)</div><div style="margin-bottom: 8px;">• 发现4个集中度风险点</div>
+                </div>
+            </div>
+        </div>
+            
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: #e8f5e9; color: #2e7d32;">🔥</div>
+                <div class="section-title">今日最佳操作</div>
+                <div class="section-badge">0 个推荐</div>
+            </div>
+            
+            <div class="grid">
+        
+                <div class="card">
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 3rem; color: #bdc3c7; margin-bottom: 20px;">📊</div>
+                        <div style="color: #7f8c8d; font-size: 1.1rem;">今日无强烈操作建议</div>
+                        <div style="color: #95a5a6; font-size: 0.9rem; margin-top: 10px;">建议保持现金，等待更好机会</div>
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+        
+        <!-- 期权机会 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: #e3f2fd; color: #1565c0;">💰</div>
+                <div class="section-title">最佳期权机会</div>
+                <div class="section-badge">特别为你优化</div>
+            </div>
+            
+            <div class="grid">
+        
+                <div class="card">
+                    <div class="card-title">
+                        <div class="card-icon" style="background: #e3f2fd; color: #1565c0;">⭐️</div>
+                        <h3>最佳期权机会</h3>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 1.4rem; font-weight: bold; color: #2c3e50;">TSLA</div>
+                        <div style="color: #7f8c8d;">现金担保看跌期权</div>
+                    </div>
+                    
+                    <div class="operation-details">
+                        <div style="font-weight: bold; margin-bottom: 10px;">关键参数:</div>
+                        <div style="margin-bottom: 8px;">策略评分: 105</div>
+                        <div style="margin-bottom: 8px;">年化收益: 94.9%</div>
+                        <div style="margin-bottom: 8px;">推荐: 强烈推荐</div>
+                    </div>
+                </div>
+            
+                <div class="card">
+                    <div class="card-title">
+                        <div class="card-icon" style="background: #f3e5f5; color: #7b1fa2;">💡</div>
+                        <h3>Z的专属建议</h3>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="color: #7f8c8d; margin-bottom: 10px;">基于你的偏好特别优化</div>
+                    </div>
+                    
+                    <div class="operation-details">
+            
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-weight: bold; color: #7b1fa2;">TSLA</div>
+                            <div style="font-size: 0.9rem; color: #666;">重点配置 - 10-20%现金</div>
+                        </div>
+                
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-weight: bold; color: #7b1fa2;">NVDA</div>
+                            <div style="font-size: 0.9rem; color: #666;">适度配置 - 5-10%现金</div>
+                        </div>
+                
+                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">总现金分配: 37.5%</div>
+                            <div style="font-size: 0.85rem; color: #95a5a6;">现金剩余: -2.5%</div>
+                        </div>
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+        
+        <!-- 投资组合健康度 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: #fff3cd; color: #856404;">📊</div>
+                <div class="section-title">投资组合健康度</div>
+                <div class="section-badge">{portfolio_health_score}分</div>
+            </div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-title">
+                        <div class="card-icon" style="background: #e8f5e9; color: #2e7d32;">❤️</div>
+                        <h3>健康评估</h3>
+                    </div>
+                    
+                    <div class="portfolio-metrics">
+                        <div class="metric-box">
+                            <div class="metric-value metric-good">{portfolio_health.get("overall_score", 0):.1f}</div>
+                            <div class="metric-label">综合评分</div>
+                        </div>
+                        
+                        <div class="metric-box">
+                            <div class="metric-value metric-good">{portfolio_health.get("rating", "N/A").split(" ")[-1]}</div>
+                            <div class="metric-label">健康等级</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">关键优势:</div>
+        <div style="margin-bottom: 8px; color: #27ae60;">✅ 现金充足，应对市场波动能力强</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <div class="card-icon" style="background: #ffebee; color: #c62828;">⚠️</div>
+                        <h3>风险监控</h3>
+                    </div>
+                    
+                    <div class="portfolio-metrics">
+                        <div class="metric-box">
+                            <div class="metric-value {volatility_class}">{portfolio_risk_indicators.get("annualized_volatility", 0):.1f}%</div>
+                            <div class="metric-label">年化波动率</div>
+                        </div>
+                        
+                        <div class="metric-box">
+                            <div class="metric-value {drawdown_class}">{portfolio_risk_indicators.get("max_drawdown", 0)*100:.1f}%</div>
+                            <div class="metric-label">最大回撤</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">关注点:</div>
+        <div style="margin-bottom: 8px; color: #e74c3c;">⚠️ 组合波动率偏高，需关注风险控制</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div style="text-align: center; margin-top: 40px; padding: 20px; color: #7f8c8d; font-size: 0.9rem;">
+            <p>🦅 Claw Advisor 增强版 - 基于我的投资经验构建的完整决策系统</p>
+            <p>⚠️ 免责声明: 本系统提供的建议仅供参考，不构成投资建议。投资有风险，决策需谨慎。</p>
+            <p>📅 报告生成时间: {date_str} | 🔄 建议每日查看更新</p>
+        </div>
+    </div>
+    
+    <script>
+        // 简单的页面交互
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新显示的数据
+            const portfolioHealthScore = {portfolio_health.get("overall_score", 0):.1f};
+            const portfolioRiskIndicators = {json.dumps(portfolio_analysis.get("risk_assessment", {}).get("indicators", {}))};
+            
+            // 设置波动率和回撤的样式
+            const volatility = portfolioRiskIndicators.annualized_volatility || 0;
+            const drawdown = (portfolioRiskIndicators.max_drawdown || 0) * 100;
+            
+            // 更新元素
+            const volatilityElements = document.querySelectorAll('.volatility-value');
+            const drawdownElements = document.querySelectorAll('.drawdown-value');
+            
+            volatilityElements.forEach(el => el.textContent = volatility.toFixed(1) + '%');
+            drawdownElements.forEach(el => el.textContent = drawdown.toFixed(1) + '%');
+            
+            // 设置样式类
+            const volatilityClass = volatility > 25 ? 'metric-danger' : volatility > 18 ? 'metric-warning' : 'metric-good';
+            const drawdownClass = drawdown > 20 ? 'metric-danger' : drawdown > 15 ? 'metric-warning' : 'metric-good';
+            
+            const volatilityEls = document.querySelectorAll('.volatility-class');
+            const drawdownEls = document.querySelectorAll('.drawdown-class');
+            
+            volatilityEls.forEach(el => el.className = 'metric-value ' + volatilityClass);
+            drawdownEls.forEach(el => el.className = 'metric-value ' + drawdownClass);
+            
+            // 卡片点击效果
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+            
+            // 自动更新时间
+            function updateTime() {
+                const now = new Date();
+                const timeStr = now.toLocaleString('zh-CN', {{ 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }});
+                const timeElements = document.querySelectorAll('.date');
+                timeElements.forEach(el => el.textContent = timeStr);
+            }
+            
+            setInterval(updateTime, 60000);
+        });
+    </script>
+</body>
+</html>
+        

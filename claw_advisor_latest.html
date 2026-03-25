@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claw Advisor - 投资决策系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .header .date {
+            color: #3498db;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card-title h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+        
+        .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .icon.buy {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .icon.sell-put {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .icon.portfolio {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .icon.risk {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .recommendation-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .recommendation-item.buy {
+            border-left-color: #2ecc71;
+        }
+        
+        .recommendation-item.sell-put {
+            border-left-color: #3498db;
+        }
+        
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .stock-symbol {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stock-price {
+            font-size: 1.2rem;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .score-high {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .score-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .score-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .operation-details {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .operation-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .type-buy {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .type-sell-put {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .reasons {
+            margin-top: 10px;
+        }
+        
+        .reason-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .advice-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .advice-item:before {
+            content: "💡";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .warning-item {
+            background: #fff3cd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .warning-item:before {
+            content: "⚠️";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦅 Claw Advisor</h1>
+            <div class="subtitle">基于我的投资经验 + 你的保守偏好</div>
+            <div class="date">2026年03月23日 23:24</div>
+        </div>
+        
+        <div class="grid">
+            <!-- 今日最佳操作 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon buy">🔥</div>
+                    <h2>今日最佳操作</h2>
+                </div>
+                
+                <div class="recommendation-item">
+                    <div style="text-align: center; padding: 30px; color: #7f8c8d;">
+                        📊 今日无强烈买入建议，建议保持现金观望
+                    </div>
+                </div>
+            
+            </div>
+            
+            <!-- 投资组合建议 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon portfolio">📊</div>
+                    <h2>投资组合建议</h2>
+                </div>
+        
+                <div class="advice-item">
+                    部分持仓估值偏高，注意风险
+                </div>
+                
+                <div class="advice-item">
+                    建议保持35%现金比例，用于机会性投资
+                </div>
+                
+                <div class="advice-item">
+                    每季度检查一次持仓，进行必要的再平衡
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="grid">
+            <!-- 最佳sell put机会 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon sell-put">💰</div>
+                    <h2>最佳期权机会</h2>
+                </div>
+        
+            </div>
+            
+            <!-- 风险提示 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon risk">⚠️</div>
+                    <h2>风险提示</h2>
+                </div>
+        
+                <div class="warning-item">
+                    所有投资都有风险，过去表现不代表未来
+                </div>
+                
+                <div class="warning-item">
+                    建议分批建仓，避免一次性投入
+                </div>
+                
+                <div class="warning-item">
+                    根据你的保守偏好，建议优先选择低波动、有股息的大盘股
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🦅 Claw Advisor - 基于我的投资经验构建的决策系统</p>
+            <p>⚠️ 免责声明: 本系统提供的建议仅供参考，不构成投资建议。投资有风险，决策需谨慎。</p>
+            <p>📅 数据更新时间: {date_str} | 🔄 建议每日查看更新</p>
+        </div>
+    </div>
+    
+    <script>
+        // 简单的页面交互
+        document.addEventListener('DOMContentLoaded', function() {{
+            // 为所有推荐项添加点击效果
+            const recommendations = document.querySelectorAll('.recommendation-item');
+            recommendations.forEach(item => {{
+                item.addEventListener('click', function() {{
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {{
+                        this.style.transform = '';
+                    }}, 150);
+                }});
+            }});
+            
+            // 自动更新时间
+            function updateTime() {{
+                const now = new Date();
+                const timeStr = now.toLocaleString('zh-CN', {{ 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }});
+                document.querySelector('.date').textContent = timeStr;
+            }}
+            
+            // 每分钟更新一次时间
+            setInterval(updateTime, 60000);
+        }});
+    </script>
+</body>
+</html>
+        

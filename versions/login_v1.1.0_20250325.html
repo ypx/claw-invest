@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claw · 登录</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+      background: #f7f3ef;
+      color: #2c2420;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 背景纹理装饰 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(192,98,42,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,98,42,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* 光晕 */
+    .glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      opacity: .25;
+    }
+    .glow-1 { width: 400px; height: 400px; background: #e8a870; top: -120px; left: -100px; }
+    .glow-2 { width: 300px; height: 300px; background: #a99be0; bottom: -80px; right: -80px; }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 400px;
+      padding: 24px;
+    }
+
+    /* Logo */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #c0622a, #7c5cbf);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 18px; color: #fff;
+    }
+    .logo-text { font-size: 22px; font-weight: 800; letter-spacing: -.3px; color: #2c2420; }
+
+    /* Card */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e8ddd5;
+      border-radius: 14px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgba(100,60,30,0.08);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-align: center;
+      color: #2c2420;
+    }
+    .card-subtitle {
+      font-size: 13px;
+      color: #7a6a60;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #f2ede8;
+      border-radius: 8px;
+      padding: 3px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a89a90;
+      transition: all .2s;
+    }
+    .tab.active {
+      background: #ffffff;
+      color: #2c2420;
+      box-shadow: 0 1px 4px rgba(100,60,30,0.12);
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7a6a60;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #faf7f4;
+      border: 1px solid #e8ddd5;
+      border-radius: 8px;
+      color: #2c2420;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus { border-color: #c0622a; box-shadow: 0 0 0 3px rgba(192,98,42,0.08); }
+    input::placeholder { color: #c0b4a8; }
+
+    .input-wrap { position: relative; }
+    .input-wrap input { padding-right: 38px; }
+    .input-icon {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: #c0b4a8;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 11px;
+      background: linear-gradient(135deg, #c0622a, #a0508a);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:hover { opacity: .9; }
+    .btn:active { transform: scale(.99); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 20px 0;
+      font-size: 12px; color: #a89a90;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #e8ddd5;
+    }
+
+    /* Demo accounts */
+    .demo-accounts {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 16px;
+    }
+    .demo-btn {
+      padding: 8px 10px;
+      background: #faf7f4;
+      border: 1px solid #e8ddd5;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      text-align: center;
+    }
+    .demo-btn:hover { border-color: #c0622a; background: rgba(192,98,42,0.04); }
+    .demo-label { font-size: 11px; color: #a89a90; margin-bottom: 2px; }
+    .demo-val { font-size: 12px; font-weight: 600; color: #2c2420; }
+
+    /* Alert */
+    .alert {
+      padding: 10px 12px;
+      border-radius: 7px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center; gap: 8px;
+    }
+    .alert.error { background: rgba(217,79,42,.08); border: 1px solid rgba(217,79,42,.25); color: #d94f2a; display: flex; }
+    .alert.success { background: rgba(46,139,87,.08); border: 1px solid rgba(46,139,87,.25); color: #2e8b57; display: flex; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #a89a90;
+    }
+    .footer a { color: #c0622a; text-decoration: none; }
+
+    /* Spinner */
+    .spin { animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <div class="logo-icon">C</div>
+      <span class="logo-text">Claw</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">欢迎回来</div>
+      <div class="card-subtitle">登录你的投资决策中心</div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('login')">登录</div>
+        <div class="tab" onclick="switchTab('register')">注册</div>
+      </div>
+
+      <!-- Alert -->
+      <div class="alert" id="alert"></div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label>用户名</label>
+          <div class="input-wrap">
+            <input type="text" id="login-username" placeholder="输入用户名" autocomplete="username" required />
+            <i class="fa fa-user input-icon"></i>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <div class="input-wrap">
+            <input type="password" id="login-password" placeholder="输入密码" autocomplete="current-password" required />
+            <i class="fa fa-eye input-icon" onclick="togglePw('login-password', this)"></i>
+          </div>
+        </div>
+        <button class="btn" type="submit" id="login-btn">
+          <i class="fa fa-right-to-bracket"></i> 登录
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" style="display:none" onsubmit="doRegister(event)">
+        <div class="form-group">
+          <label>用户名</label>
+          <div class="input-wrap">
+            <input type="text" id="reg-username" placeholder="2-20 位字符" required />
+            <i class="fa fa-user input-icon"></i>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>邮箱</label>
+          <div class="input-wrap">
+            <input type="email" id="reg-email" placeholder="your@email.com" required />
+            <i class="fa fa-envelope input-icon"></i>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <div class="input-wrap">
+            <input type="password" id="reg-password" placeholder="至少 6 位" required />
+            <i class="fa fa-eye input-icon" onclick="togglePw('reg-password', this)"></i>
+          </div>
+        </div>
+        <button class="btn" type="submit" id="reg-btn">
+          <i class="fa fa-user-plus"></i> 创建账号
+        </button>
+      </form>
+
+      <!-- Divider + Demo -->
+      <div class="divider">演示账号</div>
+      <div class="demo-accounts">
+        <div class="demo-btn" onclick="fillDemo('Z','z888888')">
+          <div class="demo-label">普通用户</div>
+          <div class="demo-val">Z / z888888</div>
+        </div>
+        <div class="demo-btn" onclick="fillDemo('admin','admin888')">
+          <div class="demo-label">管理员</div>
+          <div class="demo-val">admin / admin888</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Claw 投资决策中心 · <a href="/docs" target="_blank">API 文档</a>
+    </div>
+  </div>
+
+<script>
+const API = '';  // 相对路径，兼容所有访问方式
+
+// ── Tab 切换 ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0&&tab==='login') || (i===1&&tab==='register'));
+  });
+  document.getElementById('login-form').style.display = tab==='login' ? '' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? '' : 'none';
+  clearAlert();
+}
+
+// ── 密码显示/隐藏 ──
+function togglePw(id, icon) {
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  icon.className = isText ? 'fa fa-eye input-icon' : 'fa fa-eye-slash input-icon';
+}
+
+// ── 演示账号填充 ──
+function fillDemo(user, pw) {
+  switchTab('login');
+  document.getElementById('login-username').value = user;
+  document.getElementById('login-password').value = pw;
+}
+
+// ── 提示 ──
+function showAlert(msg, type='error') {
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = 'alert ' + type;
+}
+function clearAlert() {
+  const el = document.getElementById('alert');
+  el.className = 'alert';
+}
+
+// ── 登录 ──
+async function doLogin(e) {
+  e.preventDefault();
+  clearAlert();
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> 登录中…';
+
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const fd = new FormData();
+    fd.append('username', username);
+    fd.append('password', password);
+    const res = await fetch(API + '/api/auth/login', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || '登录失败');
+
+    // 存 token
+    localStorage.setItem('claw_token', data.access_token);
+    localStorage.setItem('claw_user', JSON.stringify(data.user));
+
+    showAlert('登录成功，正在跳转…', 'success');
+
+    // 根据角色跳转
+    setTimeout(() => {
+      if (data.user.role === 'admin') {
+        location.href = '/admin';
+      } else {
+        location.href = '/dashboard';
+      }
+    }, 600);
+  } catch(err) {
+    showAlert(err.message);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> 登录';
+  }
+}
+
+// ── 注册 ──
+async function doRegister(e) {
+  e.preventDefault();
+  clearAlert();
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> 注册中…';
+
+  const body = {
+    username: document.getElementById('reg-username').value.trim(),
+    email: document.getElementById('reg-email').value.trim(),
+    password: document.getElementById('reg-password').value,
+  };
+
+  try {
+    const res = await fetch(API + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || '注册失败');
+    showAlert('注册成功！请登录', 'success');
+    setTimeout(() => switchTab('login'), 1200);
+  } catch(err) {
+    showAlert(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-user-plus"></i> 创建账号';
+  }
+}
+
+// ── 已登录则直接跳转 ──
+const token = localStorage.getItem('claw_token');
+if (token) {
+  fetch(API + '/api/auth/me', { headers: { Authorization: 'Bearer ' + token } })
+    .then(r => r.ok ? r.json() : null)
+    .then(u => {
+      if (u) location.href = u.role === 'admin' ? '/admin' : '/dashboard';
+    }).catch(() => {});
+}
+</script>
+</body>
+</html>

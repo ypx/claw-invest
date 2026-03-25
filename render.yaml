@@ -12,3 +12,5 @@ services:
         value: /opt/render/project/src
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: RENDER_CACHE_BUST
+        value: "2025-03-25-v2"
