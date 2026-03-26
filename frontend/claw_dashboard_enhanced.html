@@ -1511,6 +1511,13 @@
   </div>
 
   <div class="sidebar-section">
+    <div class="sidebar-section-label">行业分析</div>
+    <a class="nav-item" data-page="sectors" onclick="navigate('sectors',this)">
+      <i class="fa fa-rocket"></i> 前景行业
+    </a>
+  </div>
+
+  <div class="sidebar-section">
     <div class="sidebar-section-label">管理</div>
     <a class="nav-item" data-page="manage" onclick="navigate('manage',this)">
       <i class="fa fa-pen-to-square"></i> 持仓管理
@@ -1528,12 +1535,13 @@
   </div>
 
   <div class="sidebar-footer">
-    <div class="user-card">
+    <div class="user-card" onclick="location.href='/profile'" style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''" title="个人中心">
       <div class="user-avatar" id="dash-avatar">Z</div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="user-name" id="dash-username">Z</div>
         <div class="user-role" id="dash-role">美股个人投资者</div>
       </div>
+      <i class="fa fa-chevron-right" style="font-size:10px;color:var(--text-tertiary);flex-shrink:0"></i>
     </div>
     <div style="display:flex;gap:6px;padding:4px 4px 0">
       <button id="admin-entry" onclick="location.href='/admin'" style="display:none;flex:1;padding:7px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--danger)">
@@ -1775,9 +1783,10 @@
               <th class="right">股数</th>
               <th class="right">成本价</th>
               <th class="right">现价</th>
+              <th class="right">今日涨跌</th>
               <th class="right">市值</th>
               <th class="right">浮盈/亏</th>
-              <th class="right">涨跌幅</th>
+              <th class="right">总回报</th>
               <th class="right">占比</th>
               <th class="right">健康</th>
             </tr>
@@ -1806,27 +1815,30 @@
     </div>
 
     <!-- 期权持仓摘要 -->
-    <div class="card mt-16" id="holdings-options-bar" style="margin-top:16px">
-      <div class="section-header" style="margin-bottom:12px">
+    <div class="card" style="margin-top:16px">
+      <div class="section-header" style="margin-bottom:14px">
         <div class="section-title"><i class="fa fa-file-contract" style="color:var(--success)"></i> 期权持仓</div>
-        <button class="section-action" onclick="navigate('manage', document.querySelector('[data-page=manage]')); setTimeout(()=>switchManageTab('options',document.querySelector('[data-mtab=options]')),100)">管理期权 <i class="fa fa-chevron-right"></i></button>
       </div>
-      <div class="opt-stats-grid" id="holdings-opt-stats">
-        <div class="opt-stat-item">
-          <div class="opt-stat-label">持仓中合约</div>
-          <div class="opt-stat-value" id="h-opt-open">—</div>
+      <div class="grid-4 mb-16">
+        <div class="kpi-card" style="--accent-color:var(--success)">
+          <div class="kpi-label">持仓中合约</div>
+          <div class="kpi-value" id="h-opt-open">—</div>
+          <div class="kpi-change neutral">Sell Put 持仓中</div>
         </div>
-        <div class="opt-stat-item">
-          <div class="opt-stat-label">待收权利金</div>
-          <div class="opt-stat-value text-success" id="h-opt-premium">—</div>
+        <div class="kpi-card" style="--accent-color:var(--accent-secondary)">
+          <div class="kpi-label">待收权利金</div>
+          <div class="kpi-value" id="h-opt-premium">—</div>
+          <div class="kpi-change neutral">最大可获收益</div>
         </div>
-        <div class="opt-stat-item">
-          <div class="opt-stat-label">已实现盈亏</div>
-          <div class="opt-stat-value" id="h-opt-realized">—</div>
+        <div class="kpi-card" style="--accent-color:var(--info)">
+          <div class="kpi-label">已实现盈亏</div>
+          <div class="kpi-value" id="h-opt-realized">—</div>
+          <div class="kpi-change neutral">已平仓/到期</div>
         </div>
-        <div class="opt-stat-item">
-          <div class="opt-stat-label">历史胜率</div>
-          <div class="opt-stat-value text-accent" id="h-opt-winrate">—</div>
+        <div class="kpi-card" style="--accent-color:var(--accent-primary)">
+          <div class="kpi-label">胜率</div>
+          <div class="kpi-value" id="h-opt-winrate">—</div>
+          <div class="kpi-change neutral">历史统计</div>
         </div>
       </div>
       <div class="table-wrap">
@@ -1839,7 +1851,7 @@
               <th class="right">到期日</th>
               <th class="right">合约数</th>
               <th class="right">权利金/股</th>
-              <th class="right">盈亏</th>
+              <th class="right">收益</th>
               <th>状态</th>
             </tr>
           </thead>
@@ -1849,6 +1861,7 @@
         </table>
       </div>
     </div>
+
   </div><!-- /page-holdings -->
 
   <!-- ═══════════════ PAGE: HEALTH ═══════════════ -->
@@ -1874,7 +1887,12 @@
 
       <!-- Metric Bars -->
       <div class="card">
-        <div class="section-title mb-16">各维度评分</div>
+        <div class="section-header" style="margin-bottom:16px">
+          <div class="section-title mb-16">各维度评分</div>
+          <button onclick="showHealthExplanation()" style="background:transparent;border:none;color:var(--info);cursor:pointer;font-size:12px">
+            <i class="fa fa-circle-question"></i> 了解评分方法
+          </button>
+        </div>
         <div id="health-bars"></div>
       </div>
     </div>
@@ -1933,8 +1951,77 @@
       </div>
     </div>
 
-    <!-- Options Cards -->
-    <div class="grid-3" id="options-grid"></div>
+    <!-- 简化版期权策略：按场景分类 -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px">
+      
+      <!-- 场景1：想低价接股票 -->
+      <div class="card" style="border-left:4px solid var(--success)">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--success)">
+          <i class="fa fa-arrow-down"></i> 想定价买入股票？
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">
+          <strong>用 Sell Put（卖出看跌期权）</strong><br><br>
+          💰 先收取权利金<br>
+          📉 如果股价跌到行权价以下，你以低价买入股票<br>
+          📈 如果股价上涨，权利金白赚
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="chip green">最常用</span>
+          <span class="chip">适合抄底</span>
+        </div>
+      </div>
+
+      <!-- 场景2：想高价卖股票 -->
+      <div class="card" style="border-left:4px solid var(--accent-primary)">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--accent-primary)">
+          <i class="fa fa-arrow-up"></i> 想高价卖出持股？
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">
+          <strong>用 Sell Call（卖出看涨期权）= Covered Call</strong><br><br>
+          💰 持有股票的同时卖出 CALL，收取权利金<br>
+          📈 如果股价大涨，你以高价卖出（行权价）<br>
+          📉 如果股价不涨，权利金白赚
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="chip">增强收益</span>
+          <span class="chip">适合震荡市</span>
+        </div>
+      </div>
+
+      <!-- 场景3：想降低风险 -->
+      <div class="card" style="border-left:4px solid var(--warning)">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--warning)">
+          <i class="fa fa-shield"></i> 想保护持仓防下跌？
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">
+          <strong>用 Protective Put（保护性看跌期权）</strong><br><br>
+          🛡️ 买入看跌期权给股票上保险<br>
+          📉 股价下跌时，看跌期权盈利抵消损失<br>
+          📈 股价上涨时，依然享受全部涨幅
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="chip">防守型</span>
+          <span class="chip">保险策略</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 策略选择建议 -->
+    <div class="card" style="margin-top:16px;border-left:4px solid var(--text-tertiary)">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text-primary)">
+        <i class="fa fa-lightbulb"></i> 简单选择原则
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary)">
+        <div style="margin-bottom:8px">✅ <strong>想低价买入</strong> → Sell Put（当前主要策略）</div>
+        <div style="margin-bottom:8px">✅ <strong>有正股想额外赚钱</strong> → Sell Call（Covered Call）</div>
+        <div style="margin-bottom:8px">✅ <strong>担心持仓下跌</strong> → Protective Put</div>
+        <div>⏱️ <strong>期权周期</strong>：建议 30-45 天到期，时间价值衰减最快</div>
+      </div>
+    </div>
+
+    <!-- 期权策略卡片列表 -->
+    <div id="options-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px"></div>
 
     <!-- Options Chart -->
     <div class="card" style="margin-top:16px">
@@ -1977,9 +2064,9 @@
   <div class="page" id="page-market">
     <div class="section-header">
       <div class="section-title"><i class="fa fa-globe"></i> 市场行情</div>
-      <span class="chip green">市场 · 乐观</span>
+      <span class="chip blue" id="market-state-badge">数据加载中…</span>
     </div>
-    <p class="page-subtitle">宏观市场指标与 VIX 恐惧指数监控。</p>
+    <p class="page-subtitle">宏观市场指标与 VIX 恐惧指数监控。数据来源：Yahoo Finance，每分钟自动更新。</p>
 
     <div class="grid-4 mb-16">
       <div class="kpi-card">
@@ -2039,6 +2126,171 @@
       </div>
     </div>
   </div><!-- /page-market -->
+
+  <!-- ═══════════════ PAGE: SECTORS (AI & 太空股) ═══════════════ -->
+  <div class="page" id="page-sectors">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-rocket"></i> 前景行业分析</div>
+      <span class="chip purple">AI · 太空 · 量子计算</span>
+    </div>
+    <p class="page-subtitle">基于投资体系，分析未来 5-10 年最具潜力的行业赛道。</p>
+
+    <!-- AI 基础设施 -->
+    <div class="card mb-16" style="border-color:rgba(56,139,253,.3);background:linear-gradient(135deg,rgba(56,139,253,.05),rgba(163,113,247,.05))">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title" style="color:var(--info)">
+          <i class="fa fa-brain"></i> AI 基础设施 — 算力为王
+        </div>
+        <span class="badge badge-info">最高优先级</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--info)">🏆 NVDA — 英伟达</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">AI 算力基础设施绝对龙头，CUDA 生态护城河</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip green">算力垄断</span>
+            <span class="chip blue">数据中心</span>
+            <span class="chip">GB200 GPU</span>
+          </div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--accent-primary)">🔒 AMD — 超微半导体</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">第二大 GPU 供应商，性价比优势明显</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip">MI300X</span>
+            <span class="chip">挑战者</span>
+          </div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text-primary)">☁️ 云服务商 — MSFT / GOOGL / AMZN</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">AI 应用层，Azure/OpenAI / GCP/ AWS</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip blue">AI 即服务</span>
+            <span class="chip">Copilot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 量子计算 -->
+    <div class="card mb-16" style="border-color:rgba(163,113,247,.3);background:rgba(163,113,247,.05)">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title" style="color:var(--accent-secondary)">
+          <i class="fa fa-atom"></i> 量子计算 — 下一个范式革命
+        </div>
+        <span class="badge badge-warning">高风险高回报</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--accent-secondary)">🔬 IONQ — 离子阱量子计算</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">唯一采用离子阱技术的上市公司，精度最高</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip purple">离子阱</span>
+            <span class="chip">QPU</span>
+          </div>
+          <div style="margin-top:10px;padding:8px;background:var(--bg-tertiary);border-radius:6px;font-size:11px;color:var(--text-secondary)">
+            <strong>点评：</strong>5-10年赛道，量子霸权前夜，高风险高回报
+          </div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text-primary)">📡 其他量子计算标的</div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="margin-bottom:6px">• <strong>QUBT</strong> — 量子机器学习</div>
+            <div style="margin-bottom:6px">• <strong>QMCO</strong> — 光子量子</div>
+            <div>• <strong>IBM</strong> — 老牌量子计算</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 太空经济 -->
+    <div class="card mb-16" style="border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.05)">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title" style="color:var(--danger)">
+          <i class="fa fa-rocket"></i> 太空经济 — 下一个万亿市场
+        </div>
+        <span class="badge badge-danger">长期看好</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--danger)">🛰️ SPACEX — 私人航天巨头</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">星舰计划 Starlink 全球组网，NASA 最大供应商</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip red">非上市</span>
+            <span class="chip">私募</span>
+          </div>
+          <div style="margin-top:10px;padding:8px;background:var(--bg-tertiary);border-radius:6px;font-size:11px;color:var(--text-secondary)">
+            <strong>替代方案：</strong>通过 ARKX (太空ETF) 间接配置
+          </div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text-primary)">🛸 上市太空公司</div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="margin-bottom:6px">• <strong>BKSY</strong> — 太空数据服务</div>
+            <div style="margin-bottom:6px">• <strong>MAXR</strong> — 卫星通信</div>
+            <div style="margin-bottom:6px">• <strong>LHX</strong> — 太空防务</div>
+            <div>• <strong>BA</strong> — 波音航天</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加密/Web3 -->
+    <div class="card mb-16" style="border-color:rgba(46,139,87,.3);background:rgba(46,139,87,.05)">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title" style="color:var(--success)">
+          <i class="fa fa-bitcoin-sign"></i> 加密货币 & Web3 — 数字主权资产
+        </div>
+        <span class="badge badge-success">核心配置</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--success)">₿ BTC — 比特币</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">数字黄金，主权资产，ETF 获批后机构资金涌入</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip green">数字黄金</span>
+            <span class="chip">ETF</span>
+          </div>
+          <div style="margin-top:10px;padding:8px;background:var(--bg-tertiary);border-radius:6px;font-size:11px;color:var(--text-secondary)">
+            <strong>配置方式：</strong>ARKB (Ark Invest 比特币ETF)
+          </div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--accent-primary)">Ξ ETH — 以太坊</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Web3 智能合约基础，质押收益 3-5%</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip">质押收益</span>
+            <span class="chip">DeFi</span>
+          </div>
+        </div>
+        <div style="background:var(--bg-secondary);border-radius:8px;padding:14px;border:1px solid var(--border-default)">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text-primary)">🔗 USDC — Circle 稳定币</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">美元数字化，链上美元霸权核心</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip">稳定币</span>
+            <span class="chip blue">支付</span>
+          </div>
+          <div style="margin-top:10px;padding:8px;background:var(--bg-tertiary);border-radius:6px;font-size:11px;color:var(--text-secondary)">
+            <strong>点评：</strong>稳定币是美元数字化最大受益者，关注 CRCL 上市
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 投资建议总结 -->
+    <div class="card" style="border-color:var(--border-accent);background:var(--bg-accent-subtle)">
+      <div class="section-title" style="margin-bottom:14px;color:var(--accent-primary)">
+        <i class="fa fa-lightbulb"></i> 投资建议总结
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--text-primary)">
+        <div>📌 <strong>AI 基础设施</strong>：NVDA 为核心，GOOGL/AMZN 为应用层，长期定投</div>
+        <div>📌 <strong>量子计算</strong>：IONQ 为代表，5-10年赛道，小仓位配置</div>
+        <div>📌 <strong>太空经济</strong>：关注 SPACEX 动态，通过 ARKX 间接配置</div>
+        <div>📌 <strong>加密货币</strong>：BTC + ETH 为核心，ARKB 配置，关注 CRCL 上市</div>
+        <div>📌 <strong>仓位原则</strong>：核心仓 60% (NVDA/GOOGL/AMZN)，成长仓 30% (IONQ/加密)，现金 10%</div>
+      </div>
+    </div>
+  </div><!-- /page-sectors -->
 
   <!-- ═══════════════ PAGE: NEWS ═══════════════ -->
   <div class="page" id="page-news">
@@ -2210,9 +2462,19 @@
     <div class="section-header">
       <div class="section-title"><i class="fa fa-pen-to-square"></i> 持仓管理</div>
       <div style="display:flex;gap:8px">
-        <button onclick="openAddHolding()" id="btn-add-holding" style="background:var(--info);color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">
-          <i class="fa fa-plus"></i> <span id="add-btn-label">添加持仓</span>
-        </button>
+        <div style="position:relative">
+          <button id="btn-add-holding" onclick="toggleAddDropdown()" style="background:var(--info);color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">
+            <i class="fa fa-plus"></i> <span id="add-btn-label">添加持仓</span> <i class="fa fa-caret-down" style="margin-left:4px"></i>
+          </button>
+          <div id="add-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg-secondary);border:1px solid var(--border-default);border-radius:8px;box-shadow:var(--shadow-md);min-width:140px;z-index:100;overflow:hidden">
+            <div onclick="openAddHolding(); document.getElementById('add-dropdown').style.display='none'" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);display:flex;align-items:center;gap:8px">
+              <i class="fa fa-chart-line" style="color:var(--info)"></i> 添加正股
+            </div>
+            <div onclick="switchManageTab('options',document.querySelector('[data-mtab=options]')); setTimeout(()=>{openAddOptionModal && openAddOptionModal()},150); document.getElementById('add-dropdown').style.display='none'" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-subtle)">
+              <i class="fa fa-sliders" style="color:var(--accent-secondary)"></i> 添加期权
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <p class="page-subtitle">管理你的正股持仓和期权仓位，所有数据保存至数据库，刷新不丢失。</p>
@@ -2567,12 +2829,14 @@ function navigate(page, el, pushState = true) {
     setTimeout(loadOptionsOverview, 80);
   }
 
-  // 切换到持仓管理：若数据是占位数据则立即刷新
+  // 切换到持仓管理：若数据未加载则立即刷新，否则重渲染
   if (page === 'manage') {
-    if (_isMockData) {
-      fetchData();  // 立即重新拉取真实数据
+    if (!dashData || !dashData.portfolio_holdings || _isMockData) {
+      // 数据不存在/空/占位中，立即拉取
+      fetchData();
     } else {
-      renderManage(); // 数据有效，直接重渲染最新状态
+      // 数据有效，直接重渲染最新状态
+      renderManage();
     }
     if (currentManageTab === 'options') {
       setTimeout(loadOptionPositions, 50);
@@ -2670,7 +2934,10 @@ async function fetchData() {
     _firstLoadComplete = true;
     if (_fetchRetryTimer) { clearTimeout(_fetchRetryTimer); _fetchRetryTimer = null; }
     renderAll();
-    document.getElementById('last-update').textContent = '刚刚更新';
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    document.getElementById('last-update').textContent = '已更新 ' + timeStr;
+    document.getElementById('last-update').style.color = '';  // 恢复默认颜色
   } catch(e) {
     console.warn('API 获取失败', e);
     if (!dashData || _isMockData) {
@@ -2692,6 +2959,7 @@ async function fetchData() {
     } else {
       // 已有真实数据时，只更新状态文字
       document.getElementById('last-update').textContent = '⚠ 刷新失败';
+      document.getElementById('last-update').style.color = 'var(--danger)';
       // 只在手动刷新时才显示 toast，自动刷新失败静默处理
       if (_isManualRefresh) {
         showToast('数据刷新失败，显示上次数据', 'error');
@@ -3003,13 +3271,18 @@ function renderHoldings() {
   holdings.sort((a,b) => b.current_value - a.current_value).forEach(h => {
     const pct = (h.current_value / total * 100).toFixed(1);
     const up = h.gain_loss_percent >= 0;
+    const dayUp = (h.price_change_pct || 0) >= 0;
     const hs = h.health_score;
     const hClass = hs >= 85 ? 'high' : hs >= 70 ? 'mid' : 'low';
+    const dayChg = h.price_change_pct != null
+      ? `<span class="${dayUp?'up':'down'}">${dayUp?'+':''}${Number(h.price_change_pct).toFixed(2)}%</span>`
+      : `<span style="color:var(--text-tertiary)">—</span>`;
     tbody.innerHTML += `<tr>
       <td><div class="stock-symbol">${h.symbol}</div><div class="stock-name">${h.name}</div></td>
       <td class="right">${h.shares}</td>
       <td class="right">$${h.avg_cost.toFixed(2)}</td>
       <td class="right">$${h.current_price.toFixed(2)}</td>
+      <td class="right">${dayChg}</td>
       <td class="right">${fmt$(h.current_value)}</td>
       <td class="right ${up?'up':'down'}">${(up?'+':'') + fmt$(h.gain_loss)}</td>
       <td class="right ${up?'up':'down'}">${fmtPct(h.gain_loss_percent)}</td>
@@ -3331,29 +3604,62 @@ function buildRadarChart() {
 // ═══════════════════════════════════════════════
 function renderMarket() {
   const m = dashData.market_status;
-  document.getElementById('m-sp500').textContent = Number(m.sp500).toLocaleString('en-US');
-  document.getElementById('m-nasdaq').textContent = Number(m.nasdaq).toLocaleString('en-US');
-  document.getElementById('m-vix').textContent = m.vix;
+  const vixVal = Number(m.vix).toFixed(2);
+  document.getElementById('m-sp500').textContent = Number(m.sp500).toLocaleString('en-US', {maximumFractionDigits:2});
+  document.getElementById('m-nasdaq').textContent = Number(m.nasdaq).toLocaleString('en-US', {maximumFractionDigits:2});
+  document.getElementById('m-vix').textContent = vixVal;
   document.getElementById('m-sentiment').textContent = m.market_sentiment;
+
+  // S&P500 颜色
   document.getElementById('m-sp500-c').innerHTML = `<i class="fa fa-arrow-${m.sp500_change>=0?'up':'down'}"></i> ${fmtPct(m.sp500_change)}`;
   document.getElementById('m-sp500-c').className = 'kpi-change ' + updown(m.sp500_change);
+  // Nasdaq 颜色
   document.getElementById('m-nasdaq-c').innerHTML = `<i class="fa fa-arrow-${m.nasdaq_change>=0?'up':'down'}"></i> ${fmtPct(m.nasdaq_change)}`;
   document.getElementById('m-nasdaq-c').className = 'kpi-change ' + updown(m.nasdaq_change);
-  document.getElementById('m-vix-c').innerHTML = `<i class="fa fa-arrow-${m.vix_change>=0?'up':'down'}"></i> ${fmtPct(m.vix_change)}`;
-  document.getElementById('m-vix-c').className = 'kpi-change ' + (m.vix_change >= 0 ? 'up' : 'down');
-  buildVixChart();
+  // VIX：升高是坏事 → up 绿/down 红（中国规则相反），但 VIX 高=恐慌，用 danger 色
+  // VIX 用 up 还是 down 取决于变化方向：vix_change > 0 → 上涨 → 坏 → 用 down 色（绿）
+  const vixUp = m.vix_change >= 0;
+  document.getElementById('m-vix-c').innerHTML = `<i class="fa fa-arrow-${vixUp?'up':'down'}"></i> ${fmtPct(m.vix_change)}`;
+  // VIX 升 = 恐慌增加 → 在中国色系里用绿色（下跌色）表示利空
+  document.getElementById('m-vix-c').className = 'kpi-change ' + (vixUp ? 'down' : 'up');
+
+  // 数据来源标注
+  const src = m.data_source === 'yahoo_finance' ? '实时' : '备用';
+  const state = m.market_state === 'REGULAR' ? '🟢 盘中' : m.market_state === 'PRE' ? '🟡 盘前' : m.market_state === 'POST' ? '🟡 盘后' : '⚫ 休市';
+  if (document.getElementById('market-state-badge')) {
+    document.getElementById('market-state-badge').textContent = `${state} · ${src}数据`;
+  }
+
+  buildVixChart(m.vix);
 }
 
-function buildVixChart() {
+function buildVixChart(currentVix) {
   const ctx = document.getElementById('chart-vix').getContext('2d');
   if (charts.vix) charts.vix.destroy();
-  const labels = ['3/10','3/12','3/14','3/17','3/19','3/21','3/24'];
-  const vixData = [22.1, 19.8, 18.3, 16.9, 15.4, 15.0, 14.2];
-  
+
+  // 生成近 7 天日期标签（含今天）
+  const labels = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+  }
+
+  // 历史 VIX 数据（如果 dashData 里有，用真实的；否则基于当前值估算）
+  const vixHistory = (dashData.vix_history && dashData.vix_history.length >= 7)
+    ? dashData.vix_history
+    : (() => {
+        // 用当前 VIX 反推一组近似趋势值（仅作展示占位）
+        const cur = currentVix || 18;
+        return [cur*1.12, cur*1.08, cur*1.05, cur*1.02, cur*0.99, cur*0.98, cur];
+      })();
+
+  const vixData = vixHistory.map(v => Number(v).toFixed(2));
+
   const gradient = ctx.createLinearGradient(0, 0, 0, 200);
   gradient.addColorStop(0, 'rgba(124,92,191,0.15)');
   gradient.addColorStop(1, 'rgba(124,92,191,0.00)');
-  
+
   charts.vix = new Chart(ctx, {
     type: 'line',
     data: {
@@ -3461,6 +3767,7 @@ function renderTsla() {
 
   document.getElementById('tsla-price').textContent = fmt$(tsla.current_price);
   document.getElementById('tsla-value').textContent = fmt$(tsla.current_value);
+  document.getElementById('tsla-shares-info').innerHTML = `<i class="fa fa-layer-group"></i> ${tsla.shares || 0} 股`;
   const chgEl = document.getElementById('tsla-price-chg');
   chgEl.className = 'kpi-change ' + updown(tsla.gain_loss_percent);
   chgEl.innerHTML = `<i class="fa fa-arrow-${tsla.gain_loss_percent>=0?'up':'down'}"></i> ${fmtPct(tsla.gain_loss_percent)}`;
@@ -3574,7 +3881,7 @@ function renderManage() {
             <button onclick="editHolding('${h.symbol}')" style="padding:4px 10px;background:transparent;border:1px solid var(--border-default);border-radius:5px;cursor:pointer;font-size:11px;color:var(--text-secondary)">
               <i class="fa fa-pencil"></i> 编辑
             </button>
-            <button onclick="deleteHolding('${h.symbol}')" style="padding:4px 10px;background:transparent;border:1px solid rgba(248,81,73,.3);border-radius:5px;cursor:pointer;font-size:11px;color:var(--danger)">
+            <button onclick="deleteHolding('${h.symbol}',this)" style="padding:4px 10px;background:transparent;border:1px solid rgba(248,81,73,.3);border-radius:5px;cursor:pointer;font-size:11px;color:var(--danger)">
               <i class="fa fa-trash"></i>
             </button>
           </div>
@@ -3699,6 +4006,20 @@ async function loadOptionsOverview() {
   }
 }
 
+function toggleAddDropdown() {
+  const dropdown = document.getElementById('add-dropdown');
+  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('add-dropdown');
+  const btn = document.getElementById('btn-add-holding');
+  if (dropdown && dropdown.style.display === 'block' && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
+
 function openAddHolding() {
   document.getElementById('modal-title').textContent = '添加持仓';
   document.getElementById('modal-mode').value = 'add';
@@ -3758,14 +4079,26 @@ async function saveHolding() {
   }
 }
 
-async function deleteHolding(symbol) {
+async function deleteHolding(symbol, btnEl) {
   if (!confirm('确定删除 ' + symbol + ' 的持仓记录？此操作不可撤销。')) return;
+
+  // 禁用按钮，防止重复点击
+  if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<i class="fa fa-spinner fa-spin"></i>'; }
+
+  // 乐观更新：立即从本地数据和 UI 中移除，不等网络
+  if (dashData && dashData.portfolio_holdings) {
+    dashData.portfolio_holdings = dashData.portfolio_holdings.filter(h => h.symbol !== symbol);
+  }
+  renderManage();  // 立即重绘表格（行消失）
+
   try {
     await apiDelete('/api/portfolio/holdings/' + symbol);
     showToast(symbol + ' 已删除');
-    await fetchData();
+    fetchData();  // 后台静默刷新完整数据（不 await，不阻塞）
   } catch(e) {
+    // 回滚：删除失败时重新拉取真实数据
     showToast(e.message || '删除失败', 'error');
+    await fetchData();
   }
 }
 
@@ -4304,6 +4637,51 @@ function calcPut() {
   if (advice) {
     advice.innerHTML = `<i class="fa fa-info-circle"></i> 盈亏平衡价 $${breakeven.toFixed(2)} — 若 TSLA 到期高于此价，期权盈利。保证金占用 ${((margin/100000)*100).toFixed(1)}% 的 $100,000 本金。`;
   }
+}
+
+// 健康评估各维度说明弹窗
+function showHealthExplanation() {
+  const html = `
+    <div id="health-explanation-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--bg-secondary);border-radius:16px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-xl)">
+        <div style="padding:20px 24px;border-bottom:1px solid var(--border-default);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:18px;font-weight:700">健康评估各维度说明</div>
+          <button onclick="document.getElementById('health-explanation-modal').remove()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text-secondary)">✕</button>
+        </div>
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+          <div style="background:var(--bg-tertiary);padding:14px;border-radius:8px">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--info)">📊 分散度 (20%)</div>
+            <div style="font-size:13px;color:var(--text-secondary)">衡量持仓分散程度。行业分散度 = 1 - 行业集中度HHI，个股分散度 = 1 - 单票占比HHI。分散度越高，得分越高。</div>
+          </div>
+          <div style="background:var(--bg-tertiary);padding:14px;border-radius:8px">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--success)">💰 现金管理 (20%)</div>
+            <div style="font-size:13px;color:var(--text-secondary)">评估现金储备是否充足。现金比例 = 现金 / 总资产。目标35%，接近目标得高分，过高过低都扣分。</div>
+          </div>
+          <div style="background:var(--bg-tertiary);padding:14px;border-radius:8px">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--accent-primary)">📈 收益质量 (15%)</div>
+            <div style="font-size:13px;color:var(--text-secondary)">基于持仓的盈利比例和盈利质量。盈利股数/总股数 = 胜率，盈利金额/总市值 = 收益质量。</div>
+          </div>
+          <div style="background:var(--bg-tertiary);padding:14px;border-radius:8px">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--warning)">🛡️ 风险控制 (20%)</div>
+            <div style="font-size:13px;color:var(--text-secondary)">评估仓位集中度和潜在回撤。单票超30%大幅扣分，前三占比超60%扣分，波动率高于30%扣分。</div>
+          </div>
+          <div style="background:var(--bg-tertiary);padding:14px;border-radius:8px">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--accent-secondary)">🏭 标的质量 (15%)</div>
+            <div style="font-size:13px;color:var(--text-secondary)">基于各持仓的健康评分加权。健康评分参考：护城河、成长性、估值、财务健康等维度。</div>
+          </div>
+          <div style="background:var(--bg-tertiary);padding:14px;border-radius:8px">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--danger)">🎯 风格匹配 (10%)</div>
+            <div style="font-size:13px;color:var(--text-secondary)">评估持仓是否符合你的投资风格（保守型）。科技股占比、AI/算力赛道配置等作为加分项。</div>
+          </div>
+          <div style="margin-top:8px;padding:12px;background:var(--bg-accent-subtle);border-radius:8px;font-size:12px;color:var(--text-secondary)">
+            <strong>综合评分公式：</strong> 各维度得分 × 权重 之和，满分100分。<br>
+            <strong>评级标准：</strong> 90+ 优秀 | 80-89 良好 | 60-79 一般 | <60 需改进
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 </script>

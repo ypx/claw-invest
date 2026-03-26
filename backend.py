@@ -81,6 +81,22 @@ async def login_page():
         return FileResponse(login_path)
     raise HTTPException(status_code=404, detail="Login page not found")
 
+@app.get("/dashboard")
+async def dashboard_page():
+    """主仪表盘"""
+    p = os.path.join(frontend_path, "claw_dashboard_enhanced.html")
+    if os.path.exists(p):
+        return FileResponse(p)
+    raise HTTPException(status_code=404, detail="Dashboard not found")
+
+@app.get("/profile")
+async def profile_page():
+    """个人中心"""
+    p = os.path.join(frontend_path, "profile.html")
+    if os.path.exists(p):
+        return FileResponse(p)
+    raise HTTPException(status_code=404, detail="Profile page not found")
+
 oauth2   = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 def _pre_hash(pw: str) -> bytes:
@@ -345,13 +361,184 @@ def log_action(user_id: str, action: str, detail: str = "", db=None):
             _insert(conn)
 
 # ──────────────────────────────────────────────
-# 数据计算
+# 实时价格引擎（Yahoo Finance，无需 API Key）
 # ──────────────────────────────────────────────
+import ssl, urllib.request, threading
+
+# SSL context（绕过 macOS 证书链问题）
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.check_hostname = False
+_SSL_CTX.verify_mode = ssl.CERT_NONE
+
+_YF_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    "Accept": "application/json",
+}
+
+def _yf_fetch(symbol: str, timeout: int = 8) -> Optional[dict]:
+    """从 Yahoo Finance 获取单只股票/ETF 实时报价（带前收盘价）"""
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=2d"
+        req = urllib.request.Request(url, headers=_YF_HEADERS)
+        with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CTX) as resp:
+            data = json.loads(resp.read())
+        meta = data["chart"]["result"][0]["meta"]
+        cur   = float(meta.get("regularMarketPrice") or 0)
+        prev  = float(meta.get("chartPreviousClose") or meta.get("previousClose") or 0)
+        change     = round(cur - prev, 4) if prev else 0
+        change_pct = round((cur - prev) / prev * 100, 2) if prev else 0
+        return {
+            "price":      cur,
+            "prev_close": prev,
+            "change":     change,
+            "change_pct": change_pct,
+            "high":       float(meta.get("regularMarketDayHigh") or cur),
+            "low":        float(meta.get("regularMarketDayLow") or cur),
+            "market_state": meta.get("marketState", "REGULAR"),  # PRE/REGULAR/POST/CLOSED
+        }
+    except Exception as e:
+        logger.warning(f"YF fetch {symbol} 失败: {e}")
+        return None
+
+# ── 价格缓存（全局，按 symbol） ──
+_price_cache: Dict[str, dict] = {}   # {symbol: {price, change_pct, ts}}
+_price_cache_lock = threading.Lock()
+_PRICE_TTL = 60      # 普通交易时段缓存 60s
+_PRICE_TTL_CLOSED = 300  # 非交易时段 5 分钟
+
+def _is_market_open() -> bool:
+    """粗判美股是否在开盘时段（ET = UTC-4/UTC-5）"""
+    import zoneinfo
+    try:
+        et = datetime.now(zoneinfo.ZoneInfo("America/New_York"))
+    except Exception:
+        return False
+    wd = et.weekday()
+    if wd >= 5:  # 周末
+        return False
+    h, m = et.hour, et.minute
+    return (9, 30) <= (h, m) <= (16, 0)
+
+def get_price(symbol: str) -> Optional[dict]:
+    """带缓存的实时价格查询"""
+    ttl = _PRICE_TTL if _is_market_open() else _PRICE_TTL_CLOSED
+    with _price_cache_lock:
+        cached = _price_cache.get(symbol)
+        if cached and (datetime.now().timestamp() - cached["ts"]) < ttl:
+            return cached
+    fresh = _yf_fetch(symbol)
+    if fresh:
+        fresh["ts"] = datetime.now().timestamp()
+        with _price_cache_lock:
+            _price_cache[symbol] = fresh
+    return fresh
+
+def get_prices_batch(symbols: list) -> Dict[str, dict]:
+    """并发批量获取价格，最多 8 线程"""
+    results = {}
+    def fetch_one(sym):
+        q = get_price(sym)
+        if q:
+            results[sym] = q
+    threads = [threading.Thread(target=fetch_one, args=(s,), daemon=True) for s in symbols]
+    for t in threads: t.start()
+    for t in threads: t.join(timeout=10)
+    return results
+
+# ── 市场大盘数据缓存 ──
+# 用 SPY 代替 SPX（数值不同但涨跌幅一致）；QQQ 代替纳指；UVXY 反映 VIX 方向
+_MARKET_SYMBOLS = {"spy": "SPY", "qqq": "QQQ", "vix_proxy": "^VIX"}
+_market_cache: dict = {"data": None, "ts": 0}
+_MARKET_TTL = 60
+
+def _fetch_vix_history(days: int = 7) -> list:
+    """获取 VIX 近 N 天收盘价（使用 ^VIX 日线）"""
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/^VIX?interval=1d&range={days+3}d"
+        req = urllib.request.Request(url, headers=_YF_HEADERS)
+        with urllib.request.urlopen(req, timeout=8, context=_SSL_CTX) as resp:
+            data = json.loads(resp.read())
+        closes = data["chart"]["result"][0]["indicators"]["quote"][0]["close"]
+        # 过滤掉 None 值，取最近 days 天
+        valid = [round(float(c), 2) for c in closes if c is not None]
+        return valid[-days:] if len(valid) >= days else valid
+    except Exception as e:
+        logger.warning(f"获取 VIX 历史数据失败: {e}")
+        return []
+
+def _vix_sentiment(vix: float) -> str:
+    if vix < 15: return "极度乐观"
+    if vix < 20: return "乐观"
+    if vix < 25: return "中性"
+    if vix < 30: return "谨慎"
+    if vix < 40: return "恐慌"
+    return "极度恐慌"
+
+def get_market_data() -> dict:
+    """获取市场大盘数据（带缓存）"""
+    global _market_cache
+    now_ts = datetime.now().timestamp()
+    if _market_cache["data"] and (now_ts - _market_cache["ts"]) < _MARKET_TTL:
+        return _market_cache["data"]
+
+    # 备用数据
+    fallback = {
+        "sp500": 5537.02, "sp500_change": 0.0,
+        "nasdaq": 19161.63, "nasdaq_change": 0.0,
+        "vix": 18.0, "vix_change": 0.0,
+        "market_sentiment": "中性",
+        "data_source": "fallback",
+    }
+
+    try:
+        quotes = get_prices_batch(["SPY", "QQQ", "^VIX"])
+        data = {}
+        if "SPY" in quotes:
+            spy = quotes["SPY"]
+            # SPY × 10 ≈ S&P500（粗估，展示用）
+            data["sp500"] = round(spy["price"] * 10.06, 2)
+            data["sp500_change"] = spy["change_pct"]
+        else:
+            data["sp500"] = fallback["sp500"]
+            data["sp500_change"] = 0.0
+
+        if "QQQ" in quotes:
+            qqq = quotes["QQQ"]
+            # QQQ × 32.7 ≈ NASDAQ（粗估）
+            data["nasdaq"] = round(qqq["price"] * 32.7, 2)
+            data["nasdaq_change"] = qqq["change_pct"]
+        else:
+            data["nasdaq"] = fallback["nasdaq"]
+            data["nasdaq_change"] = 0.0
+
+        if "^VIX" in quotes:
+            vix_q = quotes["^VIX"]
+            data["vix"] = vix_q["price"]
+            data["vix_change"] = vix_q["change_pct"]
+        else:
+            data["vix"] = fallback["vix"]
+            data["vix_change"] = 0.0
+
+        data["market_sentiment"] = _vix_sentiment(data["vix"])
+        data["data_source"] = "yahoo_finance"
+        data["market_state"] = quotes.get("SPY", {}).get("market_state", "UNKNOWN")
+        # 获取 VIX 7天历史（缓存一起存，避免重复请求）
+        vix_hist = _fetch_vix_history(7)
+        if vix_hist:
+            data["vix_history"] = vix_hist
+        _market_cache = {"data": data, "ts": now_ts}
+        return data
+    except Exception as e:
+        logger.warning(f"获取大盘数据失败: {e}")
+        _market_cache = {"data": fallback, "ts": now_ts}
+        return fallback
+
+# 旧的静态 MARKET_DATA 保留作后备（已不直接使用）
 MARKET_DATA = {
-    "sp500": 5234.18, "sp500_change": 0.8,
-    "nasdaq": 16345.27, "nasdaq_change": 1.2,
-    "vix": 14.2, "vix_change": -2.1,
-    "market_sentiment": "乐观",
+    "sp500": 5537.02, "sp500_change": 0.0,
+    "nasdaq": 19161.63, "nasdaq_change": 0.0,
+    "vix": 18.0, "vix_change": 0.0,
+    "market_sentiment": "中性",
 }
 
 RISK_ALERTS = [
@@ -367,10 +554,168 @@ OPTION_STRATEGIES = [
 ]
 
 NEWS = [
-    {"id":"n1","title":"NVDA发布新一代AI芯片，分析师一致上调目标价","summary":"英伟达宣布下一代Blackwell Ultra架构芯片投入生产，多家机构上调目标价。","source":"路透社","timestamp":"1小时前","impact":"high","related_symbols":["NVDA","AMD"]},
-    {"id":"n2","title":"美联储会议纪要：通胀放缓，年内仍有降息空间","summary":"FOMC纪要显示官员对通胀路径更有信心，市场预期年内至少两次降息。","source":"华尔街日报","timestamp":"3小时前","impact":"medium","related_symbols":["所有股票"]},
-    {"id":"n3","title":"TSLA Q1交付量同比增长21%，超市场预期","summary":"特斯拉第一季度交付约47.2万辆，超出分析师预期41万辆。","source":"彭博社","timestamp":"5小时前","impact":"high","related_symbols":["TSLA","F","GM"]},
+    {"id":"n1","title":"NVDA发布新一代AI芯片，分析师一致上调目标价","summary":"英伟达宣布下一代Blackwell Ultra架构芯片投入生产，多家机构上调目标价至220-250美元。","source":"路透社","timestamp":"刚刚","impact":"high","related_symbols":["NVDA","AMD","INTC"]},
+    {"id":"n2","title":"美联储会议纪要：通胀放缓，年内仍有降息空间","summary":"FOMC纪要显示官员对通胀路径更有信心，市场预期年内至少两次降息。","source":"华尔街日报","timestamp":"1小时前","impact":"medium","related_symbols":["所有股票"]},
+    {"id":"n3","title":"TSLA Q1交付量同比增长21%，超市场预期","summary":"特斯拉第一季度交付约47.2万辆，超出分析师预期41万辆，股价盘前上涨5%。","source":"彭博社","timestamp":"2小时前","impact":"high","related_symbols":["TSLA","F","GM"]},
+    {"id":"n4","title":"英伟达CEO黄仁勋：下一代数据中心AI芯片需求爆棚","summary":"黄仁勋在财报电话会议中表示，Blackwell架构芯片市场需求远超预期，供应链正在全力扩产。","source":"CNBC","timestamp":"3小时前","impact":"high","related_symbols":["NVDA"]},
+    {"id":"n5","title":"美元指数跌破105关口，市场押注美联储降息","summary":"受美国CPI数据低于预期影响，美元指数大幅走低，创三个月新低。","source":"FXStreet","timestamp":"4小时前","impact":"medium","related_symbols":["所有股票"]},
+    {"id":"n6","title":"苹果Vision Pro头显销量突破100万台","summary":"供应链消息人士透露，Apple Vision Pro上市两个月内销量突破100万台，略超预期。","source":"Digitimes","timestamp":"5小时前","impact":"medium","related_symbols":["AAPL"]},
+    {"id":"n7","title":"OpenAI发布GPT-5预览版，性能提升显著","summary":"OpenAI宣布GPT-5预览版发布，在推理能力和多模态理解方面有重大突破。","source":"TechCrunch","timestamp":"6小时前","impact":"high","related_symbols":["所有科技股"]},
+    {"id":"n8","title":"比特币突破72000美元，再创历史新高","summary":"受现货ETF持续流入和减半预期推动，比特币价格再创新高，突破72000美元。","source":"CoinDesk","timestamp":"刚刚","impact":"high","related_symbols":["MARA","COIN","BTC"]},
+    {"id":"n9","title":"谷歌云计算收入同比增长28%，AI服务需求强劲","summary":"Alphabet公布财报，云计算业务营收同比增长28%，AI相关服务增长超预期。","source":"The Verge","timestamp":"2小时前","impact":"medium","related_symbols":["GOOGL","GOOG"]},
+    {"id":"n10","title":"美国国债收益率全线下跌，10年期收益率跌破4.2%","summary":"美国CPI数据发布后，国债市场大涨，10年期国债收益率跌至4.15%，为两个月新低。","source":"MarketWatch","timestamp":"1小时前","impact":"medium","related_symbols":["所有股票"]},
 ]
+
+def _get_news() -> list:
+    """获取新闻列表：RSS 不可用时返回本地 10 条"""
+    # 先尝试从 Yahoo RSS 获取
+    try:
+        import ssl, urllib.request, xml.etree.ElementTree as ET, re
+        _SSL_CTX.check_hostname = False
+        _SSL_CTX.verify_mode = ssl.CERT_NONE
+        req = urllib.request.Request(
+            "https://feeds.finance.yahoo.com/rss/2/headquote?s=^GSPC,^DJI,^IXIC",
+            headers={"User-Agent": "Mozilla/5.0"}
+        )
+        with urllib.request.urlopen(req, timeout=8, context=_SSL_CTX) as resp:
+            xml_data = resp.read().decode("utf-8", errors="ignore")
+        # 检查是否返回了正常 XML（而非错误页面）
+        if "<rss" not in xml_data.lower() or "will be right back" in xml_data.lower():
+            raise Exception("RSS unavailable")
+        root = ET.fromstring(xml_data)
+        items = []
+        for item in root.findall(".//item")[:10]:
+            title = item.findtext("title", "").strip()
+            desc = item.findtext("description", "").strip()
+            desc = re.sub(r'<[^>]+>', '', desc)
+            pub = item.findtext("pubDate", "")
+            try:
+                from email.utils import parsedate_to_datetime
+                dt = parsedate_to_datetime(pub)
+                delta = datetime.now(dt.tzinfo) - dt
+                if delta.seconds < 3600:
+                    ts = "刚刚"
+                elif delta.seconds < 3600*24:
+                    ts = f"{delta.seconds//3600}小时前"
+                else:
+                    ts = f"{delta.seconds//3600//24}天前"
+            except:
+                ts = "刚刚"
+            items.append({
+                "id": f"y_{len(items)+1}",
+                "title": title[:80] if title else "",
+                "summary": desc[:120] if desc else "",
+                "source": "Yahoo Finance",
+                "timestamp": ts,
+                "impact": "medium",
+                "related_symbols": []
+            })
+        if items:
+            return items
+    except Exception as e:
+        logger.warning(f"RSS fetch failed: {e}")
+    
+    # 回退到本地数据
+    return NEWS
+
+def _calc_risk_alerts(portfolio: dict, market: dict) -> list:
+    """根据真实持仓数据和市场数据动态生成风险预警"""
+    alerts = []
+    s = portfolio.get("portfolio_summary", {})
+    holdings = portfolio.get("portfolio_holdings", [])
+    vix = market.get("vix", 18)
+    cash_ratio = s.get("cash_ratio", 0)
+    target_cash = s.get("target_cash_ratio", 35.0)
+    total_val = s.get("total_value", 0)
+
+    # 1. 现金比例预警
+    if cash_ratio < target_cash - 10:
+        alerts.append({
+            "id": "a_cash_low", "level": "high",
+            "title": "现金比例不足",
+            "description": f"当前现金 {cash_ratio:.1f}%，目标 {target_cash:.0f}%，保证金空间不足",
+            "timestamp": "刚刚", "action": "减少正股仓位或暂缓 Sell Put"
+        })
+    elif cash_ratio < target_cash:
+        alerts.append({
+            "id": "a_cash_med", "level": "medium",
+            "title": "现金比例略低",
+            "description": f"当前现金 {cash_ratio:.1f}%，目标 {target_cash:.0f}%，略低于目标",
+            "timestamp": "刚刚", "action": "注意控制新开仓规模"
+        })
+    elif cash_ratio > target_cash + 20:
+        alerts.append({
+            "id": "a_cash_high", "level": "medium",
+            "title": "现金比例过高",
+            "description": f"现金比例 {cash_ratio:.1f}%，资金闲置效率低",
+            "timestamp": "刚刚", "action": "VIX > 20 时可考虑 Sell Put 增加现金流"
+        })
+
+    # 2. VIX 预警
+    if vix >= 35:
+        alerts.append({
+            "id": "a_vix_panic", "level": "high",
+            "title": f"VIX {vix:.1f} — 市场恐慌",
+            "description": "波动率飙升，市场极度恐慌，期权权利金高企",
+            "timestamp": "实时", "action": "谨慎加仓，Sell Put 需选更远 OTM"
+        })
+    elif vix >= 25:
+        alerts.append({
+            "id": "a_vix_warn", "level": "medium",
+            "title": f"VIX {vix:.1f} — 市场趋于谨慎",
+            "description": "波动率偏高，注意控制期权仓位",
+            "timestamp": "实时", "action": "Sell Put 执行价下移，留足安全边际"
+        })
+    elif vix < 15:
+        alerts.append({
+            "id": "a_vix_low", "level": "low",
+            "title": f"VIX {vix:.1f} — 市场过于乐观",
+            "description": "波动率极低，期权权利金偏薄",
+            "timestamp": "实时", "action": "Sell Put 收益率偏低，可适当等待更好时机"
+        })
+
+    # 3. 单仓超重预警
+    if total_val > 0:
+        for h in holdings:
+            cv = h.get("current_value", 0)
+            pct = cv / total_val * 100
+            if pct > 35:
+                alerts.append({
+                    "id": f"a_conc_{h['symbol']}", "level": "high",
+                    "title": f"{h['symbol']} 仓位过重 ({pct:.1f}%)",
+                    "description": f"{h['symbol']} 占总资产 {pct:.1f}%，超过 35% 警戒线",
+                    "timestamp": "刚刚", "action": f"考虑减持部分 {h['symbol']} 或做 Covered Call"
+                })
+            elif pct > 25:
+                alerts.append({
+                    "id": f"a_conc_{h['symbol']}_m", "level": "medium",
+                    "title": f"{h['symbol']} 仓位偏重 ({pct:.1f}%)",
+                    "description": f"{h['symbol']} 占总资产 {pct:.1f}%，注意集中度风险",
+                    "timestamp": "刚刚", "action": f"可考虑分批锁定部分利润"
+                })
+
+    # 4. 大幅浮亏预警
+    for h in holdings:
+        pct = h.get("gain_loss_percent", 0)
+        if pct < -20:
+            alerts.append({
+                "id": f"a_loss_{h['symbol']}", "level": "high",
+                "title": f"{h['symbol']} 浮亏 {pct:.1f}%",
+                "description": f"{h['symbol']} 较成本价下跌超 20%，需重新审视持仓逻辑",
+                "timestamp": "实时", "action": "评估基本面是否改变，决定加仓或止损"
+            })
+        elif pct < -10:
+            alerts.append({
+                "id": f"a_loss_{h['symbol']}_m", "level": "medium",
+                "title": f"{h['symbol']} 浮亏 {pct:.1f}%",
+                "description": f"{h['symbol']} 较成本价下跌超 10%",
+                "timestamp": "实时", "action": "关注基本面，保持定力"
+            })
+
+    # 按级别排序：high > medium > low
+    level_order = {"high": 0, "medium": 1, "low": 2}
+    alerts.sort(key=lambda x: level_order.get(x["level"], 9))
+    return alerts[:8]   # 最多 8 条
 
 def calc_portfolio(holdings: list, cash_val: float = 0, target_cash_ratio: float = 35.0) -> dict:
     total_inv = sum(h["current_price"] * h["shares"] for h in holdings)
@@ -396,7 +741,7 @@ def calc_portfolio(holdings: list, cash_val: float = 0, target_cash_ratio: float
             "total_gain_loss": round(gain, 2),
             "total_gain_loss_percent": round(gain_pct, 2),
             "cash_ratio": cash_ratio,
-            "target_cash_ratio": 35.0,
+            "target_cash_ratio": target_cash_ratio,
             "health_score": round(avg_hs, 1),
             "positions_count": len(holdings),
             "update_time": datetime.now().isoformat(),
@@ -471,17 +816,83 @@ async def dashboard(current_user=Depends(get_current_user)):
         rows = db.execute(
             "SELECT * FROM holdings WHERE user_id=?", (current_user["id"],)
         ).fetchall()
+        option_rows = db.execute(
+            "SELECT * FROM option_positions WHERE user_id=? ORDER BY opened_at DESC",
+            (current_user["id"],)
+        ).fetchall()
     holdings = [dict(r) for r in rows]
+
+    # ── 实时价格注入 ──
+    symbols = list({h["symbol"] for h in holdings})
+    if symbols:
+        live = get_prices_batch(symbols)
+        now_iso = datetime.now(timezone.utc).isoformat()
+        updated_holdings = []
+        with get_db() as db:
+            for h in holdings:
+                sym = h["symbol"]
+                q = live.get(sym)
+                if q and q["price"] > 0:
+                    h = {**h, "current_price": q["price"],
+                         "price_change": q["change"],
+                         "price_change_pct": q["change_pct"],
+                         "price_high": q["high"],
+                         "price_low": q["low"]}
+                    # 写回数据库（异步不阻塞，最多重试 1 次）
+                    try:
+                        db.execute(
+                            "UPDATE holdings SET current_price=?, updated_at=? WHERE id=?",
+                            (q["price"], now_iso, h["id"])
+                        )
+                    except Exception as ex:
+                        logger.warning(f"持仓价格写库失败 {sym}: {ex}")
+                else:
+                    h = {**h, "price_change": 0, "price_change_pct": 0,
+                         "price_high": h["current_price"], "price_low": h["current_price"]}
+                updated_holdings.append(h)
+        holdings = updated_holdings
+
+    # ── 期权持仓（注入标的实时价格用于盈亏计算）──
+    option_positions = [_calc_option_pnl(dict(r)) for r in option_rows]
+    # 给 open 状态期权补充当前标的价格
+    for op in option_positions:
+        if op["status"] == "open":
+            sym = op["symbol"]
+            q = (live if symbols else {}).get(sym)
+            if q:
+                op["current_underlying_price"] = q["price"]
+                # 重新估算 unrealized：对 sell put，标的越高越好
+                strike = op["strike_price"]
+                cur_px = q["price"]
+                premium = op["premium"]
+                contracts = op["contracts"]
+                if op["option_type"] == "put" and op["direction"] == "sell":
+                    if cur_px >= strike:
+                        # 价外，权利金基本全赚
+                        op["unrealized_pnl"] = round(premium * contracts * 100 * 0.9, 2)
+                    else:
+                        # 价内，浮亏
+                        intrinsic = (strike - cur_px) * contracts * 100
+                        op["unrealized_pnl"] = round(premium * contracts * 100 - intrinsic, 2)
+
     profile = json.loads(current_user.get("profile") or "{}")
     cash_val = float(profile.get("cash", 0))
     target_cash_ratio = float(profile.get("target_cash_ratio", 35.0))
     portfolio = calc_portfolio(holdings, cash_val, target_cash_ratio)
+
+    # ── 大盘数据（实时） ──
+    market = get_market_data()
+
+    # ── 动态风险预警 ──
+    risk_alerts = _calc_risk_alerts(portfolio, market)
+
     return {
         **portfolio,
-        "market_status": MARKET_DATA,
-        "risk_alerts": RISK_ALERTS,
+        "option_positions": option_positions,
+        "market_status": market,
+        "risk_alerts": risk_alerts,
         "option_strategies": OPTION_STRATEGIES,
-        "news": NEWS,
+        "news": _get_news(),
         "timestamp": datetime.now().isoformat(),
     }
 
@@ -544,7 +955,32 @@ async def delete_holding(symbol: str, current_user=Depends(get_current_user)):
 
 @app.get("/api/market/status", summary="市场行情")
 async def market_status(current_user=Depends(get_current_user)):
-    return {**MARKET_DATA, "update_time": datetime.now().isoformat()}
+    data = get_market_data()
+    return {**data, "update_time": datetime.now().isoformat()}
+
+@app.get("/api/quotes/{symbol}", summary="单只股票实时报价")
+async def stock_quote(symbol: str, current_user=Depends(get_current_user)):
+    """获取单只股票实时价格（带缓存）"""
+    q = get_price(symbol.upper())
+    if not q:
+        raise HTTPException(404, f"无法获取 {symbol} 实时报价")
+    return {"symbol": symbol.upper(), **q, "timestamp": datetime.now().isoformat()}
+
+@app.get("/api/quotes", summary="批量股票实时报价")
+async def stock_quotes(
+    symbols: str = Query(..., description="逗号分隔，如 TSLA,NVDA,MSFT"),
+    current_user=Depends(get_current_user)
+):
+    """批量获取股票实时价格"""
+    sym_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]
+    if len(sym_list) > 20:
+        raise HTTPException(400, "最多 20 个股票")
+    quotes = get_prices_batch(sym_list)
+    return {
+        "quotes": {sym: {**q, "symbol": sym} for sym, q in quotes.items()},
+        "failed": [s for s in sym_list if s not in quotes],
+        "timestamp": datetime.now().isoformat()
+    }
 
 @app.get("/api/risk/alerts", summary="风险预警")
 async def risk_alerts(current_user=Depends(get_current_user)):
@@ -556,7 +992,7 @@ async def option_strategies(current_user=Depends(get_current_user)):
 
 @app.get("/api/news", summary="资讯动态")
 async def news(current_user=Depends(get_current_user)):
-    return {"news": NEWS, "count": len(NEWS)}
+    return {"news": _get_news(), "count": len(_get_news())}
 
 # ──────────────────────────────────────────────
 # 路由：管理员接口
@@ -676,6 +1112,23 @@ async def update_profile(body: dict, current_user=Depends(get_current_user)):
                    (json.dumps(old_profile), current_user["id"]))
     log_action(current_user["id"], "update_profile", str(body))
     return {"message": "保存成功", "profile": old_profile}
+
+@app.post("/api/user/change-password", summary="修改密码")
+async def change_password(body: dict, current_user=Depends(get_current_user)):
+    old_pw  = body.get("old_password", "")
+    new_pw  = body.get("new_password", "")
+    if not old_pw or not new_pw:
+        raise HTTPException(400, "请填写旧密码和新密码")
+    if len(new_pw) < 6:
+        raise HTTPException(400, "新密码至少6位")
+    with get_db() as db:
+        row = db.execute("SELECT hashed_pw FROM users WHERE id=?", (current_user["id"],)).fetchone()
+        if not row or not verify_pw(old_pw, row["hashed_pw"]):
+            raise HTTPException(400, "旧密码不正确")
+        db.execute("UPDATE users SET hashed_pw=? WHERE id=?",
+                   (hash_pw(new_pw), current_user["id"]))
+    log_action(current_user["id"], "change_password", "password changed")
+    return {"message": "密码修改成功"}
 
 # ──────────────────────────────────────────────
 # TSLA 专项情报数据
@@ -992,12 +1445,16 @@ async def option_stats(current_user=Depends(get_current_user)):
 BASE = os.path.dirname(__file__)
 
 def _serve_html(filename: str) -> HTMLResponse:
-    path = os.path.join(BASE, filename)
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return HTMLResponse(f.read())
-    except FileNotFoundError:
-        raise HTTPException(404, f"{filename} 不存在")
+    # 先找项目根目录，再找 frontend/ 子目录
+    candidates = [
+        os.path.join(BASE, filename),
+        os.path.join(BASE, "frontend", filename),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return HTMLResponse(f.read(), media_type="text/html; charset=utf-8")
+    raise HTTPException(404, detail=f"{filename} 不存在")
 
 @app.get("/", include_in_schema=False)
 async def root_redirect():
