@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 const { config, validateConfig } = require('./config/config');
 const { logger } = require('./utils/logger');
 const routes = require('./routes');
@@ -41,6 +42,39 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// 静态文件服务 - 前端页面
+const frontendPath = path.resolve(__dirname, '../../frontend');
+
+// 根路径重定向到 dashboard（必须在静态文件服务之前）
+app.get('/', (req, res) => {
+  res.redirect('/dashboard');
+});
+
+// 特定页面路由（在静态文件服务之前）
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'claw_dashboard_enhanced.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'claw_login.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'admin.html'));
+});
+
+app.get('/strategy', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'strategy.html'));
+});
+
+// 策略详情页路由 - 返回 strategy_detail.html（注意：这个路由要放在 /strategy 之后）
+app.get('/strategy/:id', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'strategy_detail.html'));
+});
+
+// 静态文件服务
+app.use(express.static(frontendPath));
+
 // 健康检查端点
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -55,14 +89,18 @@ app.get('/health', (req, res) => {
 // API路由
 app.use(config.api.prefix, routes);
 
-// 404处理
+// 404处理 - 对于API请求返回JSON，对于页面请求返回HTML
 app.use((req, res) => {
-  res.status(404).json({
-    error: '未找到请求的资源',
-    path: req.path,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-  });
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({
+      error: '未找到请求的资源',
+      path: req.path,
+      method: req.method,
+      timestamp: new Date().toISOString(),
+    });
+  } else {
+    res.status(404).sendFile(path.join(frontendPath, 'claw_dashboard_enhanced.html'));
+  }
 });
 
 // 全局错误处理

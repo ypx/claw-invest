@@ -125,19 +125,28 @@ const generateToken = (user) => {
  * 开发环境模拟用户（用于测试）
  */
 const mockAuthenticate = (req, res, next) => {
+  // 优先读取真实 JWT token（如果有）
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = require('jsonwebtoken').verify(token, config.jwt.secret);
+      req.user = { id: decoded.id, email: decoded.email, role: decoded.role || 'user' };
+      return next();
+    } catch (e) {
+      // token 无效，继续用 mock
+    }
+  }
+
+  // 开发环境 mock：使用数据库中真实的 Z 用户
   if (config.app.env === 'development') {
-    // 模拟用户数据
     req.user = {
-      id: 'dev-user-001',
-      email: 'z@clawadvisor.com',
+      id: '5d67698d-132f-48f1-9e0c-fab1c4fa4479',  // Z 用户真实 ID
+      email: 'z@claw.app',
       role: 'user',
-      name: 'Z (开发用户)',
-      portfolio: {
-        cash: 50000,
-        total_value: 125000,
-      },
+      name: 'Z',
     };
-    logger.debug('使用开发环境模拟认证', { userId: req.user.id, ip: req.ip });
+    logger.debug('使用开发环境模拟认证 (Z用户)', { userId: req.user.id, ip: req.ip });
   }
   next();
 };

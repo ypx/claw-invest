@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投资策略 - CLAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a90d9;
+            --secondary: #6c5ce7;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --border: #dfe6e9;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--light); }
+        
+        /* 风险等级颜色 */
+        .risk-1 { background: #00b894; }
+        .risk-2 { background: #74b9ff; }
+        .risk-3 { background: #fdcb6e; }
+        .risk-4 { background: #e17055; }
+        .risk-5 { background: #d63031; }
+        
+        .risk-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 12px; }
+        
+        .strategy-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .strategy-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        
+        .match-score { 
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe); 
+            color: white; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 14px; 
+        }
+        
+        .quiz-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .quiz-modal.active { display: flex; }
+        
+        .quiz-option {
+            display: block;
+            padding: 16px 20px;
+            margin: 10px 0;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover { border-color: var(--primary); background: #f0f7ff; }
+        .quiz-option.selected { border-color: var(--primary); background: #e8f4ff; }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .profile-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e8f4ff;
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen">
+        <!-- 顶部导航 -->
+        <nav class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="/dashboard" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-800">
+                        <i class="fas fa-chart-pie text-purple-500 mr-2"></i>投资策略
+                    </h1>
+                </div>
+                <button onclick="openQuiz()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                    <i class="fas fa-robot"></i> 修改画像
+                </button>
+            </div>
+        </nav>
+
+        <div class="max-w-6xl mx-auto p-6">
+            <!-- 用户画像信息 -->
+            <div id="profileInfo" class="bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl p-6 text-white mb-6 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-medium mb-2">您的投资画像</h2>
+                        <div id="profileTags" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm opacity-80">已完成风险测评</div>
+                        <div class="text-2xl font-bold">已完善</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 引导完成测评 -->
+            <div id="quizPrompt" class="bg-white rounded-xl p-8 text-center mb-6 shadow-sm">
+                <i class="fas fa-user-circle text-6xl text-gray-300 mb-4"></i>
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">完成风险测评，获取个性化推荐</h2>
+                <p class="text-gray-500 mb-6">只需回答5个问题，我们将为您推荐最适合的投资策略</p>
+                <button onclick="openQuiz()" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-3 rounded-lg text-lg">
+                    <i class="fas fa-play mr-2"></i> 开始测评
+                </button>
+            </div>
+
+            <!-- 为您推荐 -->
+            <div id="recommendSection" class="mb-8 hidden">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i>为您推荐
+                </h2>
+                <div id="recommendList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- 全部策略 -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-th-large text-gray-400 mr-2"></i>全部策略
+                </h2>
+                
+                <!-- 筛选器 -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="text-gray-500 self-center mr-2">风险等级:</span>
+                    <button class="filter-btn active" data-risk="0" onclick="filterByRisk(0)">全部</button>
+                    <button class="filter-btn" data-risk="1" onclick="filterByRisk(1)">保守</button>
+                    <button class="filter-btn" data-risk="2" onclick="filterByRisk(2)">稳健</button>
+                    <button class="filter-btn" data-risk="3" onclick="filterByRisk(3)">平衡</button>
+                    <button class="filter-btn" data-risk="4" onclick="filterByRisk(4)">激进</button>
+                </div>
+                
+                <div id="strategyList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 问卷弹窗 -->
+    <div id="quizModal" class="quiz-modal">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6 m-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold">风险测评 <span id="quizProgress">1/5</span></h2>
+                <button onclick="closeQuiz()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="quizContent">
+                <!-- 问题内容 -->
+            </div>
+            
+            <div class="flex justify-between mt-6">
+                <button id="prevBtn" onclick="prevQuestion()" class="px-4 py-2 text-gray-500 hidden">上一题</button>
+                <button id="nextBtn" onclick="nextQuestion()" class="px-6 py-2 bg-purple-500 text-white rounded-lg ml-auto" disabled>下一题</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '';
+        const token = localStorage.getItem('claw_token');
+        
+        function authHeaders() {
+            return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        }
+        
+        let userProfile = null;
+        let allStrategies = [];
+        let recommendStrategies = [];
+        let currentFilter = 0;
+        let quizAnswers = {};
+        
+        const questions = [
+            {
+                key: "capital_scale",
+                question: "您的可投资资金规模是？",
+                options: [
+                    { value: "小资金", label: "5万元以下（积累阶段）", desc: "适合从基础开始，逐步积累" },
+                    { value: "中等", label: "5-20万元（起步阶段）", desc: "可以进行初步配置" },
+                    { value: "大资金", label: "20万元以上（配置阶段）", desc: "适合多元化资产配置" }
+                ]
+            },
+            {
+                key: "risk_tolerance",
+                question: "您能接受的单笔最大亏损？",
+                options: [
+                    { value: "保守", label: "5%以内（极度保守）", desc: "追求稳定，避免波动" },
+                    { value: "稳健", label: "10-15%（保守型）", desc: "接受小幅波动，求稳" },
+                    { value: "平衡", label: "20-30%（平衡型）", desc: "愿意承担中等风险" },
+                    { value: "激进", label: "30%以上（激进型）", desc: "追求高收益，能承受大波动" }
+                ]
+            },
+            {
+                key: "investment_goal",
+                question: "您的投资目标是什么？",
+                options: [
+                    { value: "保值", label: "保值跑赢通胀", desc: "目标是守住本金" },
+                    { value: "增值", label: "稳健增值", desc: "在安全前提下获取收益" },
+                    { value: "增长", label: "积极增长", desc: "追求资本快速增值" },
+                    { value: "高回报", label: "高回报", desc: "目标收益最大化" }
+                ]
+            },
+            {
+                key: "experience_level",
+                question: "您的投资经验水平？",
+                options: [
+                    { value: "小白", label: "投资新手", desc: "刚接触投资不久" },
+                    { value: "有经验", label: "有经验", desc: "有几年投资经验" },
+                    { value: "专业", label: "专业投资者", desc: "有丰富的投资经验" }
+                ]
+            },
+            {
+                key: "time_horizon",
+                question: "您的投资周期？",
+                options: [
+                    { value: "短期", label: "短期（1年内）", desc: "灵活操作" },
+                    { value: "中期", label: "中期（1-3年）", desc: "阶段性配置" },
+                    { value: "长期", label: "长期（3年以上）", desc: "长期持有" }
+                ]
+            }
+        ];
+        
+        let currentQuestion = 0;
+        
+        // 初始化
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadProfile();
+            await loadStrategies();
+            await loadRecommendations();
+        });
+        
+        async function loadProfile() {
+            try {
+                const res = await fetch("/api/strategy/profile", { headers: authHeaders() });
+                const data = await res.json();
+                userProfile = data;
+                
+                if (data.has_profile && data.is_completed) {
+                    document.getElementById("quizPrompt").classList.add("hidden");
+                    document.getElementById("profileInfo").classList.remove("hidden");
+                    document.getElementById("recommendSection").classList.remove("hidden");
+                    
+                    const tags = [
+                        data.risk_tolerance + "型",
+                        data.capital_scale === "小资金" ? "小资金" : data.capital_scale === "大资金" ? "大资金" : "中等资金",
+                        data.experience_level,
+                        data.time_horizon + "投资"
+                    ];
+                    document.getElementById("profileTags").innerHTML = tags.map(t => `<span class="profile-tag">${t}</span>`).join("");
+                } else {
+                    document.getElementById("quizPrompt").classList.remove("hidden");
+                    document.getElementById("profileInfo").classList.add("hidden");
+                    document.getElementById("recommendSection").classList.add("hidden");
+                }
+            } catch (e) {
+                console.error("加载画像失败", e);
+            }
+        }
+        
+        async function loadStrategies() {
+            try {
+                const res = await fetch("/api/strategy/list", { headers: authHeaders() });
+                const data = await res.json();
+                allStrategies = data.strategies || [];
+                renderStrategyList(allStrategies);
+            } catch (e) {
+                console.error("加载策略列表失败", e);
+            }
+        }
+        
+        async function loadRecommendations() {
+            try {
+                const res = await fetch("/api/strategy/recommend", { headers: authHeaders() });
+                const data = await res.json();
+                recommendStrategies = data.recommendations || [];
+                renderRecommendations(recommendStrategies);
+            } catch (e) {
+                console.error("加载推荐失败", e);
+            }
+        }
+        
+        function renderRecommendations(list) {
+            const container = document.getElementById("recommendList");
+            if (!list.length) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <i class="fas fa-search text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-400">暂无匹配策略，尝试调整画像或浏览全部策略</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = list.map(s => createStrategyCard(s, true)).join("");
+        }
+        
+        function renderStrategyList(list) {
+            const container = document.getElementById("strategyList");
+            container.innerHTML = list.map(s => createStrategyCard(s, false)).join("");
+        }
+        
+        function createStrategyCard(s, showMatchScore) {
+            const riskLabels = {1: "保守", 2: "稳健", 3: "平衡", 4: "激进", 5: "激进"};
+            const tags = s.tags || [];
+            const tagsHtml = tags.slice(0, 2).map(t => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">${t}</span>`).join("");
+            
+            return `
+                <div class="strategy-card" onclick="viewStrategy('${s.id}')">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">${s.name}</h3>
+                            <p class="text-sm text-gray-500 mt-1">${s.description?.substring(0, 60)}...</p>
+                        </div>
+                        ${showMatchScore ? `<span class="match-score">匹配度 ${s.match_score}%</span>` : ''}
+                    </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="risk-badge risk-${s.risk_level}">${riskLabels[s.risk_level]}</span>
+                        <span class="text-sm text-gray-500">${s.min_capital}</span>
+                        <span class="text-sm text-gray-500">预期 ${s.expected_return}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-1">${tagsHtml}</div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function filterByRisk(level) {
+            currentFilter = level;
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                btn.classList.toggle("active", parseInt(btn.dataset.risk) === level);
+            });
+            
+            const filtered = level === 0 ? allStrategies : allStrategies.filter(s => s.risk_level === level);
+            renderStrategyList(filtered);
+        }
+        
+        function viewStrategy(id) {
+            window.location.href = `/strategy/${id}`;
+        }
+        
+        // 问卷功能
+        function openQuiz() {
+            document.getElementById("quizModal").classList.add("active");
+            currentQuestion = 0;
+            quizAnswers = {};
+            renderQuestion();
+        }
+        
+        function closeQuiz() {
+            document.getElementById("quizModal").classList.remove("active");
+        }
+        
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById("quizProgress").textContent = `${currentQuestion + 1}/${questions.length}`;
+            
+            let html = `<p class="text-lg font-medium text-gray-800 mb-4">${q.question}</p>`;
+            q.options.forEach(opt => {
+                const selected = quizAnswers[q.key] === opt.value ? "selected" : "";
+                html += `<label class="quiz-option ${selected}" onclick="selectOption('${q.key}', '${opt.value}', this)">
+                    <div class="font-medium">${opt.label}</div>
+                    <div class="text-sm text-gray-500">${opt.desc}</div>
+                </label>`;
+            });
+            
+            document.getElementById("quizContent").innerHTML = html;
+            
+            document.getElementById("prevBtn").classList.toggle("hidden", currentQuestion === 0);
+            document.getElementById("nextBtn").textContent = currentQuestion === questions.length - 1 ? "提交" : "下一题";
+            document.getElementById("nextBtn").disabled = !quizAnswers[q.key];
+        }
+        
+        function selectOption(key, value, el) {
+            quizAnswers[key] = value;
+            document.querySelectorAll(".quiz-option").forEach(o => o.classList.remove("selected"));
+            el.classList.add("selected");
+            document.getElementById("nextBtn").disabled = false;
+        }
+        
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+        
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                submitProfile();
+            }
+        }
+        
+        async function submitProfile() {
+            try {
+                const res = await fetch("/api/strategy/profile", {
+                    method: "POST",
+                    headers: authHeaders(),
+                    body: JSON.stringify(quizAnswers)
+                });
+                
+                if (res.ok) {
+                    closeQuiz();
+                    await loadProfile();
+                    await loadRecommendations();
+                    alert("画像已更新！");
+                }
+            } catch (e) {
+                alert("保存失败，请重试");
+            }
+        }
+    </script>
+</body>
+</html>

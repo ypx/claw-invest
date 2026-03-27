@@ -87,6 +87,8 @@
       z-index: 100;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
+      max-height: 100vh;
     }
     
     #main { margin-left: 240px; min-height: 100vh; }
@@ -1496,6 +1498,10 @@
 
   <div class="sidebar-section">
     <div class="sidebar-section-label">策略</div>
+    <a class="nav-item" data-page="strategy" onclick="navigate('strategy', this)">
+      <i class="fa fa-chess"></i> 投资策略
+      <span class="nav-badge purple">新</span>
+    </a>
     <a class="nav-item" data-page="options" onclick="navigate('options',this)">
       <i class="fa fa-sliders"></i> 期权策略
       <span class="nav-badge blue">3</span>
@@ -1535,7 +1541,7 @@
   </div>
 
   <div class="sidebar-footer">
-    <div class="user-card" onclick="location.href='/profile'" style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''" title="个人中心">
+    <div class="user-card" onclick="navigate('profile')" style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''" title="个人中心">
       <div class="user-avatar" id="dash-avatar">Z</div>
       <div style="flex:1;min-width:0">
         <div class="user-name" id="dash-username">Z</div>
@@ -1546,6 +1552,9 @@
     <div style="display:flex;gap:6px;padding:4px 4px 0">
       <button id="admin-entry" onclick="location.href='/admin'" style="display:none;flex:1;padding:7px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--danger)">
         <i class="fa fa-shield-halved"></i> 管理后台
+      </button>
+      <button onclick="openChangePwModal()" style="flex:1;padding:7px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-secondary);transition:all .15s" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
+        <i class="fa fa-key"></i> 改密码
       </button>
       <button onclick="doLogout()" style="flex:1;padding:7px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-secondary);transition:all .15s" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
         <i class="fa fa-right-from-bracket"></i> 退出
@@ -1921,6 +1930,90 @@
       <div id="health-recs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px"></div>
     </div>
   </div><!-- /page-health -->
+
+  <!-- ═══════════════ PAGE: STRATEGY ═══════════════ -->
+  <div class="page" id="page-strategy">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-chess"></i> 投资策略中心</div>
+      <span class="chip purple">智能推荐</span>
+    </div>
+    <p class="page-subtitle">基于您的投资画像，为您推荐最适合的投资策略。</p>
+
+    <!-- 用户画像卡片 -->
+    <div id="strategy-profile-card" class="card mb-16" style="border-left:4px solid var(--accent-secondary);background:linear-gradient(135deg,rgba(124,92,191,0.1),rgba(124,92,191,0.05))">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--accent-secondary)">
+            <i class="fa fa-user-circle"></i> 您的投资画像
+          </div>
+          <div id="strategy-profile-tags" style="display:flex;flex-wrap:wrap;gap:8px">
+            <span style="padding:4px 12px;background:var(--bg-secondary);border-radius:12px;font-size:12px;color:var(--text-secondary)">加载中...</span>
+          </div>
+        </div>
+        <button onclick="openStrategyQuiz()" style="padding:8px 16px;background:var(--accent-secondary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">
+          <i class="fa fa-robot"></i> <span id="strategy-quiz-btn-text">修改画像</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 我的订阅 (已隐藏) -->
+    <!--
+    <div class="section-header" style="margin-top:24px">
+      <div class="section-title" style="font-size:16px"><i class="fa fa-bookmark" style="color:var(--accent-primary)"></i> 我的订阅</div>
+    </div>
+    <div id="strategy-subscriptions-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px">
+      <div class="card" style="text-align:center;padding:40px 20px">
+        <i class="fa fa-bookmark-o" style="font-size:48px;color:var(--text-tertiary);margin-bottom:16px"></i>
+        <p style="color:var(--text-secondary)">您还没有订阅任何策略</p>
+        <p style="color:var(--text-tertiary);font-size:12px;margin-top:8px">订阅策略后可在此快速查看</p>
+      </div>
+    </div>
+    -->
+
+    <!-- 为您推荐 -->
+    <div class="section-header" style="margin-top:24px">
+      <div class="section-title" style="font-size:16px"><i class="fa fa-star" style="color:var(--warning)"></i> 为您推荐</div>
+    </div>
+    <div id="strategy-recommend-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px">
+      <div class="card" style="text-align:center;padding:40px 20px">
+        <i class="fa fa-search" style="font-size:48px;color:var(--text-tertiary);margin-bottom:16px"></i>
+        <p style="color:var(--text-secondary)">完成测评后显示个性化推荐</p>
+      </div>
+    </div>
+
+    <!-- 全部策略 -->
+    <div class="section-header" style="margin-top:24px">
+      <div class="section-title" style="font-size:16px"><i class="fa fa-th-large" style="color:var(--text-tertiary)"></i> 全部策略</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--text-secondary);align-self:center">风险等级:</span>
+        <button class="chip active" onclick="filterStrategies(0,this)" data-filter="0">全部</button>
+        <button class="chip" onclick="filterStrategies(1,this)" data-filter="1">保守</button>
+        <button class="chip" onclick="filterStrategies(2,this)" data-filter="2">稳健</button>
+        <button class="chip" onclick="filterStrategies(3,this)" data-filter="3">平衡</button>
+        <button class="chip" onclick="filterStrategies(4,this)" data-filter="4">激进</button>
+      </div>
+    </div>
+    <div id="strategy-all-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+      <!-- 策略卡片将在这里渲染 -->
+    </div>
+
+    <!-- 问卷弹窗 -->
+    <div id="strategy-quiz-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+      <div style="background:var(--bg-secondary);border:1px solid var(--border-default);border-radius:12px;padding:24px;width:min(500px,90vw);max-height:85vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div style="font-size:16px;font-weight:700">风险测评 <span id="strategy-quiz-progress" style="color:var(--text-secondary);font-weight:400">1/5</span></div>
+          <button onclick="closeStrategyQuiz()" style="background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px">✕</button>
+        </div>
+        <div id="strategy-quiz-content">
+          <!-- 问题内容 -->
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:24px">
+          <button id="strategy-quiz-prev" onclick="prevStrategyQuestion()" style="padding:10px 20px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text-secondary);display:none">上一题</button>
+          <button id="strategy-quiz-next" onclick="nextStrategyQuestion()" style="padding:10px 24px;background:var(--accent-secondary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;margin-left:auto" disabled>下一题</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-strategy -->
 
   <!-- ═══════════════ PAGE: OPTIONS ═══════════════ -->
   <div class="page" id="page-options">
@@ -2627,7 +2720,73 @@
     </div>
   </div><!-- /page-manage -->
 
-  <!-- ═══ Modal：添加/编辑 正股持仓 ═══ -->
+  <!-- ═══════════════ PAGE: PROFILE ═══════════════ -->
+  <div class="page" id="page-profile">
+    <div class="section-header">
+      <div class="section-title"><i class="fa fa-user-circle"></i> 个人中心</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+      <!-- 基本信息 -->
+      <div class="card" style="grid-column:1/-1">
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#c0622a,#e07a3a);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff" id="profile-avatar-big">Z</div>
+          <div style="flex:1">
+            <div style="font-size:22px;font-weight:700" id="profile-username-big">—</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="profile-role-big">个人投资者</div>
+            <div style="font-size:12px;color:var(--text-tertiary);margin-top:3px" id="profile-email-big">—</div>
+          </div>
+          <button onclick="openChangePwModal()" style="padding:8px 16px;background:var(--info);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"><i class="fa fa-key"></i> 修改密码</button>
+        </div>
+      </div>
+      <!-- 账户设置 -->
+      <div class="card">
+        <div style="font-weight:700;font-size:14px;margin-bottom:16px"><i class="fa fa-sliders" style="color:var(--accent-primary);margin-right:6px"></i>投资偏好设置</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px">账户现金（$）</label>
+            <input type="number" id="profile-cash" placeholder="如：50000" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px">目标现金比例（%）</label>
+            <input type="number" id="profile-target-cash" min="0" max="100" placeholder="如：35" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px">券商</label>
+            <input type="text" id="profile-broker" placeholder="如：老虎证券" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px" />
+          </div>
+          <button onclick="saveProfileSettings()" style="padding:10px;background:var(--accent-primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">保存设置</button>
+        </div>
+      </div>
+      <!-- 账户统计 -->
+      <div class="card">
+        <div style="font-weight:700;font-size:14px;margin-bottom:16px"><i class="fa fa-chart-bar" style="color:var(--accent-primary);margin-right:6px"></i>账户统计</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-default)">
+            <span style="font-size:13px;color:var(--text-secondary)">总资产</span>
+            <span style="font-weight:700" id="profile-stat-total">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-default)">
+            <span style="font-size:13px;color:var(--text-secondary)">股票仓位</span>
+            <span style="font-weight:700" id="profile-stat-invested">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-default)">
+            <span style="font-size:13px;color:var(--text-secondary)">现金</span>
+            <span style="font-weight:700" id="profile-stat-cash">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-default)">
+            <span style="font-size:13px;color:var(--text-secondary)">持股数量</span>
+            <span style="font-weight:700" id="profile-stat-positions">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+            <span style="font-size:13px;color:var(--text-secondary)">期权持仓</span>
+            <span style="font-weight:700" id="profile-stat-options">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-profile -->
+
+
   <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
     <div style="background:var(--bg-tertiary);border:1px solid var(--border-default);border-radius:12px;padding:24px;width:min(480px,90vw);max-height:85vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
@@ -2774,6 +2933,35 @@
 
 </div><!-- /main -->
 
+<!-- ═══ Modal：修改密码 ═══ -->
+<div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:var(--bg-tertiary);border:1px solid var(--border-default);border-radius:12px;padding:24px;width:min(380px,90vw)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700"><i class="fa fa-key" style="color:var(--accent-primary);margin-right:8px"></i>修改密码</div>
+      <button onclick="closeChangePwModal()" style="background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px">✕</button>
+    </div>
+    <div id="change-pw-alert" style="display:none;padding:10px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;align-items:center;gap:8px"></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px">当前密码</label>
+        <input type="password" id="cpw-current" placeholder="输入当前密码" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px;outline:none" />
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px">新密码</label>
+        <input type="password" id="cpw-new" placeholder="至少6位" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px;outline:none" />
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px">确认新密码</label>
+        <input type="password" id="cpw-confirm" placeholder="再次输入新密码" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:6px;padding:9px 12px;color:var(--text-primary);font-size:13px;outline:none" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button onclick="closeChangePwModal()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary)">取消</button>
+        <button id="cpw-submit-btn" onclick="doChangePw()" style="flex:1;padding:10px;background:var(--accent-primary);border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#fff">确认修改</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
 // ═══════════════════════════════════════════════
@@ -2792,12 +2980,14 @@ const PAGE_TITLES = {
   overview: '投资总览',
   holdings: '持仓明细',
   health: '健康评估',
+  strategy: '投资策略',
   options: '期权策略',
   tsla: 'TSLA 专项监控',
   alerts: '风险预警',
   manage: '持仓管理',
   market: '市场行情',
-  news: '资讯动态'
+  news: '资讯动态',
+  profile: '个人中心'
 };
 
 function navigate(page, el, pushState = true) {
@@ -2824,6 +3014,16 @@ function navigate(page, el, pushState = true) {
     setTimeout(loadTslaIntel, 50);
   }
 
+  // 切换到投资策略页时加载数据
+  if (page === 'strategy') {
+    setTimeout(loadStrategyData, 50);
+  }
+
+  // 切换到期权策略页时加载动态策略
+  if (page === 'options') {
+    setTimeout(loadDynamicOptionStrategies, 50);
+  }
+
   // 切换到投资总览或持仓明细：刷新期权摘要
   if (page === 'overview' || page === 'holdings') {
     setTimeout(loadOptionsOverview, 80);
@@ -2841,6 +3041,22 @@ function navigate(page, el, pushState = true) {
     if (currentManageTab === 'options') {
       setTimeout(loadOptionPositions, 50);
     }
+  }
+
+  // 切换到个人中心：填充数据
+  if (page === 'profile') {
+    setTimeout(renderProfilePage, 50);
+  }
+
+  // 切换到带图表的页面时重绘（图表在隐藏时尺寸为0，需要重绘）
+  if (page === 'health' && dashData) {
+    setTimeout(() => { try { buildHealthRing(dashData.portfolio_health.overall_score); } catch(e){} }, 80);
+  }
+  if (page === 'alerts' && dashData) {
+    setTimeout(() => { try { buildRadarChart(); } catch(e){} }, 80);
+  }
+  if (page === 'market' && dashData) {
+    setTimeout(() => { try { buildVixChart(dashData.market_status.vix); } catch(e){} }, 80);
   }
 
   // 移动端：切页后关闭侧边栏
@@ -2865,9 +3081,115 @@ function getHashPage() {
 // ═══════════════════════════════════════════════
 let token = localStorage.getItem('claw_token');
 
+function renderProfilePage() {
+  if (!dashData) return;
+  const user = dashData.user || {};
+  const sum = dashData.portfolio_summary || {};
+  const el = id => document.getElementById(id);
+  // 基本信息
+  const name = user.username || currentUsername || 'Z';
+  if (el('profile-avatar-big')) el('profile-avatar-big').textContent = name.charAt(0).toUpperCase();
+  if (el('profile-username-big')) el('profile-username-big').textContent = name;
+  if (el('profile-email-big')) el('profile-email-big').textContent = user.email || '—';
+  // 设置表单填充
+  if (el('profile-cash')) el('profile-cash').value = user.cash || '';
+  if (el('profile-target-cash')) el('profile-target-cash').value = user.target_cash_ratio || '';
+  // 统计数据
+  if (el('profile-stat-total')) el('profile-stat-total').textContent = fmt$(sum.total_value || 0);
+  if (el('profile-stat-invested')) el('profile-stat-invested').textContent = fmt$(sum.invested_value || 0);
+  if (el('profile-stat-cash')) el('profile-stat-cash').textContent = fmt$(sum.cash_value || 0);
+  if (el('profile-stat-positions')) el('profile-stat-positions').textContent = (sum.positions_count || 0) + ' 支';
+  // 期权统计
+  fetch(API + '/api/options/positions', { headers: authHeaders() })
+    .then(r => r.json()).then(d => {
+      const open = (d.positions || []).filter(p => p.status === 'open').length;
+      if (el('profile-stat-options')) el('profile-stat-options').textContent = open + ' 张持仓中';
+    }).catch(() => {});
+}
+
+async function saveProfileSettings() {
+  const cash = parseFloat(document.getElementById('profile-cash')?.value);
+  const targetCash = parseFloat(document.getElementById('profile-target-cash')?.value);
+  if (isNaN(cash) || cash < 0) { showToast('请输入有效的现金金额', 'error'); return; }
+  if (isNaN(targetCash) || targetCash < 0 || targetCash > 100) { showToast('目标现金比例应在0-100之间', 'error'); return; }
+  try {
+    const res = await fetch(API + '/api/user/profile', {
+      method: 'PATCH',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cash, target_cash_ratio: targetCash })
+    });
+    if (!res.ok) throw new Error('保存失败');
+    showToast('设置已保存，刷新数据中…');
+    fetchData(); // 重新拉取数据
+  } catch(e) {
+    showToast(e.message || '保存失败', 'error');
+  }
+}
+
 function doLogout() {
   localStorage.clear();
   location.href = '/login';
+}
+
+// ── 修改密码 Modal ──
+function openChangePwModal() {
+  document.getElementById('cpw-current').value = '';
+  document.getElementById('cpw-new').value = '';
+  document.getElementById('cpw-confirm').value = '';
+  const alertEl = document.getElementById('change-pw-alert');
+  alertEl.style.display = 'none';
+  alertEl.textContent = '';
+  const m = document.getElementById('change-pw-modal');
+  m.style.display = 'flex';
+}
+function closeChangePwModal() {
+  document.getElementById('change-pw-modal').style.display = 'none';
+}
+async function doChangePw() {
+  const alertEl = document.getElementById('change-pw-alert');
+  const btn = document.getElementById('cpw-submit-btn');
+  alertEl.style.display = 'none';
+
+  const current = document.getElementById('cpw-current').value;
+  const newPw = document.getElementById('cpw-new').value;
+  const confirm = document.getElementById('cpw-confirm').value;
+
+  if (!current || !newPw || !confirm) {
+    alertEl.textContent = '请填写所有字段';
+    alertEl.style.cssText = 'display:flex;padding:10px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;align-items:center;gap:8px;background:rgba(217,79,42,.08);border:1px solid rgba(217,79,42,.25);color:#d94f2a;';
+    return;
+  }
+  if (newPw.length < 6) {
+    alertEl.textContent = '新密码至少6位';
+    alertEl.style.cssText = 'display:flex;padding:10px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;align-items:center;gap:8px;background:rgba(217,79,42,.08);border:1px solid rgba(217,79,42,.25);color:#d94f2a;';
+    return;
+  }
+  if (newPw !== confirm) {
+    alertEl.textContent = '两次密码不一致';
+    alertEl.style.cssText = 'display:flex;padding:10px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;align-items:center;gap:8px;background:rgba(217,79,42,.08);border:1px solid rgba(217,79,42,.25);color:#d94f2a;';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i> 处理中…';
+  try {
+    const res = await fetch(API + '/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: current, new_password: newPw })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || '修改失败');
+    alertEl.textContent = '✅ 密码修改成功，请重新登录';
+    alertEl.style.cssText = 'display:flex;padding:10px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;align-items:center;gap:8px;background:rgba(46,139,87,.08);border:1px solid rgba(46,139,87,.25);color:#2e8b57;';
+    setTimeout(() => { doLogout(); }, 2000);
+  } catch(err) {
+    alertEl.textContent = err.message;
+    alertEl.style.cssText = 'display:flex;padding:10px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;align-items:center;gap:8px;background:rgba(217,79,42,.08);border:1px solid rgba(217,79,42,.25);color:#d94f2a;';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '确认修改';
+  }
 }
 
 function initUserUI() {
@@ -2999,9 +3321,9 @@ const MOCK_DATA = {
     { id:'r3', level:'medium', title:'利率风险', description:'下周FOMC会议，关注市场反应', timestamp:'5h前', action:'保持现金，关注市场反应' }
   ],
   option_strategies: [
-    { symbol:'TSLA', type:'put', strike_price:380, expiration:'2026-04-24', premium:3.2, probability:68, annualized_return:12.5, recommendation:'高概率，适合sell put' },
-    { symbol:'NVDA', type:'put', strike_price:170, expiration:'2026-05-08', premium:2.8, probability:55, annualized_return:11.2, recommendation:'中等概率，风险可控' },
-    { symbol:'AAPL', type:'put', strike_price:245, expiration:'2026-04-17', premium:1.5, probability:72, annualized_return:9.8, recommendation:'保守策略，适合新手' }
+    { symbol:'TSLA', type:'put', strike_price:340, current_price:380, expiration:'2026-04-24', dte:28, premium:3.5, probability:75, annualized_return:15.2, distance_pct:10.5, strategy_name:'Sell Put', recommendation:'深度价外(10.5%)，胜率75%，VIX适中' },
+    { symbol:'NVDA', type:'put', strike_price:100, current_price:115, expiration:'2026-05-08', dte:42, premium:2.2, probability:70, annualized_return:18.5, distance_pct:13.0, strategy_name:'Sell Put', recommendation:'深度价外(13%)，胜率70%，适合保守型' },
+    { symbol:'AAPL', type:'put', strike_price:205, current_price:225, expiration:'2026-04-17', dte:21, premium:1.8, probability:68, annualized_return:16.8, distance_pct:8.9, strategy_name:'Sell Put', recommendation:'中度价外(8.9%)，平衡收益风险' }
   ],
   portfolio_health: {
     overall_score: 81.2,
@@ -3023,15 +3345,17 @@ const MOCK_DATA = {
 // ═══════════════════════════════════════════════
 function renderAll() {
   if (!dashData) return;
-  renderOverview();
-  renderHoldings();
-  renderHealth();
-  renderOptions();
-  renderAlerts();
-  renderMarket();
-  renderNews();
-  renderTsla();
-  renderManage();
+  // 用 try-catch 逐块渲染，避免一处出错导致全页崩溃
+  const safe = (fn) => { try { fn(); } catch(e) { console.error(fn.name + ' render error:', e); } };
+  safe(renderOverview);
+  safe(renderHoldings);
+  safe(renderHealth);
+  safe(renderOptions);
+  safe(renderAlerts);
+  safe(renderMarket);
+  safe(renderNews);
+  safe(renderTsla);
+  safe(renderManage);
   // 异步加载期权摘要（不阻塞主渲染）
   loadOptionsOverview();
 }
@@ -3271,11 +3595,12 @@ function renderHoldings() {
   holdings.sort((a,b) => b.current_value - a.current_value).forEach(h => {
     const pct = (h.current_value / total * 100).toFixed(1);
     const up = h.gain_loss_percent >= 0;
-    const dayUp = (h.price_change_pct || 0) >= 0;
+    const chgPct = h.change_pct != null ? h.change_pct : h.price_change_pct;
+    const dayUp = (chgPct || 0) >= 0;
     const hs = h.health_score;
     const hClass = hs >= 85 ? 'high' : hs >= 70 ? 'mid' : 'low';
-    const dayChg = h.price_change_pct != null
-      ? `<span class="${dayUp?'up':'down'}">${dayUp?'+':''}${Number(h.price_change_pct).toFixed(2)}%</span>`
+    const dayChg = chgPct != null
+      ? `<span class="${dayUp?'up':'down'}">${dayUp?'+':''}${Number(chgPct).toFixed(2)}%</span>`
       : `<span style="color:var(--text-tertiary)">—</span>`;
     tbody.innerHTML += `<tr>
       <td><div class="stock-symbol">${h.symbol}</div><div class="stock-name">${h.name}</div></td>
@@ -3420,7 +3745,9 @@ function renderHealth() {
 }
 
 function buildHealthRing(score) {
-  const ctx = document.getElementById('chart-health-ring').getContext('2d');
+  const canvas = document.getElementById('chart-health-ring');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   if (charts.healthRing) charts.healthRing.destroy();
   // Chart.js 不支持 CSS 变量，需要直接用颜色值
   const color = score >= 80 ? '#2e8b57' : score >= 60 ? '#b07d1a' : '#d94f2a';
@@ -3444,30 +3771,61 @@ function buildHealthRing(score) {
 }
 
 // ═══════════════════════════════════════════════
-// OPTIONS
+// OPTIONS - 动态策略推荐
 // ═══════════════════════════════════════════════
+let dynamicOptionStrategies = [];
+
+async function loadDynamicOptionStrategies() {
+  // 从API加载基于用户画像的动态期权策略
+  try {
+    const res = await fetch(API + '/api/options/strategies', { headers: authHeaders() });
+    if (res.status === 401) { location.href = '/login'; return; }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    dynamicOptionStrategies = data.strategies || [];
+    renderOptions();
+    return data;
+  } catch (e) {
+    console.error('加载动态期权策略失败:', e);
+    // 降级使用静态数据
+    dynamicOptionStrategies = dashData.option_strategies || [];
+    renderOptions();
+  }
+}
+
 function renderOptions() {
-  const opts = dashData.option_strategies;
+  const opts = dynamicOptionStrategies.length > 0 ? dynamicOptionStrategies : dashData.option_strategies;
   const grid = document.getElementById('options-grid');
+  if (!grid) return;
   grid.innerHTML = '';
+  
+  if (!opts || opts.length === 0) {
+    grid.innerHTML = '<div class="card" style="text-align:center;padding:40px"><i class="fa fa-chart-line" style="font-size:48px;color:var(--text-tertiary)"></i><p style="color:var(--text-secondary);margin-top:16px">暂无策略推荐，请稍后刷新</p></div>';
+    return;
+  }
+  
   opts.forEach(o => {
     const color = o.probability >= 70 ? 'var(--success)' : o.probability >= 55 ? 'var(--warning)' : 'var(--danger)';
+    const strategyType = o.strategy_name || 'Sell Put';
+    const currentPrice = o.current_price ? `<span style="color:var(--text-tertiary);font-size:11px">现价 $${o.current_price}</span>` : '';
+    const distanceInfo = o.distance_pct ? `<span style="color:var(--text-tertiary);font-size:11px;margin-left:8px">${o.distance_pct}% OTM</span>` : '';
+    
     grid.innerHTML += `<div class="option-card">
       <div class="option-header">
         <span class="option-symbol">${o.symbol}</span>
-        <span class="option-type">SELL PUT</span>
+        <span class="option-type">${strategyType.toUpperCase()}</span>
       </div>
       <div class="option-row">
         <span class="option-key">执行价</span>
-        <span class="option-val">$${o.strike_price}</span>
+        <span class="option-val">$${o.strike_price} ${currentPrice}</span>
       </div>
       <div class="option-row">
         <span class="option-key">到期日</span>
-        <span class="option-val">${o.expiration}</span>
+        <span class="option-val">${o.expiration} ${o.dte ? '(' + o.dte + '天)' : ''}</span>
       </div>
       <div class="option-row">
         <span class="option-key">权利金</span>
-        <span class="option-val" style="color:var(--success)">$${o.premium}/股</span>
+        <span class="option-val" style="color:var(--success)">$${o.premium}/股 ${distanceInfo}</span>
       </div>
       <div class="option-row">
         <span class="option-key">年化收益</span>
@@ -3554,7 +3912,9 @@ function renderAlerts() {
 }
 
 function buildRadarChart() {
-  const ctx = document.getElementById('chart-radar').getContext('2d');
+  const radarCanvas = document.getElementById('chart-radar');
+  if (!radarCanvas) return;
+  const ctx = radarCanvas.getContext('2d');
   if (charts.radar) charts.radar.destroy();
   const h = dashData.portfolio_health;
   const metricLabels = ['分散度', '风险控制', '现金管理', '行业配置', '仓位控制', '波动管理'];
@@ -3634,7 +3994,9 @@ function renderMarket() {
 }
 
 function buildVixChart(currentVix) {
-  const ctx = document.getElementById('chart-vix').getContext('2d');
+  const vixCanvas = document.getElementById('chart-vix');
+  if (!vixCanvas) return;
+  const ctx = vixCanvas.getContext('2d');
   if (charts.vix) charts.vix.destroy();
 
   // 生成近 7 天日期标签（含今天）
@@ -3709,7 +4071,7 @@ function buildVixChart(currentVix) {
 // NEWS
 // ═══════════════════════════════════════════════
 function renderNews() {
-  const news = dashData.news;
+  const news = dashData.news || dashData.news_feed || [];
   document.getElementById('news-count').textContent = news.length + ' 条';
 
   const listEl = document.getElementById('news-list');
@@ -3963,10 +4325,10 @@ async function loadOptionsOverview() {
           ${openPositions.slice(0, 5).map(p => `
             <div style="display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--bg-elevated);border-radius:6px;font-size:12px">
               <strong style="color:var(--accent-primary);min-width:40px">${p.symbol}</strong>
-              <span style="color:var(--success);font-weight:600;min-width:70px">Sell ${p.option_type.toUpperCase()}</span>
+              <span style="color:var(--success);font-weight:600;min-width:70px">${p.direction==='sell'?'Sell':'Buy'} ${(p.option_type||'').toUpperCase()}</span>
               <span style="color:var(--text-secondary)">$${p.strike_price} | 到期 ${p.expiration}</span>
-              <span style="margin-left:auto;color:var(--success);font-weight:700">${p.contracts}张 × $${p.premium.toFixed(2)}/股</span>
-              <span style="color:var(--success);font-weight:700">+$${p.total_premium_received.toFixed(2)}</span>
+              <span style="margin-left:auto;color:var(--success);font-weight:700">${p.contracts}张 × $${Number(p.premium).toFixed(2)}/股</span>
+              <span style="color:var(--success);font-weight:700">+$${(p.premium * p.contracts * 100).toFixed(2)}</span>
             </div>
           `).join('')}
           ${openPositions.length > 5 ? `<div style="text-align:center;font-size:11px;color:var(--text-secondary)">还有 ${openPositions.length - 5} 条，点击"查看全部"</div>` : ''}
@@ -4428,9 +4790,21 @@ function renderOptionPositions(positions) {
   const dirLabel = { sell: 'Sell', buy: 'Buy' };
   tbody.innerHTML = positions.map(p => {
     const isOpen = p.status === 'open';
-    const pnl = isOpen ? p.total_premium_received : p.realized_pnl;
+    const grossPremium = (p.premium || 0) * (p.contracts || 0) * 100;
+    let pnl;
+    if (isOpen) {
+      pnl = grossPremium; // 持仓中：最大可收益（权利金全收）
+    } else if (p.status === 'expired') {
+      pnl = grossPremium; // 到期归零：全收
+    } else if (p.status === 'closed') {
+      const closeCost = (p.close_price || 0) * (p.contracts || 0) * 100;
+      pnl = (p.direction === 'sell' || !p.direction) ? (grossPremium - closeCost) : (closeCost - grossPremium);
+    } else {
+      pnl = 0; // assigned 等
+    }
+    const pnlNote = isOpen ? '最大收益' : (p.status === 'expired' ? '到期全收' : p.status === 'closed' ? '已实现' : '已行权');
     const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
-    const typeStr = `${dirLabel[p.direction]||p.direction} ${p.option_type.toUpperCase()}`;
+    const typeStr = `${(p.direction==='sell'?'Sell':'Buy')||p.direction} ${(p.option_type||'').toUpperCase()}`;
     const typeColor = p.direction === 'sell' ? 'var(--success)' : 'var(--danger)';
     return `
       <tr>
@@ -4440,7 +4814,7 @@ function renderOptionPositions(positions) {
         <td class="right" style="font-size:12px">${p.expiration}</td>
         <td class="right">${p.contracts} 张<span style="font-size:10px;color:var(--text-secondary)">×100</span></td>
         <td class="right">$${p.premium.toFixed(2)}</td>
-        <td class="right" style="font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}<div style="font-size:10px;color:var(--text-secondary)">${p.pnl_note}</div></td>
+        <td class="right" style="font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}<div style="font-size:10px;color:var(--text-secondary)">${pnlNote}</div></td>
         <td><span style="font-size:11px;font-weight:600;color:${statusColor[p.status]||'var(--text-tertiary)'};background:var(--bg-tertiary);padding:2px 7px;border-radius:20px">${statusLabel[p.status]||p.status}</span></td>
         <td class="right">
           <div style="display:flex;gap:4px;justify-content:flex-end">
@@ -4615,6 +4989,291 @@ async function deleteOptPosition(posId) {
     renderTslaOptStats();
   } catch(e) {
     showToast(e.message || '删除失败', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 投资策略模块
+// ═══════════════════════════════════════════════
+let strategyProfile = null;
+let allStrategies = [];
+let strategyQuizAnswers = {};
+let strategyCurrentQuestion = 0;
+
+const STRATEGY_QUESTIONS = [
+  {
+    key: "capital_scale",
+    question: "您的可投资资金规模是？",
+    options: [
+      { value: "小资金", label: "5万元以下（积累阶段）", desc: "适合从基础开始，逐步积累" },
+      { value: "中等", label: "5-20万元（起步阶段）", desc: "可以进行初步配置" },
+      { value: "大资金", label: "20万元以上（配置阶段）", desc: "适合多元化资产配置" }
+    ]
+  },
+  {
+    key: "risk_tolerance",
+    question: "您能接受的单笔最大亏损？",
+    options: [
+      { value: "保守", label: "5%以内（极度保守）", desc: "追求稳定，避免波动" },
+      { value: "稳健", label: "10-15%（保守型）", desc: "接受小幅波动，求稳" },
+      { value: "平衡", label: "20-30%（平衡型）", desc: "愿意承担中等风险" },
+      { value: "激进", label: "30%以上（激进型）", desc: "追求高收益，能承受大波动" }
+    ]
+  },
+  {
+    key: "investment_goal",
+    question: "您的投资目标是什么？",
+    options: [
+      { value: "保值", label: "保值跑赢通胀", desc: "目标是守住本金" },
+      { value: "增值", label: "稳健增值", desc: "在安全前提下获取收益" },
+      { value: "增长", label: "积极增长", desc: "追求资本快速增值" },
+      { value: "高回报", label: "高回报", desc: "目标收益最大化" }
+    ]
+  },
+  {
+    key: "experience_level",
+    question: "您的投资经验水平？",
+    options: [
+      { value: "小白", label: "投资新手", desc: "刚接触投资不久" },
+      { value: "有经验", label: "有经验", desc: "有几年投资经验" },
+      { value: "专业", label: "专业投资者", desc: "有丰富的投资经验" }
+    ]
+  },
+  {
+    key: "time_horizon",
+    question: "您的投资周期？",
+    options: [
+      { value: "短期", label: "短期（1年内）", desc: "灵活操作" },
+      { value: "中期", label: "中期（1-3年）", desc: "阶段性配置" },
+      { value: "长期", label: "长期（3年以上）", desc: "长期持有" }
+    ]
+  }
+];
+
+async function loadStrategyData() {
+  try {
+    const [profileRes, listRes, subRes] = await Promise.all([
+      fetch(API + '/api/strategy/profile', { headers: authHeaders() }),
+      fetch(API + '/api/strategy/list', { headers: authHeaders() }),
+      fetch(API + '/api/strategy/subscriptions', { headers: authHeaders() })
+    ]);
+    
+    if (profileRes.status === 401 || listRes.status === 401) {
+      location.href = '/login'; return;
+    }
+    
+    strategyProfile = await profileRes.json();
+    const listData = await listRes.json();
+    allStrategies = listData.strategies || [];
+    
+    // 加载用户订阅
+    if (subRes.ok) {
+      const subData = await subRes.json();
+      renderStrategySubscriptions(subData.subscriptions || []);
+    }
+    
+    renderStrategyProfile();
+    renderAllStrategies(allStrategies);
+    
+    // 如果已有画像，加载推荐
+    if (strategyProfile.has_profile && strategyProfile.is_completed) {
+      loadStrategyRecommendations();
+    }
+  } catch (e) {
+    console.error('加载投资策略失败', e);
+  }
+}
+
+async function loadStrategyRecommendations() {
+  try {
+    const res = await fetch(API + '/api/strategy/recommend', { headers: authHeaders() });
+    if (res.status === 401) { location.href = '/login'; return; }
+    const data = await res.json();
+    renderStrategyRecommendations(data.recommendations || []);
+  } catch (e) {
+    console.error('加载推荐失败', e);
+  }
+}
+
+function renderStrategyProfile() {
+  const tagsContainer = document.getElementById('strategy-profile-tags');
+  const btnText = document.getElementById('strategy-quiz-btn-text');
+  if (!tagsContainer) return;
+  
+  if (strategyProfile && strategyProfile.has_profile && strategyProfile.is_completed) {
+    const p = strategyProfile;
+    const tags = [
+      p.risk_tolerance + '型',
+      p.capital_scale === '小资金' ? '小资金' : p.capital_scale === '大资金' ? '大资金' : '中等资金',
+      p.experience_level,
+      p.time_horizon + '投资'
+    ];
+    tagsContainer.innerHTML = tags.map(t => `<span style="padding:4px 12px;background:var(--bg-secondary);border-radius:12px;font-size:12px;color:var(--text-primary);border:1px solid var(--border-default)">${t}</span>`).join('');
+    if (btnText) btnText.textContent = '修改画像';
+  } else {
+    tagsContainer.innerHTML = `<span style="padding:4px 12px;background:var(--bg-secondary);border-radius:12px;font-size:12px;color:var(--text-secondary)">尚未完成测评</span>`;
+    if (btnText) btnText.textContent = '风险测评';
+  }
+}
+
+function renderStrategyRecommendations(list) {
+  const container = document.getElementById('strategy-recommend-list');
+  if (!container) return;
+  
+  if (!list.length) {
+    container.innerHTML = `
+      <div class="card" style="text-align:center;padding:40px 20px;grid-column:1/-1">
+        <i class="fa fa-search" style="font-size:48px;color:var(--text-tertiary);margin-bottom:16px"></i>
+        <p style="color:var(--text-secondary)">暂无匹配策略，尝试调整画像或浏览全部策略</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = list.map(s => createStrategyCard(s, true)).join('');
+}
+
+function renderAllStrategies(list) {
+  const container = document.getElementById('strategy-all-list');
+  if (!container) return;
+  container.innerHTML = list.map(s => createStrategyCard(s, false)).join('');
+}
+
+function renderStrategySubscriptions(list) {
+  const container = document.getElementById('strategy-subscriptions-list');
+  if (!container) return;
+  
+  if (!list.length) {
+    container.innerHTML = `
+      <div class="card" style="text-align:center;padding:40px 20px;grid-column:1/-1">
+        <i class="fa fa-bookmark-o" style="font-size:48px;color:var(--text-tertiary);margin-bottom:16px"></i>
+        <p style="color:var(--text-secondary)">您还没有订阅任何策略</p>
+        <p style="color:var(--text-tertiary);font-size:12px;margin-top:8px">订阅策略后可在此快速查看</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = list.map(s => createStrategyCard(s, false)).join('');
+}
+
+function createStrategyCard(s, showMatchScore) {
+  const riskColors = {1: 'var(--success)', 2: 'var(--info)', 3: 'var(--warning)', 4: 'var(--danger)', 5: '#d63031'};
+  const riskLabels = {1: '保守', 2: '稳健', 3: '平衡', 4: '激进', 5: '激进'};
+  const tags = s.tags || [];
+  
+  return `
+    <div class="card" style="cursor:pointer;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''" onclick="viewStrategyDetail('${s.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px">${s.name}</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">${s.description?.substring(0, 60)}...</div>
+        </div>
+        ${showMatchScore ? `<span style="background:linear-gradient(135deg,var(--accent-secondary),#a29bfe);color:white;padding:4px 12px;border-radius:20px;font-size:12px;white-space:nowrap">匹配 ${s.match_score}%</span>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+        <span style="padding:2px 8px;border-radius:4px;font-size:11px;color:white;background:${riskColors[s.risk_level] || riskColors[3]}">${riskLabels[s.risk_level] || '平衡'}</span>
+        <span style="font-size:12px;color:var(--text-secondary)">${s.min_capital}</span>
+        <span style="font-size:12px;color:var(--text-secondary)">预期 ${s.expected_return}</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${tags.slice(0, 3).map(t => `<span style="padding:2px 8px;background:var(--bg-elevated);border-radius:4px;font-size:11px;color:var(--text-secondary)">${t}</span>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function filterStrategies(level, btn) {
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const filtered = level === 0 ? allStrategies : allStrategies.filter(s => s.risk_level === level);
+  renderAllStrategies(filtered);
+}
+
+function viewStrategyDetail(id) {
+  // 在当前页打开详情页（不新开标签页）
+  console.log('Opening strategy detail:', id);
+  window.location.assign('/strategy/' + id);
+}
+
+// 问卷功能
+function openStrategyQuiz() {
+  document.getElementById('strategy-quiz-modal').style.display = 'flex';
+  strategyCurrentQuestion = 0;
+  strategyQuizAnswers = {};
+  renderStrategyQuestion();
+}
+
+function closeStrategyQuiz() {
+  document.getElementById('strategy-quiz-modal').style.display = 'none';
+}
+
+function renderStrategyQuestion() {
+  const q = STRATEGY_QUESTIONS[strategyCurrentQuestion];
+  document.getElementById('strategy-quiz-progress').textContent = `${strategyCurrentQuestion + 1}/${STRATEGY_QUESTIONS.length}`;
+  
+  let html = `<p style="font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:16px">${q.question}</p>`;
+  q.options.forEach(opt => {
+    const selected = strategyQuizAnswers[q.key] === opt.value ? 'border-color:var(--accent-secondary);background:rgba(124,92,191,0.1)' : '';
+    html += `<label style="display:block;padding:14px 16px;margin:10px 0;border:2px solid var(--border-default);border-radius:8px;cursor:pointer;transition:all .2s;${selected}" onclick="selectStrategyOption('${q.key}', '${opt.value}', this)">
+      <div style="font-weight:500;color:var(--text-primary);margin-bottom:2px">${opt.label}</div>
+      <div style="font-size:12px;color:var(--text-secondary)">${opt.desc}</div>
+    </label>`;
+  });
+  
+  document.getElementById('strategy-quiz-content').innerHTML = html;
+  
+  document.getElementById('strategy-quiz-prev').style.display = strategyCurrentQuestion === 0 ? 'none' : 'inline-block';
+  document.getElementById('strategy-quiz-next').textContent = strategyCurrentQuestion === STRATEGY_QUESTIONS.length - 1 ? '提交' : '下一题';
+  document.getElementById('strategy-quiz-next').disabled = !strategyQuizAnswers[q.key];
+}
+
+function selectStrategyOption(key, value, el) {
+  strategyQuizAnswers[key] = value;
+  document.querySelectorAll('#strategy-quiz-content label').forEach(l => {
+    l.style.borderColor = 'var(--border-default)';
+    l.style.background = 'transparent';
+  });
+  el.style.borderColor = 'var(--accent-secondary)';
+  el.style.background = 'rgba(124,92,191,0.1)';
+  document.getElementById('strategy-quiz-next').disabled = false;
+}
+
+function prevStrategyQuestion() {
+  if (strategyCurrentQuestion > 0) {
+    strategyCurrentQuestion--;
+    renderStrategyQuestion();
+  }
+}
+
+function nextStrategyQuestion() {
+  if (strategyCurrentQuestion < STRATEGY_QUESTIONS.length - 1) {
+    strategyCurrentQuestion++;
+    renderStrategyQuestion();
+  } else {
+    submitStrategyProfile();
+  }
+}
+
+async function submitStrategyProfile() {
+  try {
+    const res = await fetch(API + '/api/strategy/profile', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(strategyQuizAnswers)
+    });
+    
+    if (res.ok) {
+      closeStrategyQuiz();
+      showToast('画像已更新！');
+      // 重新加载数据
+      await loadStrategyData();
+    } else {
+      showToast('保存失败，请重试', 'error');
+    }
+  } catch (e) {
+    showToast('保存失败，请重试', 'error');
   }
 }
 

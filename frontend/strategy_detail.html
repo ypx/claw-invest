@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>策略详情 - CLAW</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a90d9;
+            --secondary: #6c5ce7;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --border: #dfe6e9;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--light); }
+        
+        .risk-1 { background: #00b894; }
+        .risk-2 { background: #74b9ff; }
+        .risk-3 { background: #fdcb6e; }
+        .risk-4 { background: #e17055; }
+        .risk-5 { background: #d63031; }
+        
+        .risk-badge { padding: 4px 12px; border-radius: 6px; color: white; font-size: 14px; }
+        
+        .match-score { 
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe); 
+            color: white; 
+            padding: 6px 16px; 
+            border-radius: 20px; 
+            font-size: 16px; 
+        }
+        
+        .allocation-item {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .tag { display: inline-block; padding: 4px 12px; background: #f0f0f0; border-radius: 12px; font-size: 12px; margin-right: 6px; }
+        .tag.suitable { background: #e8f4ff; color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen pb-20">
+        <!-- 顶部导航 -->
+        <nav class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+            <div class="max-w-4xl mx-auto flex items-center justify-between">
+                <a href="/dashboard#/strategy" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-arrow-left mr-2"></i>返回策略广场
+                </a>
+                <h1 class="text-xl font-semibold text-gray-800" id="strategyName">策略详情</h1>
+                <div></div>
+            </div>
+        </nav>
+
+        <div class="max-w-4xl mx-auto p-6">
+            <!-- 策略概览 -->
+            <div class="bg-white rounded-xl p-6 mb-6 shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <div id="matchScoreContainer" class="mb-2 hidden">
+                            <span class="match-score">匹配度 <span id="matchScore">0</span>%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="riskBadge" class="risk-badge">平衡</span>
+                            <span class="text-gray-500"><i class="fas fa-coins mr-1"></i><span id="minCapital">10万+</span></span>
+                            <span class="text-gray-500"><i class="fas fa-chart-line mr-1"></i>预期 <span id="expectedReturn">10-15%</span></span>
+                        </div>
+                    </div>
+                    <!-- 订阅按钮已隐藏
+                    <button id="subscribeBtn" onclick="toggleSubscribe()" class="px-6 py-2 rounded-lg font-medium transition">
+                        <i class="fas fa-plus-circle mr-2"></i>订阅
+                    </button>
+                    -->
+                </div>
+                
+                <p id="strategyDesc" class="text-gray-600 leading-relaxed"></p>
+                
+                <div class="mt-4">
+                    <span class="text-sm text-gray-500 mr-2">策略标签:</span>
+                    <div id="strategyTags" class="inline-flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+
+            <!-- 适用画像 -->
+            <div class="bg-white rounded-xl p-6 mb-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-user-check text-purple-500 mr-2"></i>适合的用户画像
+                </h2>
+                <div id="suitableProfiles" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- 配置建议 -->
+            <div class="bg-white rounded-xl p-6 mb-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-chart-pie text-blue-500 mr-2"></i>配置建议
+                </h2>
+                <div id="allocationsList"></div>
+                
+                <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        以上配置建议仅供参考，实际操作请根据个人情况调整。投资有风险，入市需谨慎。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+                <div class="max-w-4xl mx-auto">
+                    <button onclick="window.location.href='/dashboard#/strategy'" class="w-full py-3 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-arrow-left mr-2"></i>返回策略广场
+                    </button>
+                    <!-- 订阅按钮已隐藏
+                    <button id="subscribeBtnBottom" onclick="toggleSubscribe()" class="flex-1 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600">
+                        <i class="fas fa-check mr-2"></i>订阅此策略
+                    </button>
+                    -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '';
+        const token = localStorage.getItem('claw_token');
+        
+        function authHeaders() {
+            return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        }
+        
+        const strategyId = window.location.pathname.split("/").pop();
+        let strategyData = null;
+        
+        document.addEventListener("DOMContentLoaded", loadStrategy);
+        
+        async function loadStrategy() {
+            try {
+                const res = await fetch(`/api/strategy/${strategyId}`, { headers: authHeaders() });
+                strategyData = await res.json();
+                renderStrategy();
+            } catch (e) {
+                alert("加载策略失败");
+                window.location.href = "/dashboard#/strategy";
+            }
+        }
+        
+        function renderStrategy() {
+            const s = strategyData;
+            
+            document.getElementById("strategyName").textContent = s.name;
+            document.title = `${s.name} - CLAW投资策略`;
+            document.getElementById("strategyDesc").textContent = s.description || "";
+            document.getElementById("minCapital").textContent = s.min_capital;
+            document.getElementById("expectedReturn").textContent = s.expected_return;
+            
+            const riskLabels = {1: "保守", 2: "稳健", 3: "平衡", 4: "激进", 5: "激进"};
+            const riskEl = document.getElementById("riskBadge");
+            riskEl.textContent = riskLabels[s.risk_level];
+            riskEl.className = `risk-badge risk-${s.risk_level}`;
+            
+            // 匹配度
+            if (s.match_score > 0) {
+                document.getElementById("matchScoreContainer").classList.remove("hidden");
+                document.getElementById("matchScore").textContent = s.match_score;
+            }
+            
+            // 标签
+            const tags = s.tags || [];
+            document.getElementById("strategyTags").innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join("");
+            
+            // 适用画像
+            const profiles = s.suitable_profiles || [];
+            document.getElementById("suitableProfiles").innerHTML = profiles.map(p => `<span class="tag suitable">${p}</span>`).join("");
+            
+            // 配置建议
+            const allocList = s.allocations || [];
+            let allocHtml = "";
+            allocList.forEach(a => {
+                const symbols = a.symbols || [];
+                allocHtml += `
+                    <div class="allocation-item">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-gray-800">${a.type}</span>
+                            <span class="text-lg font-bold text-purple-600">${a.ratio}%</span>
+                        </div>
+                        <div class="text-sm text-gray-500">${symbols.join(" / ")}</div>
+                    </div>
+                `;
+            });
+            document.getElementById("allocationsList").innerHTML = allocHtml || "<p class='text-gray-400'>暂无配置建议</p>";
+            
+            // 订阅状态（已隐藏订阅功能）
+            // updateSubscribeBtn(s.is_subscribed);
+        }
+        
+        function updateSubscribeBtn(isSubscribed) {
+            // 订阅功能已隐藏，此函数不再执行任何操作
+            // const btns = [document.getElementById("subscribeBtn"), document.getElementById("subscribeBtnBottom")];
+            // btns.forEach(btn => { ... });
+        }
+        
+        async function toggleSubscribe() {
+            if (strategyData.is_subscribed) return;
+            
+            try {
+                const res = await fetch(`/api/strategy/${strategyId}/subscribe`, { method: "POST", headers: authHeaders() });
+                const data = await res.json();
+                
+                strategyData.is_subscribed = data.is_subscribed;
+                updateSubscribeBtn(data.is_subscribed);
+                
+                if (data.is_subscribed) {
+                    alert("订阅成功！您可以在个人中心查看订阅的策略。");
+                }
+            } catch (e) {
+                alert("订阅失败，请重试");
+            }
+        }
+    </script>
+</body>
+</html>

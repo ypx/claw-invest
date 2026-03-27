@@ -6,9 +6,9 @@ const config = {
   app: {
     name: process.env.APP_NAME || 'Claw Advisor',
     env: process.env.NODE_ENV || 'development',
-    port: parseInt(process.env.PORT, 10) || 3000,
+    port: parseInt(process.env.PORT, 10) || 8000,
     host: process.env.HOST || 'localhost',
-    url: process.env.APP_URL || 'http://localhost:3000',
+    url: process.env.APP_URL || 'http://localhost:8000',
   },
 
   // 数据库配置
@@ -45,7 +45,7 @@ const config = {
   security: {
     rateLimit: {
       windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15分钟
-      max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
+      max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 500, // 从100提高到500，避免正常使用触发限制
     },
     helmet: {
       contentSecurityPolicy: false, // 在开发阶段禁用，生产环境需要配置
@@ -81,7 +81,7 @@ const config = {
 
   // API路径前缀
   api: {
-    prefix: '/api/v1',
+    prefix: '/api',
   },
 
   // 股票数据源配置

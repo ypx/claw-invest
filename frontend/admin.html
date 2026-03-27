@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claw · 管理后台</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f0ece8; color: #2c2420; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Topbar ── */
+    .topbar { background: #1e1a18; border-bottom: 1px solid #2a2420; padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; flex-shrink: 0; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width:30px;height:30px;background:linear-gradient(135deg,#c0622a,#7c5cbf);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff; }
+    .topbar h1 { font-size: 15px; font-weight: 700; color: #f0ece8; }
+    .badge-admin { background: rgba(217,79,42,.2); color: #f09070; border: 1px solid rgba(217,79,42,.35); border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .admin-user { font-size: 12px; color: #a89a90; }
+    .btn-sm { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+    .btn-sm-outline { background: transparent; border: 1px solid #3a3028; color: #a89a90; }
+    .btn-sm-outline:hover { border-color: #c0622a; color: #f0ece8; }
+    .btn-sm-danger { background: rgba(217,79,42,.15); color: #f09070; border: 1px solid rgba(217,79,42,.3); }
+    .btn-sm-danger:hover { background: rgba(217,79,42,.25); }
+
+    /* ── Shell ── */
+    .shell { display: flex; flex: 1; min-height: 0; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 220px; background: #fff; border-right: 1px solid #e8ddd5; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-section { padding: 16px 12px 6px; font-size: 10px; font-weight: 700; color: #b0a090; text-transform: uppercase; letter-spacing: .8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; font-size: 13px; font-weight: 500; color: #5a4a40; border-radius: 7px; margin: 1px 6px; transition: all .15s; text-decoration: none; }
+    .nav-item:hover { background: #f5f0ec; color: #2c2420; }
+    .nav-item.active { background: #fdf0e8; color: #c0622a; font-weight: 700; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid #e8ddd5; }
+    .sidebar-footer-info { font-size: 11px; color: #a89a90; text-align: center; }
+    .nav-badge { margin-left: auto; background: rgba(217,79,42,.12); color: #c0622a; border-radius: 20px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+
+    /* ── Main Content ── */
+    .content { flex: 1; overflow-y: auto; padding: 24px; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Cards / Sections ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: #fff; border: 1px solid #e8ddd5; border-radius: 10px; padding: 16px 18px; }
+    .stat-label { font-size: 11px; color: #a89a90; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .stat-val { font-size: 26px; font-weight: 800; color: #2c2420; }
+    .stat-sub { font-size: 11px; color: #a89a90; margin-top: 4px; }
+    .section { background: #fff; border: 1px solid #e8ddd5; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    .section-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title i { color: #c0622a; }
+    .section-title small { font-size: 11px; font-weight: 400; color: #a89a90; margin-left: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 10px; color: #a89a90; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #f0e8e0; }
+    td { padding: 10px 10px; border-bottom: 1px solid #f7f3ef; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #faf7f4; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: rgba(46,139,87,.1); color: #2e8b57; border: 1px solid rgba(46,139,87,.25); }
+    .badge-blue { background: rgba(42,122,184,.1); color: #2a7ab8; border: 1px solid rgba(42,122,184,.25); }
+    .badge-red { background: rgba(217,79,42,.1); color: #d94f2a; border: 1px solid rgba(217,79,42,.25); }
+    .badge-gray { background: rgba(168,154,144,.1); color: #a89a90; border: 1px solid rgba(168,154,144,.25); }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #7a6a60; margin-bottom: 5px; }
+    .form-group input, .form-group select { width: 100%; padding: 9px 12px; background: #faf7f4; border: 1px solid #e8ddd5; border-radius: 7px; font-size: 13px; color: #2c2420; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: #c0622a; }
+    .btn-primary { padding: 9px 20px; background: linear-gradient(135deg,#c0622a,#a0508a); border: none; border-radius: 7px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .alert { padding: 10px 14px; border-radius: 7px; font-size: 13px; margin-bottom: 14px; display: none; }
+    .alert.error { background: rgba(217,79,42,.08); border: 1px solid rgba(217,79,42,.25); color: #d94f2a; display: block; }
+    .alert.success { background: rgba(46,139,87,.08); border: 1px solid rgba(46,139,87,.25); color: #2e8b57; display: block; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .info-item { background: #faf7f4; border-radius: 7px; padding: 10px 14px; }
+    .info-key { font-size: 11px; color: #a89a90; font-weight: 600; }
+    .info-val { font-size: 13px; color: #2c2420; font-weight: 600; margin-top: 2px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .page-title { font-size: 18px; font-weight: 800; }
+    .page-subtitle { font-size: 12px; color: #a89a90; margin-top: 2px; }
+    .btn-action { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e8ddd5; background: #fff; color: #5a4a40; transition: all .15s; }
+    .btn-action:hover { border-color: #c0622a; color: #c0622a; }
+    .spin { animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 700px) { .sidebar { display: none; } .stat-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-icon">C</div>
+    <h1>Claw 管理后台</h1>
+    <span class="badge-admin"><i class="fa fa-shield-halved"></i> ADMIN</span>
+  </div>
+  <div class="topbar-right">
+    <span class="admin-user"><i class="fa fa-user-circle"></i> <span id="admin-name">管理员</span></span>
+    <button class="btn-sm btn-sm-outline" onclick="location.href='/dashboard'"><i class="fa fa-arrow-left"></i> 返回前台</button>
+    <button class="btn-sm btn-sm-danger" onclick="doLogout()"><i class="fa fa-right-from-bracket"></i> 退出</button>
+  </div>
+</div>
+
+<!-- ── Shell ── -->
+<div class="shell">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar">
+    <div class="sidebar-section">主要功能</div>
+    <a class="nav-item active" onclick="showAdminPage('dashboard')" href="#">
+      <i class="fa fa-gauge"></i> 控制台
+    </a>
+    <a class="nav-item" onclick="showAdminPage('users')" href="#">
+      <i class="fa fa-users"></i> 用户管理
+    </a>
+    <a class="nav-item" onclick="showAdminPage('password')" href="#">
+      <i class="fa fa-key"></i> 重置密码
+    </a>
+
+    <div class="sidebar-section">系统</div>
+    <a class="nav-item" onclick="showAdminPage('system')" href="#">
+      <i class="fa fa-server"></i> 系统信息
+    </a>
+    <a class="nav-item" onclick="showAdminPage('logs')" href="#">
+      <i class="fa fa-file-lines"></i> 操作日志
+    </a>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-info">Claw v1.0 · 管理后台</div>
+    </div>
+  </nav>
+
+  <!-- ── Main Content ── -->
+  <div class="content">
+
+    <!-- ═══ PAGE: DASHBOARD ═══ -->
+    <div class="page active" id="admin-page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">控制台</div>
+          <div class="page-subtitle">平台运行概览</div>
+        </div>
+        <button class="btn-action" onclick="loadAll()"><i class="fa fa-rotate"></i> 刷新数据</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">注册用户</div>
+          <div class="stat-val" id="stat-users">—</div>
+          <div class="stat-sub">活跃账户总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">持仓记录</div>
+          <div class="stat-val" id="stat-holdings">—</div>
+          <div class="stat-sub">全平台持仓条数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">期权记录</div>
+          <div class="stat-val" id="stat-options">—</div>
+          <div class="stat-sub">期权持仓总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">系统状态</div>
+          <div class="stat-val" style="font-size:16px;margin-top:6px" id="stat-status">—</div>
+          <div class="stat-sub" id="stat-uptime">检查中…</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="section">
+          <div class="section-title"><i class="fa fa-server"></i> 系统信息</div>
+          <div class="info-grid" id="sys-info-grid">
+            <div class="info-item"><div class="info-key">服务状态</div><div class="info-val" id="si-status">检查中…</div></div>
+            <div class="info-item"><div class="info-key">环境</div><div class="info-val" id="si-env">—</div></div>
+            <div class="info-item"><div class="info-key">版本</div><div class="info-val" id="si-ver">—</div></div>
+            <div class="info-item"><div class="info-key">API前缀</div><div class="info-val">/api</div></div>
+            <div class="info-item"><div class="info-key">检查时间</div><div class="info-val" id="si-time">—</div></div>
+            <div class="info-item"><div class="info-key">价格缓存</div><div class="info-val">5分钟 TTL</div></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title"><i class="fa fa-circle-info"></i> 快速操作</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn-action" style="text-align:left" onclick="showAdminPage('users')"><i class="fa fa-users" style="margin-right:8px;color:#c0622a"></i>用户管理 →</button>
+            <button class="btn-action" style="text-align:left" onclick="showAdminPage('password')"><i class="fa fa-key" style="margin-right:8px;color:#c0622a"></i>重置用户密码 →</button>
+            <button class="btn-action" style="text-align:left" onclick="location.href='/dashboard'"><i class="fa fa-arrow-left" style="margin-right:8px;color:#c0622a"></i>返回用户前台 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: USERS ═══ -->
+    <div class="page" id="admin-page-users">
+      <div class="page-header">
+        <div>
+          <div class="page-title">用户管理</div>
+          <div class="page-subtitle">查看所有注册用户，启用/禁用账号</div>
+        </div>
+        <button class="btn-action" onclick="loadUsers()"><i class="fa fa-rotate"></i> 刷新</button>
+      </div>
+      <div class="section">
+        <div id="alert-users" class="alert"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>用户名</th>
+              <th>邮箱</th>
+              <th>角色</th>
+              <th>状态</th>
+              <th>最后登录</th>
+              <th>注册时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="7" style="text-align:center;color:#a89a90;padding:24px"><i class="fa fa-circle-notch spin"></i> 加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: PASSWORD ═══ -->
+    <div class="page" id="admin-page-password">
+      <div class="page-header">
+        <div>
+          <div class="page-title">重置用户密码</div>
+          <div class="page-subtitle">以管理员身份重置任意用户的密码</div>
+        </div>
+      </div>
+      <div class="section" style="max-width:480px">
+        <div id="alert-pw" class="alert"></div>
+        <div class="form-group">
+          <label>选择用户</label>
+          <select id="pw-user-select">
+            <option value="">— 选择用户 —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>新密码</label>
+          <input type="password" id="pw-new" placeholder="至少6位" />
+        </div>
+        <div class="form-group">
+          <label>确认新密码</label>
+          <input type="password" id="pw-confirm" placeholder="再次输入" />
+        </div>
+        <button class="btn-primary" onclick="doResetPw()" id="btn-reset-pw">
+          <i class="fa fa-lock-open"></i> 重置密码
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: SYSTEM ═══ -->
+    <div class="page" id="admin-page-system">
+      <div class="page-header">
+        <div>
+          <div class="page-title">系统信息</div>
+          <div class="page-subtitle">服务运行状态与配置信息</div>
+        </div>
+        <button class="btn-action" onclick="loadHealth()"><i class="fa fa-rotate"></i> 刷新</button>
+      </div>
+      <div class="section" style="max-width:600px">
+        <div class="info-grid">
+          <div class="info-item"><div class="info-key">服务状态</div><div class="info-val" id="sys-si-status">检查中…</div></div>
+          <div class="info-item"><div class="info-key">运行环境</div><div class="info-val" id="sys-si-env">—</div></div>
+          <div class="info-item"><div class="info-key">版本号</div><div class="info-val" id="sys-si-ver">—</div></div>
+          <div class="info-item"><div class="info-key">API 前缀</div><div class="info-val">/api</div></div>
+          <div class="info-item"><div class="info-key">检查时间</div><div class="info-val" id="sys-si-time">—</div></div>
+          <div class="info-item"><div class="info-key">价格缓存 TTL</div><div class="info-val">5 分钟</div></div>
+          <div class="info-item"><div class="info-key">Rate Limit</div><div class="info-val">500次/15分钟</div></div>
+          <div class="info-item"><div class="info-key">数据库</div><div class="info-val">SQLite</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: LOGS ═══ -->
+    <div class="page" id="admin-page-logs">
+      <div class="page-header">
+        <div>
+          <div class="page-title">操作日志</div>
+          <div class="page-subtitle">系统操作记录（功能开发中）</div>
+        </div>
+      </div>
+      <div class="section">
+        <div style="text-align:center;padding:60px 20px;color:#a89a90">
+          <i class="fa fa-file-lines" style="font-size:48px;opacity:0.3;margin-bottom:16px;display:block"></i>
+          <p>操作日志功能开发中，敬请期待</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /shell -->
+
+<script>
+const API = '';
+const token = localStorage.getItem('claw_token');
+
+// 权限检查
+if (!token) { location.href = '/login'; }
+try {
+  const u = JSON.parse(localStorage.getItem('claw_user') || '{}');
+  if (u.role !== 'admin') { location.href = '/dashboard'; }
+  document.getElementById('admin-name').textContent = u.username || '管理员';
+} catch(e) { location.href = '/login'; }
+
+function authH() { return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }; }
+function doLogout() { localStorage.clear(); location.href = '/login'; }
+
+// ── 侧边栏导航 ──
+function showAdminPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('admin-page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  // 高亮对应nav-item（通过点击事件来源或遍历匹配）
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + page + "'")) {
+      n.classList.add('active');
+    }
+  });
+  // 按需加载数据
+  if (page === 'dashboard') { loadAll(); }
+  if (page === 'users') { loadUsers(); }
+  if (page === 'system') { loadHealth(); }
+}
+
+function showAlert(id, msg, type='error') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'alert ' + type;
+}
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'alert';
+}
+
+// ── 加载系统健康 ──
+async function loadHealth() {
+  try {
+    const r = await fetch('/health');
+    const d = await r.json();
+    const ok = d.status === 'healthy';
+    const statusText = ok ? '✅ 正常运行' : '❌ 异常';
+    const timeText = '最后检查: ' + new Date().toLocaleTimeString('zh-CN');
+    // 控制台页面
+    if (document.getElementById('stat-status')) document.getElementById('stat-status').textContent = ok ? '正常运行' : '异常';
+    if (document.getElementById('stat-uptime')) document.getElementById('stat-uptime').textContent = timeText;
+    if (document.getElementById('si-status')) document.getElementById('si-status').textContent = statusText;
+    if (document.getElementById('si-env')) document.getElementById('si-env').textContent = d.environment || '—';
+    if (document.getElementById('si-ver')) document.getElementById('si-ver').textContent = d.version || '1.0.0';
+    if (document.getElementById('si-time')) document.getElementById('si-time').textContent = new Date(d.timestamp).toLocaleString('zh-CN');
+    // 系统信息页面
+    if (document.getElementById('sys-si-status')) document.getElementById('sys-si-status').textContent = statusText;
+    if (document.getElementById('sys-si-env')) document.getElementById('sys-si-env').textContent = d.environment || '—';
+    if (document.getElementById('sys-si-ver')) document.getElementById('sys-si-ver').textContent = d.version || '1.0.0';
+    if (document.getElementById('sys-si-time')) document.getElementById('sys-si-time').textContent = new Date(d.timestamp).toLocaleString('zh-CN');
+  } catch(e) {
+    ['stat-status','si-status','sys-si-status'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '❌ 无法连接';
+    });
+  }
+}
+
+// ── 加载用户列表 ──
+async function loadUsers() {
+  try {
+    const r = await fetch(API + '/api/admin/users', { headers: authH() });
+    if (r.status === 401) { location.href = '/login'; return; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const { users, stats } = await r.json();
+
+    if (document.getElementById('stat-users')) document.getElementById('stat-users').textContent = users.length;
+    if (document.getElementById('stat-holdings')) document.getElementById('stat-holdings').textContent = stats.total_holdings || 0;
+    if (document.getElementById('stat-options')) document.getElementById('stat-options').textContent = stats.total_options || 0;
+
+    // 填充密码重置下拉框
+    const sel = document.getElementById('pw-user-select');
+    if (sel) {
+      sel.innerHTML = '<option value="">— 选择用户 —</option>' + users.map(u =>
+        `<option value="${u.id}">${u.username} (${u.email || '无邮箱'})</option>`
+      ).join('');
+    }
+
+    // 渲染用户表格
+    const tbody = document.getElementById('users-tbody');
+    if (tbody) {
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>${u.username}</strong></td>
+          <td style="color:#7a6a60">${u.email || '—'}</td>
+          <td><span class="badge ${u.role==='admin'?'badge-red':'badge-blue'}">${u.role}</span></td>
+          <td><span class="badge ${u.is_active?'badge-green':'badge-gray'}">${u.is_active?'活跃':'禁用'}</span></td>
+          <td style="color:#a89a90;font-size:12px">${u.last_login ? new Date(u.last_login).toLocaleString('zh-CN') : '从未'}</td>
+          <td style="color:#a89a90;font-size:12px">${u.created_at ? new Date(u.created_at).toLocaleString('zh-CN') : '—'}</td>
+          <td>
+            <button onclick="toggleUserStatus('${u.id}','${u.username}',${u.is_active})"
+              style="padding:4px 10px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid ${u.is_active?'rgba(217,79,42,.3)':'rgba(46,139,87,.3)'};background:transparent;color:${u.is_active?'#d94f2a':'#2e8b57'}">
+              ${u.is_active ? '<i class="fa fa-ban"></i> 禁用' : '<i class="fa fa-check"></i> 启用'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch(e) {
+    const tbody = document.getElementById('users-tbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#d94f2a;padding:24px">加载失败: ${e.message}</td></tr>`;
+  }
+}
+
+// ── 切换用户状态 ──
+async function toggleUserStatus(userId, username, currentActive) {
+  if (!confirm(`确定${currentActive ? '禁用' : '启用'}用户「${username}」吗？`)) return;
+  try {
+    const r = await fetch(API + `/api/admin/users/${userId}/toggle`, { method: 'PATCH', headers: authH() });
+    if (!r.ok) throw new Error((await r.json()).detail || '操作失败');
+    showAlert('alert-users', `${currentActive?'已禁用':'已启用'}用户 ${username}`, 'success');
+    setTimeout(() => { clearAlert('alert-users'); loadUsers(); }, 1500);
+  } catch(e) {
+    showAlert('alert-users', e.message);
+  }
+}
+
+// ── 重置密码 ──
+async function doResetPw() {
+  clearAlert('alert-pw');
+  const userId = document.getElementById('pw-user-select')?.value;
+  const newPw = document.getElementById('pw-new')?.value;
+  const confirmPw = document.getElementById('pw-confirm')?.value;
+  if (!userId) return showAlert('alert-pw', '请选择要修改的用户');
+  if (!newPw || newPw.length < 6) return showAlert('alert-pw', '密码至少6位');
+  if (newPw !== confirmPw) return showAlert('alert-pw', '两次密码不一致');
+
+  const btn = document.getElementById('btn-reset-pw');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> 处理中…';
+  try {
+    const r = await fetch(API + `/api/admin/users/${userId}/reset-password`, {
+      method: 'PATCH',
+      headers: authH(),
+      body: JSON.stringify({ new_password: newPw }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || d.error || '重置失败');
+    showAlert('alert-pw', '✅ 密码重置成功', 'success');
+    document.getElementById('pw-new').value = '';
+    document.getElementById('pw-confirm').value = '';
+  } catch(e) {
+    showAlert('alert-pw', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-lock-open"></i> 重置密码';
+  }
+}
+
+function loadAll() { loadHealth(); loadUsers(); }
+
+// 初始化
+loadAll();
+</script>
+</body>
+</html>

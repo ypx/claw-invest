@@ -37,3 +37,13 @@ Thumbs.db
 
 # Zip files
 *.zip
+
+# Node.js
+node_modules/
+backend/node_modules/
+package-lock.json
+backend/package-lock.json
+
+# SQLite temp files
+*.db-shm
+*.db-wal
