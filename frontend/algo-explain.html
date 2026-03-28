@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>算法解释 - CLAW 投资系统</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #1a1612;
+      --bg-secondary: #242019;
+      --bg-tertiary: #2e2720;
+      --bg-elevated: #383028;
+      --bg-hover: #423930;
+      --accent-primary: #c0622a;
+      --accent-secondary: #8b4513;
+      --text-primary: #f5f0e8;
+      --text-secondary: #a89a90;
+      --text-tertiary: #7a6e65;
+      --border-default: #3d342b;
+      --success: #4caf50;
+      --danger: #ef5350;
+      --warning: #ff9800;
+      --info: #42a5f5;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-default);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .header-title i {
+      color: var(--accent-primary);
+    }
+    
+    .header-back {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    
+    .header-back:hover {
+      color: var(--accent-primary);
+    }
+    
+    /* Main Content */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+    
+    .intro {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .intro h2 {
+      font-size: 16px;
+      color: var(--accent-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .intro p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    /* Algorithm Section */
+    .algo-section {
+      margin-bottom: 32px;
+    }
+    
+    .algo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    
+    .algo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--accent-primary);
+    }
+    
+    .algo-title {
+      flex: 1;
+    }
+    
+    .algo-title h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .algo-title .tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      background: rgba(192, 98, 42, 0.15);
+      color: var(--accent-primary);
+      border-radius: 4px;
+    }
+    
+    .algo-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .algo-content h4 {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .algo-content h4:first-child {
+      margin-top: 0;
+    }
+    
+    .algo-content h4 i {
+      color: var(--accent-primary);
+      font-size: 12px;
+    }
+    
+    .algo-content p {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    
+    .formula-box {
+      background: var(--bg-elevated);
+      border-left: 3px solid var(--accent-primary);
+      padding: 14px 16px;
+      margin: 12px 0;
+      border-radius: 0 8px 8px 0;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+      overflow-x: auto;
+    }
+    
+    .formula-box .comment {
+      color: var(--text-tertiary);
+    }
+    
+    .param-list {
+      list-style: none;
+      margin: 12px 0;
+    }
+    
+    .param-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-default);
+      font-size: 13px;
+    }
+    
+    .param-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .param-list code {
+      background: var(--bg-elevated);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--accent-primary);
+      white-space: nowrap;
+    }
+    
+    .param-list span {
+      color: var(--text-secondary);
+    }
+    
+    .example-box {
+      background: rgba(66, 165, 245, 0.08);
+      border: 1px solid rgba(66, 165, 245, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    
+    .example-box h5 {
+      font-size: 12px;
+      color: var(--info);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .example-box p {
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    
+    /* Data Source Section */
+    .data-source {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 40px;
+    }
+    
+    .data-source h3 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .data-source h3 i {
+      color: var(--warning);
+    }
+    
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    
+    .source-item {
+      background: var(--bg-elevated);
+      padding: 14px;
+      border-radius: 8px;
+    }
+    
+    .source-item h4 {
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    
+    .source-item p {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      border-top: 1px solid var(--border-default);
+      margin-top: 40px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px 16px 40px;
+      }
+      
+      .algo-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .source-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-title">
+      <i class="fa fa-code-branch"></i>
+      算法解释
+    </div>
+    <a href="/dashboard" class="header-back">
+      <i class="fa fa-arrow-left"></i>
+      返回控制台
+    </a>
+  </header>
+  
+  <main class="container">
+    <!-- Intro -->
+    <div class="intro">
+      <h2><i class="fa fa-info-circle"></i> 关于本页面</h2>
+      <p>本页面详细说明 CLAW 投资系统中使用的所有算法逻辑、计算公式及数据来源。所有算法均为辅助决策工具，不构成投资建议。用户应结合自身情况独立判断。</p>
+    </div>
+    
+    <!-- 算法1: 投资组合健康评分 -->
+    <section class="algo-section">
+      <div class="algo-header">
+        <div class="algo-icon"><i class="fa fa-heart-pulse"></i></div>
+        <div class="algo-title">
+          <h3>投资组合健康评分</h3>
+          <span class="tag">核心算法</span>
+        </div>
+      </div>
+      <div class="algo-content">
+        <h4><i class="fa fa-circle"></i> 算法目的</h4>
+        <p>综合评估用户投资组合的多元化程度、风险敞口、现金配置等因素，生成 0-100 分的健康评分。</p>
+        
+        <h4><i class="fa fa-circle"></i> 计算公式</h4>
+        <div class="formula-box">
+          <div>综合得分 = Σ(维度得分 × 维度权重)</div>
+          <div class="comment">// 各维度满分100，权重总和为1</div>
+        </div>
+        
+        <h4><i class="fa fa-circle"></i> 评分维度</h4>
+        <ul class="param-list">
+          <li><code>多元化得分</code> <span>基于行业分散度计算，单一行业占比超过40%开始扣分</span></li>
+          <li><code>风险敞口</code> <span>评估个股集中度，单只股票占比超过25%视为高风险</span></li>
+          <li><code>现金配置</code> <span>对比用户设定的目标现金比例，偏离度越大扣分越多</span></li>
+          <li><code>盈利能力</code> <span>持仓整体盈亏状态，浮亏超过10%开始影响得分</span></li>
+        </ul>
+        
+        <div class="example-box">
+          <h5><i class="fa fa-calculator"></i> 计算示例</h5>
+          <p>多元化 85分(权重25%) + 风险敞口 70分(权重25%) + 现金配置 90分(权重25%) + 盈利能力 80分(权重25%)</p>
+          <p>综合得分 = 85×0.25 + 70×0.25 + 90×0.25 + 80×0.25 = <strong>81.25分</strong></p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 算法2: 期权 Sell Put 策略推荐 -->
+    <section class="algo-section">
+      <div class="algo-header">
+        <div class="algo-icon"><i class="fa fa-file-contract"></i></div>
+        <div class="algo-title">
+          <h3>期权 Sell Put 策略推荐</h3>
+          <span class="tag">期权算法</span>
+        </div>
+      </div>
+      <div class="algo-content">
+        <h4><i class="fa fa-circle"></i> 算法逻辑</h4>
+        <p>基于参考投资体系中的 Sell Put 策略框架，结合当前市场 VIX 水平、个股波动率、技术分析推荐合适的 Sell Put 策略。</p>
+        
+        <h4><i class="fa fa-circle"></i> 核心参数</h4>
+        <ul class="param-list">
+          <li><code>VIX 区间</code> <span>最佳开仓窗口：VIX 20-35；VIX < 15 不建议开仓</span></li>
+          <li><code>价外程度(OTM)</code> <span>保守型 15% OTM，稳健型 10% OTM，进取型 5% OTM</span></li>
+          <li><code>到期天数(DTE)</code> <span>推荐 21-45 天，Theta 衰减最快区间</span></li>
+          <li><code>胜率估算</code> <span>基于 Delta 近似：ITM Delta ≈ 行权概率</span></li>
+        </ul>
+        
+        <h4><i class="fa fa-circle"></i> 年化收益率计算</h4>
+        <div class="formula-box">
+          <div>年化收益率 = (权利金收入 / 保证金占用) × (365 / 到期天数) × 100%</div>
+          <div class="comment">// 保证金占用 ≈ 行权价 × 100股 × 20% (典型券商要求)</div>
+        </div>
+        
+        <div class="example-box">
+          <h5><i class="fa fa-calculator"></i> 计算示例</h5>
+          <p>TSLA 现价 $380，卖出 $340 Put，权利金 $3.5/股，30天到期</p>
+          <p>年化收益 = (3.5×100)/(340×100×0.2) × (365/30) × 100% ≈ <strong>62.7%</strong></p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 算法3: 风险预警系统 -->
+    <section class="algo-section">
+      <div class="algo-header">
+        <div class="algo-icon"><i class="fa fa-triangle-exclamation"></i></div>
+        <div class="algo-title">
+          <h3>风险预警系统</h3>
+          <span class="tag">风控算法</span>
+        </div>
+      </div>
+      <div class="algo-content">
+        <h4><i class="fa fa-circle"></i> 预警触发条件</h4>
+        <ul class="param-list">
+          <li><code>现金比例过高</code> <span>实际现金比例超过目标比例 +15%</span></li>
+          <li><code>行业集中度</code> <span>单一行业持仓占比超过 50%</span></li>
+          <li><code>个股集中度</code> <span>单只股票占比超过 30%</span></li>
+          <li><code>浮亏预警</code> <span>单只股票浮亏超过 -15%</span></li>
+          <li><code>VIX 飙升</code> <span>VIX 单日涨幅超过 20% 或突破 30</span></li>
+        </ul>
+        
+        <h4><i class="fa fa-circle"></i> 预警等级</h4>
+        <p><strong style="color:var(--danger)">高风险（红色）</strong>：需要立即关注，可能影响整体组合安全</p>
+        <p><strong style="color:var(--warning)">中风险（黄色）</strong>：建议关注，适时调整</p>
+        <p><strong style="color:var(--info)">提示（蓝色）</strong>：信息性提醒，供参考</p>
+      </div>
+    </section>
+    
+    <!-- 算法4: TSLA 情报分析 -->
+    <section class="algo-section">
+      <div class="algo-header">
+        <div class="algo-icon"><i class="fa fa-car"></i></div>
+        <div class="algo-title">
+          <h3>TSLA 综合情报</h3>
+          <span class="tag">个股分析</span>
+        </div>
+      </div>
+      <div class="algo-content">
+        <h4><i class="fa fa-circle"></i> 护城河评分</h4>
+        <p>基于参考投资体系，从 7 个维度评估特斯拉的竞争护城河：</p>
+        <ul class="param-list">
+          <li><code>自动驾驶</code> <span>FSD 技术领先程度、数据积累规模</span></li>
+          <li><code>Dojo 超算</code> <span>自研 AI 芯片能力、算力成本优势</span></li>
+          <li><code>能源业务</code> <span>Megapack 储能增长、毛利率水平</span></li>
+          <li><code>品牌效应</code> <span>马斯克个人 IP、社交媒体影响力</span></li>
+          <li><code>垂直整合</code> <span>4680 电池、一体压铸等制造成本优势</span></li>
+          <li><code>超充网络</code> <span>全球充电桩数量、开放程度</span></li>
+          <li><code>未来业务</code> <span>Robotaxi、Optimus 人形机器人进展</span></li>
+        </ul>
+        
+        <h4><i class="fa fa-circle"></i> Sell Put 行权价建议</h4>
+        <div class="formula-box">
+          <div>保守型行权价 = 当前价 × 0.85</div>
+          <div>稳健型行权价 = 当前价 × 0.90</div>
+          <div>进取型行权价 = 当前价 × 0.95</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 算法5: 持仓盈亏计算 -->
+    <section class="algo-section">
+      <div class="algo-header">
+        <div class="algo-icon"><i class="fa fa-chart-line"></i></div>
+        <div class="algo-title">
+          <h3>持仓盈亏计算</h3>
+          <span class="tag">基础计算</span>
+        </div>
+      </div>
+      <div class="algo-content">
+        <h4><i class="fa fa-circle"></i> 正股盈亏</h4>
+        <div class="formula-box">
+          <div>浮动盈亏 = (当前价 - 成本价) × 持股数量</div>
+          <div>盈亏比例 = (当前价 - 成本价) / 成本价 × 100%</div>
+        </div>
+        
+        <h4><i class="fa fa-circle"></i> 期权盈亏</h4>
+        <p><strong>持仓中（未平仓）：</strong></p>
+        <div class="formula-box">
+          <div>最大可收益 = 权利金 × 合约数 × 100股</div>
+        </div>
+        
+        <p><strong>到期归零：</strong></p>
+        <div class="formula-box">
+          <div>已实现盈亏 = 权利金 × 合约数 × 100股（全部收入）</div>
+        </div>
+        
+        <p><strong>提前平仓：</strong></p>
+        <div class="formula-box">
+          <div>Sell Put 盈亏 = 收取权利金 - 平仓成本</div>
+          <div class="comment">// 平仓成本 = 买回价格 × 合约数 × 100股</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 数据来源 -->
+    <div class="data-source">
+      <h3><i class="fa fa-database"></i> 数据来源说明</h3>
+      <div class="source-grid">
+        <div class="source-item">
+          <h4>股票价格</h4>
+          <p>Yahoo Finance API / Alpha Vantage</p>
+        </div>
+        <div class="source-item">
+          <h4>期权数据</h4>
+          <p>用户手动录入 / 券商数据导入</p>
+        </div>
+        <div class="source-item">
+          <h4>VIX 指数</h4>
+          <p>Yahoo Finance 实时数据</p>
+        </div>
+        <div class="source-item">
+          <h4>投资策略</h4>
+          <p>参考投资体系框架</p>
+        </div>
+        <div class="source-item">
+          <h4>新闻资讯</h4>
+          <p>基于持仓智能匹配的模拟数据</p>
+        </div>
+        <div class="source-item">
+          <h4>算法版本</h4>
+          <p>CLAW v1.0 - 2026.03</p>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="footer">
+    <p>© 2026 CLAW 投资系统 · 算法仅供学习参考，不构成投资建议</p>
+  </footer>
+</body>
+</html>

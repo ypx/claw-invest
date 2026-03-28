@@ -194,6 +194,48 @@
     .ticker-up { color: var(--danger); }
     .ticker-down { color: var(--success); }
     
+    /* 风险提示滚动条 */
+    .risk-ticker-wrap {
+      margin-left: auto;
+      flex: 1;
+      max-width: 600px;
+      overflow: hidden;
+      background: rgba(192, 98, 42, 0.08);
+      border: 1px solid rgba(192, 98, 42, 0.25);
+      border-radius: 6px;
+      padding: 6px 12px;
+      position: relative;
+    }
+    .risk-ticker {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      white-space: nowrap;
+      animation: riskScroll 30s linear infinite;
+    }
+    .risk-ticker:hover {
+      animation-play-state: paused;
+    }
+    .risk-icon {
+      color: var(--warning);
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .risk-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .risk-sep {
+      color: var(--accent-primary);
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+    @keyframes riskScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
     /* Page */
     .page { display: none; padding: 28px 28px 40px; }
     .page.active { display: block; }
@@ -452,6 +494,9 @@
       font-size: 15px;
     }
     
+    /* 风险提示 - 桌面端隐藏，仅移动端显示 */
+    .risk-notice-mobile { display: none; }
+    
     #mobile-overlay {
       display: none;
       position: fixed;
@@ -519,8 +564,11 @@
       /* 卡片 padding 缩小 */
       .card { padding: 16px; }
       
-      /* 隐藏市场 ticker */
-      .market-ticker { display: none; }
+      /* 移动端隐藏顶部风险提示条，避免占空间 */
+      .risk-ticker-wrap { display: none; }
+      
+      /* 移动端显示个人中心的风险提示卡片 */
+      .risk-notice-mobile { display: block; }
       
       /* 表格横向滚动 */
       .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -1370,7 +1418,17 @@
     .score-ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
     
     /* Option filter buttons */
-    .opt-filter-btn.active { background: var(--info) !important; color: #fff !important; border-color: var(--info) !important; }
+    .opt-filter-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-default);
+    }
+    .opt-filter-btn.active {
+      background: var(--info) !important;
+      color: #fff !important;
+      border-color: var(--info) !important;
+      border-style: solid !important;
+    }
     
     /* Manage tab content */
     .manage-tab-content { display: none; }
@@ -1504,7 +1562,7 @@
     </a>
     <a class="nav-item" data-page="options" onclick="navigate('options',this)">
       <i class="fa fa-sliders"></i> 期权策略
-      <span class="nav-badge blue">3</span>
+      <span class="nav-badge blue">5</span>
     </a>
     <a class="nav-item" data-page="tsla" onclick="navigate('tsla',this)">
       <i class="fa fa-bolt"></i> TSLA 专项监控
@@ -1569,21 +1627,13 @@
   <!-- ── Topbar ── -->
   <header id="topbar">
     <div class="topbar-title" id="topbar-title">投资总览</div>
-    <div class="market-ticker" id="market-ticker">
-      <div class="ticker-item">
-        <span class="ticker-label">SPX</span>
-        <span class="ticker-val" id="t-spx">5,234</span>
-        <span class="ticker-chg up" id="t-spx-c">+0.8%</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-label">NDX</span>
-        <span class="ticker-val" id="t-ndx">16,345</span>
-        <span class="ticker-chg up" id="t-ndx-c">+1.2%</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-label">VIX</span>
-        <span class="ticker-val" id="t-vix">14.2</span>
-        <span class="ticker-chg down" id="t-vix-c">-2.1%</span>
+    <!-- 风险提示滚动条 -->
+    <div class="risk-ticker-wrap">
+      <div class="risk-ticker" id="risk-ticker">
+        <span class="risk-icon"><i class="fa fa-exclamation-triangle"></i></span>
+        <span class="risk-text">本网站所有数据、策略推荐及算法分析均来源于 AI 模型与公开博主观点，仅供参考学习，不构成任何投资建议。股市有风险，投资需谨慎。如因使用本网站信息造成任何损失，本平台概不负责。</span>
+        <span class="risk-sep">•</span>
+        <span class="risk-text">本网站所有数据、策略推荐及算法分析均来源于 AI 模型与公开博主观点，仅供参考学习，不构成任何投资建议。股市有风险，投资需谨慎。如因使用本网站信息造成任何损失，本平台概不负责。</span>
       </div>
     </div>
     <div class="topbar-actions">
@@ -2669,9 +2719,9 @@
         <div class="section-header" style="margin-bottom:14px">
           <div class="section-title"><i class="fa fa-list"></i> 期权持仓记录</div>
           <div style="display:flex;gap:6px">
-            <button onclick="filterOptions('all')" class="opt-filter-btn active" data-filter="all" style="padding:4px 10px;background:var(--info);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">全部</button>
-            <button onclick="filterOptions('open')" class="opt-filter-btn" data-filter="open" style="padding:4px 10px;background:transparent;border:1px solid var(--border-default);border-radius:4px;cursor:pointer;font-size:11px;color:var(--text-secondary)">持仓中</button>
-            <button onclick="filterOptions('closed')" class="opt-filter-btn" data-filter="closed" style="padding:4px 10px;background:transparent;border:1px solid var(--border-default);border-radius:4px;cursor:pointer;font-size:11px;color:var(--text-secondary)">已平仓</button>
+            <button onclick="filterOptions('all')" class="opt-filter-btn active" data-filter="all" style="padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">全部</button>
+            <button onclick="filterOptions('open')" class="opt-filter-btn" data-filter="open" style="padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">持仓中</button>
+            <button onclick="filterOptions('closed')" class="opt-filter-btn" data-filter="closed" style="padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">已平仓</button>
           </div>
         </div>
         <div class="table-wrap">
@@ -2726,6 +2776,16 @@
       <div class="section-title"><i class="fa fa-user-circle"></i> 个人中心</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+      <!-- 风险提示（移动端显示，桌面端隐藏） -->
+      <div class="card risk-notice-mobile" style="grid-column:1/-1;background:rgba(192,98,42,0.08);border-color:rgba(192,98,42,0.3)">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <i class="fa fa-exclamation-triangle" style="color:var(--warning);margin-top:2px;flex-shrink:0"></i>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin:0">
+            <strong style="color:var(--text-primary)">风险提示：</strong>本网站所有数据、策略推荐及算法分析均来源于 AI 模型与公开博主观点，仅供参考学习，不构成任何投资建议。股市有风险，投资需谨慎。如因使用本网站信息造成任何损失，本平台概不负责。
+          </p>
+        </div>
+      </div>
+
       <!-- 基本信息 -->
       <div class="card" style="grid-column:1/-1">
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
@@ -2735,7 +2795,10 @@
             <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="profile-role-big">个人投资者</div>
             <div style="font-size:12px;color:var(--text-tertiary);margin-top:3px" id="profile-email-big">—</div>
           </div>
-          <button onclick="openChangePwModal()" style="padding:8px 16px;background:var(--info);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"><i class="fa fa-key"></i> 修改密码</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button onclick="openAlgoExplain()" style="padding:8px 16px;background:var(--accent-primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"><i class="fa fa-code-branch"></i> 算法解释</button>
+            <button onclick="openChangePwModal()" style="padding:8px 16px;background:var(--info);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600"><i class="fa fa-key"></i> 修改密码</button>
+          </div>
         </div>
       </div>
       <!-- 账户设置 -->
@@ -3009,9 +3072,11 @@ function navigate(page, el, pushState = true) {
     history.pushState({ page }, '', '#/' + page);
   }
 
-  // 切换到 TSLA 页时加载情报
+  // 切换到 TSLA 页时加载情报和期权数据
   if (page === 'tsla') {
     setTimeout(loadTslaIntel, 50);
+    // 立即加载期权数据并更新 TSLA 页面统计
+    loadOptionPositionsForTsla();
   }
 
   // 切换到投资策略页时加载数据
@@ -3129,6 +3194,11 @@ async function saveProfileSettings() {
 function doLogout() {
   localStorage.clear();
   location.href = '/login';
+}
+
+// ── 算法解释页面 ──
+function openAlgoExplain() {
+  window.open('/algo-explain.html', '_blank', 'noopener,noreferrer');
 }
 
 // ── 修改密码 Modal ──
@@ -3385,15 +3455,6 @@ function renderOverview() {
   if (cashChg) { cashChg.innerHTML = `<i class="fa fa-circle-info"></i> ${s.cash_ratio ? s.cash_ratio.toFixed(1) : 0}% 占比`; }
 
   document.getElementById('kpi-health').textContent = s.health_score;
-
-  // Market ticker
-  const m = dashData.market_status;
-  document.getElementById('t-spx').textContent = Number(m.sp500).toLocaleString('en-US');
-  document.getElementById('t-spx-c').textContent = fmtPct(m.sp500_change);
-  document.getElementById('t-ndx').textContent = Number(m.nasdaq).toLocaleString('en-US');
-  document.getElementById('t-ndx-c').textContent = fmtPct(m.nasdaq_change);
-  document.getElementById('t-vix').textContent = m.vix;
-  document.getElementById('t-vix-c').textContent = fmtPct(m.vix_change);
 
   // Performance Line Chart
   buildPerformanceChart();
@@ -3807,8 +3868,24 @@ function renderOptions() {
   opts.forEach(o => {
     const color = o.probability >= 70 ? 'var(--success)' : o.probability >= 55 ? 'var(--warning)' : 'var(--danger)';
     const strategyType = o.strategy_name || 'Sell Put';
-    const currentPrice = o.current_price ? `<span style="color:var(--text-tertiary);font-size:11px">现价 $${o.current_price}</span>` : '';
-    const distanceInfo = o.distance_pct ? `<span style="color:var(--text-tertiary);font-size:11px;margin-left:8px">${o.distance_pct}% OTM</span>` : '';
+    // 使用实时价格，优先从 live_prices 获取（兼容写法）
+    const livePrices = (dashData && dashData.live_prices) ? dashData.live_prices : {};
+    const livePriceObj = livePrices[o.symbol];
+    // live_prices 格式是 {price: 171.24, change: ...}，需要取 .price
+    const livePrice = (livePriceObj && typeof livePriceObj === 'object') ? livePriceObj.price : livePriceObj;
+    const hasLivePrice = livePrice && !isNaN(livePrice);
+    const displayPrice = hasLivePrice ? livePrice : o.current_price;
+    const currentPrice = (displayPrice && !isNaN(displayPrice)) 
+      ? '<span style="color:var(--text-tertiary);font-size:11px">现价 $' + Number(displayPrice).toFixed(2) + '</span>' 
+      : '';
+    // 重新计算 OTM 距离（基于实时价格）
+    let distancePct = o.distance_pct;
+    if (hasLivePrice && o.strike_price) {
+      distancePct = ((livePrice - o.strike_price) / o.strike_price * 100).toFixed(1);
+    }
+    const distanceInfo = (distancePct && !isNaN(distancePct)) 
+      ? '<span style="color:var(--text-tertiary);font-size:11px;margin-left:8px">' + distancePct + '% OTM</span>' 
+      : '';
     
     grid.innerHTML += `<div class="option-card">
       <div class="option-header">
@@ -4302,14 +4379,14 @@ async function loadOptionsOverview() {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     const setColor = (id, color) => { const el = document.getElementById(id); if (el) el.style.color = color; };
 
-    set('ov-opt-open', summary.open_count + ' 张');
+    set('ov-opt-open', (summary.open_count || 0) + ' 张');
     set('ov-opt-premium', '$' + (summary.total_open_premium || 0).toFixed(2));
     set('ov-opt-realized', (statsData.total_realized_pnl >= 0 ? '+' : '') + '$' + Math.abs(statsData.total_realized_pnl || 0).toFixed(2));
     setColor('ov-opt-realized', realizedColor);
     set('ov-opt-winrate', statsData.total_trades > 0 ? statsData.win_rate + '%' : '—');
 
     // 持仓明细的4个数字
-    set('h-opt-open', summary.open_count + ' 张');
+    set('h-opt-open', (summary.open_count || 0) + ' 张');
     set('h-opt-premium', '$' + (summary.total_open_premium || 0).toFixed(2));
     set('h-opt-realized', (statsData.total_realized_pnl >= 0 ? '+' : '') + '$' + Math.abs(statsData.total_realized_pnl || 0).toFixed(2));
     setColor('h-opt-realized', realizedColor);
@@ -4600,7 +4677,7 @@ async function loadTslaIntel() {
     renderTslaMoat(tslaIntelData.moat || []);
     renderTslaOutlook(tslaIntelData.business_outlook || []);
     renderTslaSellPut(tslaIntelData.sell_put_guide || {});
-    renderTslaOptStats();
+    // 注意：期权统计由 loadOptionPositionsForTsla 负责更新，不在这里重复调用
   } catch(e) {
     console.error('TSLA intel load error:', e);
   }
@@ -4686,8 +4763,53 @@ function renderTslaSellPut(guide) {
   `;
 }
 
+async function loadOptionPositionsForTsla() {
+  // 专门为 TSLA 页面加载期权数据，确保立即更新显示
+  try {
+    const res = await fetch(API + '/api/options/positions', { headers: authHeaders() });
+    if (res.status === 401) { location.href = '/login'; return; }
+    const data = await res.json();
+    allOptionPositions = data.positions || [];
+    
+    // 立即更新 TSLA 页面的期权统计
+    const openCount = document.getElementById('tsla-opt-count');
+    const openPnl = document.getElementById('tsla-opt-pnl');
+    if (openCount) {
+      const tslaOptions = allOptionPositions.filter(p => p.symbol === 'TSLA' && p.status === 'open');
+      const tslaOptCount = tslaOptions.reduce((sum, p) => sum + (parseInt(p.contracts) || 0), 0);
+      const tslaOptPremium = tslaOptions.reduce((sum, p) => sum + (parseFloat(p.premium) || 0) * (parseInt(p.contracts) || 0) * 100, 0);
+      openCount.textContent = tslaOptCount + ' 张';
+      if (openPnl) {
+        openPnl.textContent = tslaOptCount > 0 ? '待收 $' + tslaOptPremium.toFixed(0) : '未平仓权利金';
+      }
+    }
+  } catch(e) {
+    console.error('加载 TSLA 期权数据失败:', e);
+  }
+}
+
+function renderTslaOptStatsFromCache() {
+  // 先用缓存数据渲染，避免闪烁
+  const openCount = document.getElementById('tsla-opt-count');
+  const openPnl = document.getElementById('tsla-opt-pnl');
+  if (!openCount) return;
+  
+  // 从 allOptionPositions 计算 TSLA 期权统计
+  const tslaOptions = (allOptionPositions || []).filter(p => p.symbol === 'TSLA' && p.status === 'open');
+  const tslaOptCount = tslaOptions.reduce((sum, p) => sum + (p.contracts || 0), 0);
+  const tslaOptPremium = tslaOptions.reduce((sum, p) => sum + (p.premium || 0) * (p.contracts || 0) * 100, 0);
+  
+  openCount.textContent = tslaOptCount + ' 张';
+  if (openPnl) {
+    openPnl.textContent = tslaOptCount > 0 ? '待收 $' + tslaOptPremium.toFixed(0) : '未平仓权利金';
+  }
+}
+
 function renderTslaOptStats() {
-  // 加载 TSLA 相关的期权统计
+  // 先用缓存显示
+  renderTslaOptStatsFromCache();
+  
+  // 再从服务器刷新最新数据
   fetch(API + '/api/options/stats', { headers: authHeaders() })
     .then(r => r.json())
     .then(data => {
@@ -4695,10 +4817,11 @@ function renderTslaOptStats() {
       const openCount = document.getElementById('tsla-opt-count');
       const openPnl = document.getElementById('tsla-opt-pnl');
       if (tslaStats && openCount) {
-        openCount.textContent = tslaStats.open_count + ' 张';
-        if (openPnl) openPnl.textContent = tslaStats.open_count > 0 ? '持仓中' : `历史盈亏 $${tslaStats.realized_pnl.toFixed(2)}`;
-      } else if (openCount) {
-        openCount.textContent = '0 张';
+        openCount.textContent = (tslaStats.open_count || 0) + ' 张';
+        if (openPnl) {
+          const hasOpen = (tslaStats.open_count || 0) > 0;
+          openPnl.textContent = hasOpen ? '持仓中' : `历史盈亏 $${(tslaStats.realized_pnl || 0).toFixed(2)}`;
+        }
       }
     }).catch(() => {});
 }
@@ -4752,9 +4875,15 @@ async function loadOptionPositions() {
     const summary = data.summary || {};
     // 更新统计卡片
     const el = id => document.getElementById(id);
-    if (el('opt-stat-open')) el('opt-stat-open').textContent = summary.open_count + ' 张';
+    if (el('opt-stat-open')) el('opt-stat-open').textContent = (summary.open_count || 0) + ' 张';
     if (el('opt-stat-open-premium')) el('opt-stat-open-premium').textContent = '$' + (summary.total_open_premium || 0).toFixed(2);
     if (el('opt-stat-realized')) el('opt-stat-realized').textContent = '$' + (summary.total_realized_pnl || 0).toFixed(2);
+    // 更新 TSLA 页面的期权统计（只统计 TSLA 期权）
+    const tslaOptions = allOptionPositions.filter(p => p.symbol === 'TSLA' && p.status === 'open');
+    const tslaOptCount = tslaOptions.reduce((sum, p) => sum + (p.contracts || 0), 0);
+    const tslaOptPremium = tslaOptions.reduce((sum, p) => sum + (p.premium || 0) * (p.contracts || 0) * 100, 0);
+    if (el('tsla-opt-count')) el('tsla-opt-count').textContent = tslaOptCount + ' 张';
+    if (el('tsla-opt-pnl')) el('tsla-opt-pnl').textContent = tslaOptCount > 0 ? '待收 $' + tslaOptPremium.toFixed(0) : '未平仓权利金';
     // 胜率需要再调 stats 接口
     fetch(API + '/api/options/stats', { headers: authHeaders() })
       .then(r => r.json()).then(s => {
@@ -4770,9 +4899,11 @@ function filterOptions(status) {
   currentOptFilter = status;
   document.querySelectorAll('.opt-filter-btn').forEach(b => {
     const active = b.dataset.filter === status;
-    b.style.background = active ? 'var(--info)' : 'transparent';
-    b.style.color = active ? '#fff' : 'var(--text-secondary)';
-    b.style.border = active ? 'none' : '1px solid var(--border-default)';
+    if (active) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
   });
   const filtered = status === 'all' ? allOptionPositions : allOptionPositions.filter(p => p.status === status);
   renderOptionPositions(filtered);

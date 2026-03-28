@@ -114,8 +114,10 @@ async function fetchPriceMultiSource(symbol) {
  */
 async function getLivePrices(symbols) {
   const now = Date.now();
-  // 缓存未过期，直接返回
-  if (now - _priceCacheTime < CACHE_TTL && Object.keys(_priceCache).length > 0) {
+  // 缓存未过期，且包含所有需要的股票，直接返回
+  const cacheKeys = Object.keys(_priceCache);
+  const hasAllSymbols = symbols.every(s => cacheKeys.includes(s));
+  if (now - _priceCacheTime < CACHE_TTL && hasAllSymbols) {
     return _priceCache;
   }
 
@@ -194,10 +196,11 @@ class DashboardController {
         `SELECT * FROM holdings WHERE user_id = ? ORDER BY symbol`
       ).all(userId);
 
-      const symbols = holdings.map(h => h.symbol);
-
-      // ─── 3. 获取实时价格 ───
-      const prices = await getLivePrices(symbols);
+      // ─── 3. 获取实时价格（持仓股票 + 期权策略推荐标的）───
+      const holdingSymbols = holdings.map(h => h.symbol);
+      const optionStrategySymbols = ['TSLA', 'NVDA', 'GOOGL', 'META', 'IONQ'];
+      const allSymbols = [...new Set([...holdingSymbols, ...optionStrategySymbols])];
+      const prices = await getLivePrices(allSymbols);
 
       // ─── 4. 计算持仓价值 ───
       const portfolioHoldings = holdings.map(h => {
@@ -526,9 +529,24 @@ class DashboardController {
     // 按标的汇总
     const bySymbol = {};
     for (const p of positions) {
-      if (!bySymbol[p.symbol]) bySymbol[p.symbol] = { symbol: p.symbol, count: 0, premium: 0 };
+      if (!bySymbol[p.symbol]) {
+        bySymbol[p.symbol] = { symbol: p.symbol, count: 0, open_count: 0, premium: 0, realized_pnl: 0 };
+      }
       bySymbol[p.symbol].count++;
       bySymbol[p.symbol].premium += p.premium * p.contracts * 100;
+      if (p.status === 'open') {
+        bySymbol[p.symbol].open_count += (p.contracts || 1);
+      }
+      // 计算已实现盈亏
+      if (p.status !== 'open') {
+        const openPremium = p.premium * p.contracts * 100;
+        const closePremium = (p.close_price || 0) * p.contracts * 100;
+        if (p.status === 'expired') {
+          bySymbol[p.symbol].realized_pnl += openPremium;
+        } else if (p.status === 'closed') {
+          bySymbol[p.symbol].realized_pnl += (p.direction === 'sell') ? (openPremium - closePremium) : (closePremium - openPremium);
+        }
+      }
     }
 
     return {
@@ -548,15 +566,34 @@ class DashboardController {
     else if (riskLevel === '激进') { otmPct = 0.05; dte = 21; }
     else { otmPct = 0.10; dte = 30; }
 
+    // 期权策略推荐标的（按参考投资体系偏好排序）
+    // 1. TSLA - 核心持仓，Sell Put 首选
+    // 2. NVDA - AI 算力基础设施
+    // 3. GOOGL - AI + 搜索 + 云，估值相对合理
+    // 4. META - AI 社交，广告 + AI 双引擎
+    // 5. IONQ - 量子计算高成长（高风险，小仓位）
     const targets = [
-      { symbol: 'TSLA', otmMult: 1.0 },
-      { symbol: 'NVDA', otmMult: 1.2 },
-      { symbol: 'AAPL', otmMult: 0.8 },
+      { symbol: 'TSLA', otmMult: 1.0, sector: '电动车/能源/Robotaxi', note: '核心持仓，Sell Put首选' },
+      { symbol: 'NVDA', otmMult: 1.1, sector: 'AI算力基础设施', note: 'AI芯片龙头，护城河极宽' },
+      { symbol: 'GOOGL', otmMult: 0.9, sector: 'AI/搜索/云', note: 'AI巨头中估值最低' },
+      { symbol: 'META', otmMult: 0.9, sector: 'AI社交/元宇宙', note: 'AI+广告双引擎，被低估' },
+      { symbol: 'IONQ', otmMult: 1.3, sector: '量子计算', note: '高风险高回报，小仓位' },
     ];
 
     return targets.map(t => {
-      const price = prices[t.symbol]?.price || 0;
-      if (!price) return null;
+      const priceData = prices[t.symbol];
+      // 支持两种格式: {price: 123} 或直接 123
+      let price = 0;
+      if (priceData && typeof priceData === 'object') {
+        price = priceData.price || 0;
+      } else if (typeof priceData === 'number') {
+        price = priceData;
+      }
+      if (!price || price <= 0) {
+        logger.warn(`期权策略: ${t.symbol} 无有效价格数据，跳过`);
+        return null;
+      }
+      
       const thisOtm = otmPct * t.otmMult;
       let strike = price * (1 - thisOtm);
       // 标准化行权价
@@ -567,7 +604,9 @@ class DashboardController {
       if (strike >= price) strike = Math.floor(price * 0.95 / 5) * 5;
 
       const distPct = parseFloat(((price - strike) / price * 100).toFixed(1));
-      const premium = parseFloat((price * 0.25 * Math.sqrt(dte / 365) * 0.20).toFixed(2));
+      // 权利金估算：基于股价、波动率和时间
+      const ivEstimate = t.symbol === 'IONQ' ? 0.80 : t.symbol === 'TSLA' ? 0.55 : 0.35; // 隐含波动率估计
+      const premium = parseFloat((price * ivEstimate * Math.sqrt(dte / 365) * (thisOtm / otmPct) * 0.15).toFixed(2));
       const annualized = parseFloat(((premium / strike) * (365 / dte) * 100).toFixed(1));
       const prob = riskLevel === '保守' ? 85 : riskLevel === '激进' ? 65 : 75;
 
@@ -586,7 +625,9 @@ class DashboardController {
         probability: prob,
         annualized_return: annualized,
         distance_pct: distPct,
-        recommendation: `${distPct}% OTM，胜率${prob}%，${dte}天到期`,
+        sector: t.sector,
+        note: t.note,
+        recommendation: `${distPct}% OTM，胜率${prob}%，${dte}天到期，年化${annualized}%`,
       };
     }).filter(Boolean);
   }
@@ -687,4 +728,7 @@ class DashboardController {
   }
 }
 
-module.exports = new DashboardController();
+const dashboardController = new DashboardController();
+module.exports = dashboardController;
+// 导出 getLivePrices 供其他模块复用
+module.exports.getLivePrices = getLivePrices;

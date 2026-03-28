@@ -85,9 +85,12 @@ router.get('/options/stats', authMiddleware, (req, res) => {
     const positions = db.prepare(`SELECT * FROM option_positions WHERE user_id = ?`).all(userId);
     const bySymbol = {};
     for (const p of positions) {
-      if (!bySymbol[p.symbol]) bySymbol[p.symbol] = { symbol: p.symbol, count: 0, premium: 0 };
+      if (!bySymbol[p.symbol]) bySymbol[p.symbol] = { symbol: p.symbol, count: 0, open_count: 0, premium: 0 };
       bySymbol[p.symbol].count++;
       bySymbol[p.symbol].premium += p.premium * p.contracts * 100;
+      if (p.status === 'open') {
+        bySymbol[p.symbol].open_count += (p.contracts || 1);
+      }
     }
     const closed = positions.filter(p => p.status !== 'open');
     const wins = closed.filter(p => p.status === 'expired').length;
