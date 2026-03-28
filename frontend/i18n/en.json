@@ -1,0 +1,221 @@
+{
+  "_meta": {
+    "name": "English",
+    "code": "en"
+  },
+
+  "app": {
+    "name": "Claw Advisor",
+    "slogan": "Smart Investment Decision System",
+    "beta": "BETA"
+  },
+
+  "nav": {
+    "dashboard": "Dashboard",
+    "holdings": "Holdings",
+    "holdingsDetail": "Holdings",
+    "options": "Options",
+    "tsla": "TSLA Monitor",
+    "health": "Health Check",
+    "news": "News",
+    "admin": "Admin",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "overview": "Overview",
+    "strategy": "Strategy",
+    "investmentStrategy": "Strategy",
+    "alerts": "Alerts",
+    "sectorAnalysis": "Sectors",
+    "promisingSectors": "Prospects",
+    "management": "Management",
+    "holdingsMgmt": "Holdings",
+    "market": "Market",
+    "marketData": "Market"
+  },
+
+  "user": {
+    "role": "US Stock Investor",
+    "changePassword": "Password"
+  },
+
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "new": "NEW",
+    "hot": "HOT",
+    "live": "LIVE",
+    "refresh": "Refresh"
+  },
+
+  "dashboard": {
+    "title": "Investment Dashboard",
+    "totalAssets": "Total Assets",
+    "totalReturn": "Total Return",
+    "cashRatio": "Cash Ratio",
+    "healthScore": "Health Score",
+    "holdingsCount": "Holdings",
+    "optionsCount": "Options",
+    "alerts": "Alerts",
+    "noAlerts": "No alerts",
+    "viewAll": "View All",
+    "refresh": "Refresh",
+    "lastUpdated": "Last Updated"
+  },
+
+  "holdings": {
+    "title": "Holdings Management",
+    "symbol": "Symbol",
+    "name": "Name",
+    "shares": "Shares",
+    "avgCost": "Avg Cost",
+    "currentPrice": "Price",
+    "marketValue": "Market Value",
+    "pnl": "P&L",
+    "pnlPercent": "P&L %",
+    "sector": "Sector",
+    "addHolding": "Add Holding",
+    "editHolding": "Edit Holding",
+    "deleteHolding": "Delete Holding",
+    "noHoldings": "No holdings",
+    "total": "Total",
+    "filter": {
+      "title": "Filter",
+      "allSectors": "All Sectors",
+      "allUsers": "All Users"
+    }
+  },
+
+  "options": {
+    "title": "Options Strategy",
+    "subtitle": "Sell Put Recommendations",
+    "openPositions": "Open Positions",
+    "history": "History",
+    "symbol": "Symbol",
+    "optionType": "Type",
+    "strike": "Strike",
+    "expiry": "Expiry",
+    "premium": "Premium",
+    "contracts": "Contracts",
+    "status": "Status",
+    "statusOpen": "Open",
+    "statusClosed": "Closed",
+    "statusExpired": "Expired",
+    "statusAssigned": "Assigned",
+    "addPosition": "Open Position",
+    "closePosition": "Close Position",
+    "daysToExpiry": "DTE",
+    "annualReturn": "Annual Return",
+    "filter": {
+      "title": "Filter",
+      "allTypes": "All Types",
+      "allStatuses": "All Statuses",
+      "allUsers": "All Users"
+    }
+  },
+
+  "tsla": {
+    "title": "TSLA Monitor",
+    "moat": "Moat Analysis",
+    "outlook": "Business Outlook",
+    "sellPutGuide": "Sell Put Guide",
+    "calculator": "Calculator",
+    "currentPrice": "Current Price",
+    "myPosition": "My Position",
+    "noPosition": "No Position",
+    "shares": "shares",
+    "marketValue": "Market Value",
+    "avgCost": "Avg Cost",
+    "totalReturn": "Total Return",
+    "optionPositions": "Option Positions",
+    "openContracts": "Open Contracts"
+  },
+
+  "health": {
+    "title": "Portfolio Health",
+    "overallScore": "Overall Score",
+    "dimensions": {
+      "diversification": "Diversification",
+      "risk": "Risk Exposure",
+      "cash": "Cash Allocation",
+      "profitability": "Profitability",
+      "valuation": "Valuation",
+      "trend": "Trend Alignment"
+    },
+    "analysis": "Analysis",
+    "suggestions": "Suggestions",
+    "algoExplain": "Algorithm"
+  },
+
+  "login": {
+    "title": "Login",
+    "welcomeBack": "Welcome Back",
+    "subtitle": "Sign in to your investment center",
+    "username": "Username",
+    "password": "Password",
+    "usernamePlaceholder": "Enter username",
+    "passwordPlaceholder": "Enter password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "No account?",
+    "registerNow": "Register now",
+    "loginButton": "Sign In"
+  },
+
+  "register": {
+    "title": "Register",
+    "username": "Username",
+    "password": "Password",
+    "email": "Email",
+    "usernamePlaceholder": "2-20 characters",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "At least 6 chars",
+    "confirmPassword": "Confirm Password",
+    "hasAccount": "Have an account?",
+    "loginNow": "Login now",
+    "registerButton": "Create Account"
+  },
+
+  "admin": {
+    "title": "Admin Panel",
+    "users": "Users",
+    "holdings": "Holdings",
+    "options": "Options",
+    "stats": "Statistics",
+    "userCount": "Total Users",
+    "totalAssets": "Total Assets",
+    "totalHoldings": "Total Holdings",
+    "totalOptions": "Total Options",
+    "backToFront": "Back to Site",
+    "mainFunctions": "Main",
+    "dashboard": "Dashboard",
+    "resetPassword": "Reset Password",
+    "system": "System",
+    "systemInfo": "System Info",
+    "operationLogs": "Logs",
+    "footer": "Claw Advisor v1.0 · Admin"
+  },
+
+  "language": {
+    "name": "Language",
+    "zh": "中文",
+    "en": "English"
+  }
+}

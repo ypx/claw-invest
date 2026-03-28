@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Claw · 管理后台</title>
+  <title data-i18n-page-title="admin.title">Claw Advisor · Admin</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <script src="/i18n/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f0ece8; color: #2c2420; min-height: 100vh; display: flex; flex-direction: column; }
@@ -91,13 +92,18 @@
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo-icon">C</div>
-    <h1>Claw 管理后台</h1>
+    <h1 data-i18n="admin.title">Claw 管理后台</h1>
     <span class="badge-admin"><i class="fa fa-shield-halved"></i> ADMIN</span>
   </div>
   <div class="topbar-right">
+    <!-- Language Switcher -->
+    <div class="lang-switcher" style="display:flex;align-items:center;gap:4px;margin-right:12px;padding-right:12px;border-right:1px solid #3a3028;">
+      <button data-lang="zh" onclick="i18n.switchLanguage('zh')" style="padding:4px 8px;background:rgba(192,98,42,0.2);border:1px solid rgba(192,98,42,0.4);border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;color:#f09070;min-width:28px;">中</button>
+      <button data-lang="en" onclick="i18n.switchLanguage('en')" style="padding:4px 8px;background:transparent;border:1px solid #3a3028;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;color:#a89a90;transition:all .15s;min-width:28px;" onmouseover="this.style.color='#f0ece8';this.style.borderColor='#c0622a'" onmouseout="this.style.color='#a89a90';this.style.borderColor='#3a3028'">EN</button>
+    </div>
     <span class="admin-user"><i class="fa fa-user-circle"></i> <span id="admin-name">管理员</span></span>
-    <button class="btn-sm btn-sm-outline" onclick="location.href='/dashboard'"><i class="fa fa-arrow-left"></i> 返回前台</button>
-    <button class="btn-sm btn-sm-danger" onclick="doLogout()"><i class="fa fa-right-from-bracket"></i> 退出</button>
+    <button class="btn-sm btn-sm-outline" onclick="location.href='/dashboard'"><i class="fa fa-arrow-left"></i> <span data-i18n="admin.backToFront">返回前台</span></button>
+    <button class="btn-sm btn-sm-danger" onclick="doLogout()"><i class="fa fa-right-from-bracket"></i> <span data-i18n="nav.logout">退出</span></button>
   </div>
 </div>
 
@@ -106,33 +112,33 @@
 
   <!-- ── Sidebar ── -->
   <nav class="sidebar">
-    <div class="sidebar-section">主要功能</div>
+    <div class="sidebar-section" data-i18n="admin.mainFunctions">主要功能</div>
     <a class="nav-item active" onclick="showAdminPage('dashboard')" href="#">
-      <i class="fa fa-gauge"></i> 控制台
+      <i class="fa fa-gauge"></i> <span data-i18n="admin.dashboard">控制台</span>
     </a>
     <a class="nav-item" onclick="showAdminPage('users')" href="#">
-      <i class="fa fa-users"></i> 用户管理
+      <i class="fa fa-users"></i> <span data-i18n="admin.users">用户管理</span>
     </a>
     <a class="nav-item" onclick="showAdminPage('holdings')" href="#">
-      <i class="fa fa-chart-pie"></i> 持仓管理
+      <i class="fa fa-chart-pie"></i> <span data-i18n="admin.holdings">持仓管理</span>
     </a>
     <a class="nav-item" onclick="showAdminPage('options')" href="#">
-      <i class="fa fa-file-contract"></i> 期权管理
+      <i class="fa fa-file-contract"></i> <span data-i18n="admin.options">期权管理</span>
     </a>
     <a class="nav-item" onclick="showAdminPage('password')" href="#">
-      <i class="fa fa-key"></i> 重置密码
+      <i class="fa fa-key"></i> <span data-i18n="admin.resetPassword">重置密码</span>
     </a>
 
-    <div class="sidebar-section">系统</div>
+    <div class="sidebar-section" data-i18n="admin.system">系统</div>
     <a class="nav-item" onclick="showAdminPage('system')" href="#">
-      <i class="fa fa-server"></i> 系统信息
+      <i class="fa fa-server"></i> <span data-i18n="admin.systemInfo">系统信息</span>
     </a>
     <a class="nav-item" onclick="showAdminPage('logs')" href="#">
-      <i class="fa fa-file-lines"></i> 操作日志
+      <i class="fa fa-file-lines"></i> <span data-i18n="admin.operationLogs">操作日志</span>
     </a>
 
     <div class="sidebar-footer">
-      <div class="sidebar-footer-info">Claw v1.0 · 管理后台</div>
+      <div class="sidebar-footer-info" data-i18n="admin.footer">Claw Advisor v1.0 · Admin</div>
     </div>
   </nav>
 

@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Claw · 登录</title>
+  <title data-i18n-page-title="login.title">Claw Advisor · Login</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <script src="/i18n/i18n.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -226,21 +227,27 @@
   <div class="glow glow-1"></div>
   <div class="glow glow-2"></div>
 
+  <!-- Top Right Language Switcher -->
+  <div class="lang-switcher" style="position:fixed;top:20px;right:20px;display:flex;align-items:center;gap:4px;z-index:100;">
+    <button data-lang="zh" onclick="i18n.switchLanguage('zh')" style="padding:6px 10px;background:#c0622a;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:white;min-width:32px;">中</button>
+    <button data-lang="en" onclick="i18n.switchLanguage('en')" style="padding:6px 10px;background:rgba(255,255,255,0.9);border:1px solid #e8ddd5;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#7a6a60;transition:all .15s;min-width:32px;" onmouseover="this.style.color='#2c2420';this.style.borderColor='#c0622a'" onmouseout="this.style.color='#7a6a60';this.style.borderColor='#e8ddd5'">EN</button>
+  </div>
+
   <div class="container">
     <!-- Logo -->
     <div class="logo-wrap">
       <div class="logo-icon">C</div>
-      <span class="logo-text">Claw Advisor</span>
+      <span class="logo-text" data-i18n="app.name">Claw Advisor</span>
     </div>
 
     <div class="card">
-      <div class="card-title">欢迎回来</div>
-      <div class="card-subtitle">登录你的投资决策中心</div>
+      <div class="card-title" data-i18n="login.welcomeBack">欢迎回来</div>
+      <div class="card-subtitle" data-i18n="login.subtitle">登录你的投资决策中心</div>
 
       <!-- Tabs -->
       <div class="tabs">
-        <div class="tab active" onclick="switchTab('login')">登录</div>
-        <div class="tab" onclick="switchTab('register')">注册</div>
+        <div class="tab active" onclick="switchTab('login')" data-i18n="login.title">登录</div>
+        <div class="tab" onclick="switchTab('register')" data-i18n="register.title">注册</div>
       </div>
 
       <!-- Alert -->
@@ -249,49 +256,49 @@
       <!-- Login Form -->
       <form id="login-form" onsubmit="doLogin(event)">
         <div class="form-group">
-          <label>用户名</label>
+          <label data-i18n="login.username">用户名</label>
           <div class="input-wrap">
-            <input type="text" id="login-username" placeholder="输入用户名" autocomplete="username" required />
+            <input type="text" id="login-username" data-i18n-placeholder="login.usernamePlaceholder" placeholder="输入用户名" autocomplete="username" required />
             <i class="fa fa-user input-icon"></i>
           </div>
         </div>
         <div class="form-group">
-          <label>密码</label>
+          <label data-i18n="login.password">密码</label>
           <div class="input-wrap">
-            <input type="password" id="login-password" placeholder="输入密码" autocomplete="current-password" required />
+            <input type="password" id="login-password" data-i18n-placeholder="login.passwordPlaceholder" placeholder="输入密码" autocomplete="current-password" required />
             <i class="fa fa-eye input-icon" onclick="togglePw('login-password', this)"></i>
           </div>
         </div>
         <button class="btn" type="submit" id="login-btn">
-          <i class="fa fa-right-to-bracket"></i> 登录
+          <i class="fa fa-right-to-bracket"></i> <span data-i18n="login.loginButton">登录</span>
         </button>
       </form>
 
       <!-- Register Form -->
       <form id="register-form" style="display:none" onsubmit="doRegister(event)">
         <div class="form-group">
-          <label>用户名</label>
+          <label data-i18n="register.username">用户名</label>
           <div class="input-wrap">
-            <input type="text" id="reg-username" placeholder="2-20 位字符" required />
+            <input type="text" id="reg-username" data-i18n-placeholder="register.usernamePlaceholder" placeholder="2-20 位字符" required />
             <i class="fa fa-user input-icon"></i>
           </div>
         </div>
         <div class="form-group">
-          <label>邮箱</label>
+          <label data-i18n="register.email">邮箱</label>
           <div class="input-wrap">
-            <input type="email" id="reg-email" placeholder="your@email.com" required />
+            <input type="email" id="reg-email" data-i18n-placeholder="register.emailPlaceholder" placeholder="your@email.com" required />
             <i class="fa fa-envelope input-icon"></i>
           </div>
         </div>
         <div class="form-group">
-          <label>密码</label>
+          <label data-i18n="register.password">密码</label>
           <div class="input-wrap">
-            <input type="password" id="reg-password" placeholder="至少 6 位" required />
+            <input type="password" id="reg-password" data-i18n-placeholder="register.passwordPlaceholder" placeholder="至少 6 位" required />
             <i class="fa fa-eye input-icon" onclick="togglePw('reg-password', this)"></i>
           </div>
         </div>
         <button class="btn" type="submit" id="reg-btn">
-          <i class="fa fa-user-plus"></i> 创建账号
+          <i class="fa fa-user-plus"></i> <span data-i18n="register.registerButton">创建账号</span>
         </button>
       </form>
 

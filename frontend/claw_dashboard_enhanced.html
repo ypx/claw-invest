@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Claw · 投资决策中心</title>
+  <title data-i18n-page-title="app.name">Claw Advisor</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/i18n/i18n.js"></script>
   
   <!-- Design Tokens -->
   <style>
@@ -1537,85 +1538,86 @@
 <nav id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">C</div>
-    <span class="logo-text">Claw Advisor</span>
-    <span class="logo-badge">BETA</span>
+    <span class="logo-text" data-i18n="app.name">Claw Advisor</span>
+    <span class="logo-badge" data-i18n="app.beta">BETA</span>
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">概览</div>
+    <div class="sidebar-section-label" data-i18n="nav.overview">概览</div>
     <a class="nav-item active" data-page="overview" onclick="navigate('overview',this)">
-      <i class="fa fa-chart-pie"></i> 投资总览
+      <i class="fa fa-chart-pie"></i> <span data-i18n="nav.dashboard">投资总览</span>
     </a>
     <a class="nav-item" data-page="holdings" onclick="navigate('holdings',this)">
-      <i class="fa fa-layer-group"></i> 持仓明细
+      <i class="fa fa-layer-group"></i> <span data-i18n="nav.holdings">持仓明细</span>
     </a>
     <a class="nav-item" data-page="health" onclick="navigate('health',this)">
-      <i class="fa fa-heart-pulse"></i> 健康评估
+      <i class="fa fa-heart-pulse"></i> <span data-i18n="nav.health">健康评估</span>
     </a>
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">策略</div>
+    <div class="sidebar-section-label" data-i18n="nav.strategy">策略</div>
     <a class="nav-item" data-page="strategy" onclick="navigate('strategy', this)">
-      <i class="fa fa-chess"></i> 投资策略
-      <span class="nav-badge purple">新</span>
+      <i class="fa fa-chess"></i> <span data-i18n="nav.investmentStrategy">投资策略</span>
+      <span class="nav-badge purple" data-i18n="common.new">新</span>
     </a>
     <a class="nav-item" data-page="options" onclick="navigate('options',this)">
-      <i class="fa fa-sliders"></i> 期权策略
+      <i class="fa fa-sliders"></i> <span data-i18n="nav.options">期权策略</span>
       <span class="nav-badge blue">5</span>
     </a>
     <a class="nav-item" data-page="tsla" onclick="navigate('tsla',this)">
-      <i class="fa fa-bolt"></i> TSLA 专项监控
-      <span class="nav-badge" style="background:rgba(248,81,73,.2);color:var(--danger)">热</span>
+      <i class="fa fa-bolt"></i> <span data-i18n="nav.tsla">TSLA 专项监控</span>
+      <span class="nav-badge" style="background:rgba(248,81,73,.2);color:var(--danger)" data-i18n="common.hot">热</span>
     </a>
     <a class="nav-item" data-page="alerts" onclick="navigate('alerts',this)">
-      <i class="fa fa-bell"></i> 风险预警
+      <i class="fa fa-bell"></i> <span data-i18n="nav.alerts">风险预警</span>
       <span class="nav-badge">2</span>
     </a>
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">行业分析</div>
+    <div class="sidebar-section-label" data-i18n="nav.sectorAnalysis">行业分析</div>
     <a class="nav-item" data-page="sectors" onclick="navigate('sectors',this)">
-      <i class="fa fa-rocket"></i> 前景行业
+      <i class="fa fa-rocket"></i> <span data-i18n="nav.promisingSectors">前景行业</span>
     </a>
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">管理</div>
+    <div class="sidebar-section-label" data-i18n="nav.management">管理</div>
     <a class="nav-item" data-page="manage" onclick="navigate('manage',this)">
-      <i class="fa fa-pen-to-square"></i> 持仓管理
+      <i class="fa fa-pen-to-square"></i> <span data-i18n="nav.holdingsMgmt">持仓管理</span>
     </a>
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">市场</div>
+    <div class="sidebar-section-label" data-i18n="nav.market">市场</div>
     <a class="nav-item" data-page="market" onclick="navigate('market',this)">
-      <i class="fa fa-globe"></i> 市场行情
+      <i class="fa fa-globe"></i> <span data-i18n="nav.marketData">市场行情</span>
     </a>
     <a class="nav-item" data-page="news" onclick="navigate('news',this)">
-      <i class="fa fa-newspaper"></i> 资讯动态
+      <i class="fa fa-newspaper"></i> <span data-i18n="nav.news">资讯动态</span>
     </a>
   </div>
 
   <div class="sidebar-footer">
+
     <div class="user-card" onclick="navigate('profile')" style="cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''" title="个人中心">
       <div class="user-avatar" id="dash-avatar">Z</div>
       <div style="flex:1;min-width:0">
         <div class="user-name" id="dash-username">Z</div>
-        <div class="user-role" id="dash-role">美股个人投资者</div>
+        <div class="user-role" id="dash-role" data-i18n="user.role">美股个人投资者</div>
       </div>
       <i class="fa fa-chevron-right" style="font-size:10px;color:var(--text-tertiary);flex-shrink:0"></i>
     </div>
     <div style="display:flex;gap:6px;padding:4px 4px 0">
       <button id="admin-entry" onclick="location.href='/admin'" style="display:none;flex:1;padding:7px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--danger)">
-        <i class="fa fa-shield-halved"></i> 管理后台
+        <i class="fa fa-shield-halved"></i> <span data-i18n="nav.admin">管理后台</span>
       </button>
       <button onclick="openChangePwModal()" style="flex:1;padding:7px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-secondary);transition:all .15s" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
-        <i class="fa fa-key"></i> 改密码
+        <i class="fa fa-key"></i> <span data-i18n="user.changePassword">改密码</span>
       </button>
       <button onclick="doLogout()" style="flex:1;padding:7px;background:transparent;border:1px solid var(--border-default);border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-secondary);transition:all .15s" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
-        <i class="fa fa-right-from-bracket"></i> 退出
+        <i class="fa fa-right-from-bracket"></i> <span data-i18n="nav.logout">退出</span>
       </button>
     </div>
   </div>
@@ -1637,9 +1639,14 @@
       </div>
     </div>
     <div class="topbar-actions">
+      <!-- Language Switcher -->
+      <div class="lang-switcher" style="display:flex;align-items:center;gap:2px;margin-right:12px;padding-right:12px;border-right:1px solid var(--border-default);">
+        <button data-lang="zh" onclick="i18n.switchLanguage('zh')" style="padding:4px 8px;background:var(--bg-accent-subtle);border:1px solid var(--border-accent);border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;color:var(--accent-primary);min-width:28px;">中</button>
+        <button data-lang="en" onclick="i18n.switchLanguage('en')" style="padding:4px 8px;background:transparent;border:1px solid var(--border-default);border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-secondary);transition:all .15s;min-width:28px;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">EN</button>
+      </div>
       <div class="live-dot"></div>
-      <span class="live-label">实时</span>
-      <button class="icon-btn" onclick="refreshData()" title="刷新数据"><i class="fa fa-rotate"></i></button>
+      <span class="live-label" data-i18n="common.live">实时</span>
+      <button class="icon-btn" onclick="refreshData()" data-i18n-title="common.refresh" title="刷新数据"><i class="fa fa-rotate"></i></button>
       <span id="last-update" style="font-size:11px;color:var(--text-tertiary);">更新中…</span>
     </div>
   </header>

@@ -1,0 +1,221 @@
+{
+  "_meta": {
+    "name": "简体中文",
+    "code": "zh"
+  },
+  
+  "app": {
+    "name": "Claw Advisor",
+    "slogan": "智能投资决策系统",
+    "beta": "BETA"
+  },
+
+  "nav": {
+    "dashboard": "投资总览",
+    "holdings": "持仓管理",
+    "holdingsDetail": "持仓明细",
+    "options": "期权策略",
+    "tsla": "TSLA 专项监控",
+    "health": "健康评估",
+    "news": "投资资讯",
+    "admin": "管理后台",
+    "profile": "个人设置",
+    "logout": "退出",
+    "login": "登录",
+    "register": "注册",
+    "overview": "概览",
+    "strategy": "策略",
+    "investmentStrategy": "投资策略",
+    "alerts": "风险预警",
+    "sectorAnalysis": "行业分析",
+    "promisingSectors": "前景行业",
+    "management": "管理",
+    "holdingsMgmt": "持仓管理",
+    "market": "市场",
+    "marketData": "市场行情"
+  },
+
+  "user": {
+    "role": "美股个人投资者",
+    "changePassword": "改密码"
+  },
+
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "close": "关闭",
+    "search": "搜索",
+    "filter": "筛选",
+    "clear": "清空",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "warning": "警告",
+    "info": "提示",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "new": "新",
+    "hot": "热",
+    "live": "实时",
+    "refresh": "刷新数据"
+  },
+
+  "dashboard": {
+    "title": "投资总览",
+    "totalAssets": "总资产",
+    "totalReturn": "总收益",
+    "cashRatio": "现金比例",
+    "healthScore": "健康评分",
+    "holdingsCount": "持仓数量",
+    "optionsCount": "期权策略",
+    "alerts": "预警提示",
+    "noAlerts": "暂无预警",
+    "viewAll": "查看全部",
+    "refresh": "刷新数据",
+    "lastUpdated": "最后更新"
+  },
+
+  "holdings": {
+    "title": "持仓管理",
+    "symbol": "标的",
+    "name": "名称",
+    "shares": "股数",
+    "avgCost": "成本价",
+    "currentPrice": "现价",
+    "marketValue": "市值",
+    "pnl": "盈亏",
+    "pnlPercent": "盈亏率",
+    "sector": "行业",
+    "addHolding": "添加持仓",
+    "editHolding": "编辑持仓",
+    "deleteHolding": "删除持仓",
+    "noHoldings": "暂无持仓",
+    "total": "合计",
+    "filter": {
+      "title": "筛选",
+      "allSectors": "全部行业",
+      "allUsers": "全部用户"
+    }
+  },
+
+  "options": {
+    "title": "期权策略",
+    "subtitle": "Sell Put 策略推荐",
+    "openPositions": "当前持仓",
+    "history": "历史记录",
+    "symbol": "标的",
+    "optionType": "类型",
+    "strike": "行权价",
+    "expiry": "到期日",
+    "premium": "权利金",
+    "contracts": "合约数",
+    "status": "状态",
+    "statusOpen": "持仓中",
+    "statusClosed": "已平仓",
+    "statusExpired": "已到期",
+    "statusAssigned": "已行权",
+    "addPosition": "开仓",
+    "closePosition": "平仓",
+    "daysToExpiry": "剩余天数",
+    "annualReturn": "年化收益",
+    "filter": {
+      "title": "筛选",
+      "allTypes": "全部类型",
+      "allStatuses": "全部状态",
+      "allUsers": "全部用户"
+    }
+  },
+
+  "tsla": {
+    "title": "TSLA 专项监控",
+    "moat": "护城河分析",
+    "outlook": "业务前景",
+    "sellPutGuide": "Sell Put 指南",
+    "calculator": "收益计算器",
+    "currentPrice": "当前股价",
+    "myPosition": "我的持仓",
+    "noPosition": "无持仓",
+    "shares": "股",
+    "marketValue": "市值",
+    "avgCost": "成本",
+    "totalReturn": "总收益",
+    "optionPositions": "期权持仓",
+    "openContracts": "未平仓合约"
+  },
+
+  "health": {
+    "title": "健康评估",
+    "overallScore": "综合评分",
+    "dimensions": {
+      "diversification": "多元化",
+      "risk": "风险敞口",
+      "cash": "现金配置",
+      "profitability": "盈利能力",
+      "valuation": "估值健康",
+      "trend": "趋势一致性"
+    },
+    "analysis": "详细分析",
+    "suggestions": "优化建议",
+    "algoExplain": "算法解释"
+  },
+
+  "login": {
+    "title": "登录",
+    "welcomeBack": "欢迎回来",
+    "subtitle": "登录你的投资决策中心",
+    "username": "用户名",
+    "password": "密码",
+    "usernamePlaceholder": "输入用户名",
+    "passwordPlaceholder": "输入密码",
+    "rememberMe": "记住我",
+    "forgotPassword": "忘记密码？",
+    "noAccount": "还没有账号？",
+    "registerNow": "立即注册",
+    "loginButton": "登录"
+  },
+
+  "register": {
+    "title": "注册",
+    "username": "用户名",
+    "password": "密码",
+    "email": "邮箱",
+    "usernamePlaceholder": "2-20 位字符",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "至少 6 位",
+    "confirmPassword": "确认密码",
+    "hasAccount": "已有账号？",
+    "loginNow": "立即登录",
+    "registerButton": "创建账号"
+  },
+
+  "admin": {
+    "title": "管理后台",
+    "users": "用户管理",
+    "holdings": "持仓管理",
+    "options": "期权管理",
+    "stats": "统计概览",
+    "userCount": "用户总数",
+    "totalAssets": "总资产",
+    "totalHoldings": "总持仓数",
+    "totalOptions": "总期权数",
+    "backToFront": "返回前台",
+    "mainFunctions": "主要功能",
+    "dashboard": "控制台",
+    "resetPassword": "重置密码",
+    "system": "系统",
+    "systemInfo": "系统信息",
+    "operationLogs": "操作日志",
+    "footer": "Claw Advisor v1.0 · 管理后台"
+  },
+
+  "language": {
+    "name": "语言",
+    "zh": "中文",
+    "en": "English"
+  }
+}
