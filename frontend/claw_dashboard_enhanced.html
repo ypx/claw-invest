@@ -4919,12 +4919,16 @@ function renderOptionPositions(positions) {
   const statusLabel = { open: '持仓中', closed: '已平仓', expired: '已到期', assigned: '已行权' };
   const statusColor = { open: 'var(--success)', closed: 'var(--accent-primary)', expired: 'var(--text-tertiary)', assigned: 'var(--warning)' };
   const dirLabel = { sell: 'Sell', buy: 'Buy' };
+  const today = new Date(); today.setHours(0,0,0,0);
   tbody.innerHTML = positions.map(p => {
     const isOpen = p.status === 'open';
+    // 检查是否已到期但未处理（状态还是 open 但到期日 <= 今天）
+    const expDate = p.expiration ? new Date(p.expiration + 'T00:00:00') : null;
+    const isPastDue = isOpen && expDate && expDate <= today;
     const grossPremium = (p.premium || 0) * (p.contracts || 0) * 100;
     let pnl;
     if (isOpen) {
-      pnl = grossPremium; // 持仓中：最大可收益（权利金全收）
+      pnl = grossPremium; // 持仓中/已到期未处理：最大可收益
     } else if (p.status === 'expired') {
       pnl = grossPremium; // 到期归零：全收
     } else if (p.status === 'closed') {
@@ -4933,23 +4937,31 @@ function renderOptionPositions(positions) {
     } else {
       pnl = 0; // assigned 等
     }
-    const pnlNote = isOpen ? '最大收益' : (p.status === 'expired' ? '到期全收' : p.status === 'closed' ? '已实现' : '已行权');
+    const pnlNote = (isOpen && !isPastDue) ? '最大收益' : (isPastDue ? '待确认' : p.status === 'expired' ? '到期全收' : p.status === 'closed' ? '已实现' : '已行权');
     const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
     const typeStr = `${(p.direction==='sell'?'Sell':'Buy')||p.direction} ${(p.option_type||'').toUpperCase()}`;
     const typeColor = p.direction === 'sell' ? 'var(--success)' : 'var(--danger)';
+    // 状态显示：已过期未处理的显示"已到期"（橙色警示）
+    const displayStatus = isPastDue ? '已到期' : (statusLabel[p.status] || p.status);
+    const displayColor = isPastDue ? 'var(--warning)' : (statusColor[p.status] || 'var(--text-tertiary)');
+    const displayBg = isPastDue ? 'rgba(210,153,34,0.12)' : 'var(--bg-tertiary)';
     return `
-      <tr>
+      <tr${isPastDue ? ' style="background:rgba(210,153,34,0.04)"' : ''}>
         <td><strong style="color:var(--info)">${p.symbol}</strong></td>
         <td><span style="font-size:11.5px;font-weight:700;color:${typeColor};background:var(--bg-tertiary);padding:2px 7px;border-radius:4px">${typeStr}</span></td>
         <td class="right"><strong>$${p.strike_price.toFixed(1)}</strong></td>
-        <td class="right" style="font-size:12px">${p.expiration}</td>
+        <td class="right" style="font-size:12px${isPastDue ? ';color:var(--warning)' : ''}">${p.expiration}</td>
         <td class="right">${p.contracts} 张<span style="font-size:10px;color:var(--text-secondary)">×100</span></td>
         <td class="right">$${p.premium.toFixed(2)}</td>
         <td class="right" style="font-weight:700;color:${pnlColor}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}<div style="font-size:10px;color:var(--text-secondary)">${pnlNote}</div></td>
-        <td><span style="font-size:11px;font-weight:600;color:${statusColor[p.status]||'var(--text-tertiary)'};background:var(--bg-tertiary);padding:2px 7px;border-radius:20px">${statusLabel[p.status]||p.status}</span></td>
+        <td><span style="font-size:11px;font-weight:600;color:${displayColor};background:${displayBg};padding:2px 7px;border-radius:20px">${displayStatus}</span></td>
         <td class="right">
           <div style="display:flex;gap:4px;justify-content:flex-end">
-            ${isOpen ? `
+            ${isPastDue ? `
+              <button onclick="openCloseOptModalExpired('${p.id}', '${p.symbol} $${p.strike_price} ${p.option_type.toUpperCase()}', ${p.premium}, ${p.contracts})" style="padding:3px 8px;background:rgba(210,153,34,0.15);border:1px solid rgba(210,153,34,.4);border-radius:4px;cursor:pointer;font-size:11px;color:var(--warning);font-weight:600">
+                到期归零
+              </button>
+            ` : isOpen ? `
               <button onclick="openCloseOptModal('${p.id}', '${p.symbol} $${p.strike_price} ${p.option_type.toUpperCase()}', ${p.premium}, ${p.contracts})" style="padding:3px 8px;background:transparent;border:1px solid rgba(248,81,73,.3);border-radius:4px;cursor:pointer;font-size:11px;color:var(--danger)">
                 结束
               </button>
@@ -5046,6 +5058,18 @@ function openCloseOptModal(posId, label, premium, contracts) {
   document.getElementById('close-opt-status').value = 'closed';
   toggleClosePrice();
   document.getElementById('close-opt-pnl-preview').textContent = '填写平仓权利金后预览盈亏';
+  document.getElementById('close-opt-modal').style.display = 'flex';
+}
+
+// 快捷：到期归零（预选"到期归零"，无需填价格）
+function openCloseOptModalExpired(posId, label, premium, contracts) {
+  _closeOptData = { posId, premium, contracts };
+  document.getElementById('close-opt-id').value = posId;
+  document.getElementById('close-opt-info').textContent = `持仓：${label} × ${contracts} 张 | 开仓权利金 $${premium}/股`;
+  document.getElementById('close-opt-price').value = '';
+  document.getElementById('close-opt-status').value = 'expired';
+  toggleClosePrice();
+  document.getElementById('close-opt-pnl-preview').innerHTML = `<span style="color:var(--success);font-weight:700">到期归零 — 权利金全部落袋：+$${(premium * contracts * 100).toFixed(2)}</span>`;
   document.getElementById('close-opt-modal').style.display = 'flex';
 }
 
