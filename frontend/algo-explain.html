@@ -385,26 +385,62 @@
       </div>
       <div class="algo-content">
         <h4><i class="fa fa-circle"></i> 算法逻辑</h4>
-        <p>基于参考投资体系中的 Sell Put 策略框架，结合当前市场 VIX 水平、个股波动率、技术分析推荐合适的 Sell Put 策略。</p>
-        
-        <h4><i class="fa fa-circle"></i> 核心参数</h4>
+        <p>基于参考投资体系中的 Sell Put 核心原则：只在具有强护城河、长期看好的标的上卖出 Put，结合实时股价、VIX 水平和用户风险偏好，动态生成推荐。</p>
+
+        <h4><i class="fa fa-circle"></i> 推荐标的（固定5个，优先级排序）</h4>
         <ul class="param-list">
-          <li><code>VIX 区间</code> <span>最佳开仓窗口：VIX 20-35；VIX < 15 不建议开仓</span></li>
-          <li><code>价外程度(OTM)</code> <span>保守型 15% OTM，稳健型 10% OTM，进取型 5% OTM</span></li>
-          <li><code>到期天数(DTE)</code> <span>推荐 21-45 天，Theta 衰减最快区间</span></li>
-          <li><code>胜率估算</code> <span>基于 Delta 近似：ITM Delta ≈ 行权概率</span></li>
+          <li><code>TSLA</code> <span>电动车/能源/AI机器人 — 核心持仓，Sell Put 首选；隐含波动率估算 55%，OTM 倍数 1.0×</span></li>
+          <li><code>NVDA</code> <span>AI 算力基础设施 — 护城河极宽；隐含波动率估算 50%，OTM 倍数 1.1×（稍宽）</span></li>
+          <li><code>GOOGL</code> <span>AI/搜索/云计算 — AI 巨头中估值最低；隐含波动率估算 35%，OTM 倍数 0.9×</span></li>
+          <li><code>META</code> <span>AI 社交/广告双引擎 — 被低估；隐含波动率估算 38%，OTM 倍数 0.9×</span></li>
+          <li><code>IONQ</code> <span>量子计算（高弹性）— 高风险高回报，建议小仓位；隐含波动率估算 80%，OTM 倍数 1.4×（更远）</span></li>
         </ul>
-        
+
+        <h4><i class="fa fa-circle"></i> OTM 距离计算</h4>
+        <div class="formula-box">
+          <div>基础 OTM% = 保守15% / 平衡10% / 激进5%（由用户画像决定）</div>
+          <div>实际 OTM% = 基础 OTM% × 标的 OTM 倍数</div>
+          <div>行权价 = 现价 × (1 − 实际 OTM%)</div>
+          <div class="comment">// 行权价向下取整到 $5/$2.5/$0.1 精度（依价格区间）</div>
+        </div>
+
+        <h4><i class="fa fa-circle"></i> 权利金估算（简化 Black-Scholes）</h4>
+        <div class="formula-box">
+          <div>权利金 ≈ 现价 × IV × √(DTE/365) × Delta目标</div>
+          <div class="comment">// IV = 各标的隐含波动率估算（TSLA 0.55，IONQ 0.80 等）</div>
+          <div class="comment">// Delta目标：保守 0.15，平衡 0.25，激进 0.35</div>
+          <div class="comment">// 上限为现价的 10%，下限 $0.10</div>
+        </div>
+
         <h4><i class="fa fa-circle"></i> 年化收益率计算</h4>
         <div class="formula-box">
-          <div>年化收益率 = (权利金收入 / 保证金占用) × (365 / 到期天数) × 100%</div>
-          <div class="comment">// 保证金占用 ≈ 行权价 × 100股 × 20% (典型券商要求)</div>
+          <div>年化收益率 = (权利金 / 行权价) × (365 / DTE) × 100%</div>
         </div>
-        
+
+        <h4><i class="fa fa-circle"></i> DTE（到期天数）与胜率</h4>
+        <ul class="param-list">
+          <li><code>保守型</code> <span>DTE = 45天，胜率 85%，OTM 基础 15%</span></li>
+          <li><code>平衡型</code> <span>DTE = 30天，胜率 75%，OTM 基础 10%</span></li>
+          <li><code>激进型</code> <span>DTE = 21天，胜率 65%，OTM 基础 5%</span></li>
+        </ul>
+
+        <h4><i class="fa fa-circle"></i> VIX 调节说明</h4>
+        <ul class="param-list">
+          <li><code>VIX &lt; 15</code> <span>波动率低，权利金偏少，建议等待更好时机</span></li>
+          <li><code>VIX 15–30</code> <span>正常区间，按标准参数操作</span></li>
+          <li><code>VIX &gt; 30</code> <span>权利金丰厚，此时 Sell Put 收益更高</span></li>
+        </ul>
+
+        <h4><i class="fa fa-circle"></i> 价格数据来源</h4>
+        <p>推荐标的的现价通过多源实时获取：优先使用 Stooq（免费、无限速），失败时降级至 Alpha Vantage。两源差异 &gt; 10% 时触发价格警告。</p>
+
         <div class="example-box">
-          <h5><i class="fa fa-calculator"></i> 计算示例</h5>
-          <p>TSLA 现价 $380，卖出 $340 Put，权利金 $3.5/股，30天到期</p>
-          <p>年化收益 = (3.5×100)/(340×100×0.2) × (365/30) × 100% ≈ <strong>62.7%</strong></p>
+          <h5><i class="fa fa-calculator"></i> 计算示例（用户画像：平衡型）</h5>
+          <p>TSLA 实时价 $361.75，OTM = 10% × 1.0 = 10%</p>
+          <p>行权价 = 361.75 × 0.90 ≈ $325（取整到 $5）</p>
+          <p>权利金 ≈ 361.75 × 0.55 × √(30/365) × 0.25 ≈ <strong>$14.5/股</strong></p>
+          <p>年化收益 = (14.5 / 325) × (365/30) × 100% ≈ <strong>54.2%</strong></p>
+          <p style="margin-top:8px;color:var(--text-tertiary);font-size:11px">注：实际成交价受市场供需影响，此为算法估算值，仅供参考</p>
         </div>
       </div>
     </section>
@@ -507,7 +543,7 @@
       <div class="source-grid">
         <div class="source-item">
           <h4>股票价格</h4>
-          <p>Yahoo Finance API / Alpha Vantage</p>
+          <p>Stooq（主）+ Alpha Vantage（备用交叉验证）</p>
         </div>
         <div class="source-item">
           <h4>期权数据</h4>
