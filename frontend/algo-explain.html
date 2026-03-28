@@ -349,27 +349,46 @@
         </div>
       </div>
       <div class="algo-content">
-        <h4><i class="fa fa-circle"></i> 算法目的</h4>
-        <p>综合评估用户投资组合的多元化程度、风险敞口、现金配置等因素，生成 0-100 分的健康评分。</p>
+        <h4><i class="fa fa-circle"></i> 重要说明：两个不同的评分体系</h4>
+        <p>CLAW 系统使用<strong>两个不同的评分算法</strong>，分别用于不同场景：</p>
+        <ul class="param-list" style="margin: 16px 0;">
+          <li><code>健康评分</code> <span>显示在投资总览页面，基于现金/持仓比例的简单快速评估</span></li>
+          <li><code>综合评分</code> <span>显示在健康评估页面，基于6个维度的全面深度分析</span></li>
+        </ul>
+        <p style="color: var(--warning);"><i class="fa fa-exclamation-triangle"></i> 注意：两个评分的数值可能不同，这是正常的，因为它们评估的角度和维度不同。</p>
         
-        <h4><i class="fa fa-circle"></i> 计算公式</h4>
+        <h4><i class="fa fa-circle"></i> 算法 1A：健康评分（投资总览）</h4>
+        <p>这是一个轻量级快速评估，主要关注现金与持仓的配置比例：</p>
+        <div class="formula-box">
+          <div>健康评分 = 100 - |实际现金比例 - 目标现金比例| × 惩罚系数</div>
+          <div class="comment">// 惩罚系数根据偏离程度动态调整</div>
+          <div class="comment">// 示例：目标现金30%，实际现金50%，偏离20%，评分约80分</div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-tertiary); margin-top: 8px;">
+          适用场景：投资总览页面的快速健康检查，计算简单、响应迅速。
+        </p>
+        
+        <h4><i class="fa fa-circle"></i> 算法 1B：综合评分（健康评估）</h4>
+        <p>这是一个全面的六维评估体系，深入分析投资组合的各个方面：</p>
         <div class="formula-box">
           <div>综合得分 = Σ(维度得分 × 维度权重)</div>
           <div class="comment">// 各维度满分100，权重总和为1</div>
         </div>
         
-        <h4><i class="fa fa-circle"></i> 评分维度</h4>
+        <h4><i class="fa fa-circle"></i> 六维评分体系</h4>
         <ul class="param-list">
-          <li><code>多元化得分</code> <span>基于行业分散度计算，单一行业占比超过40%开始扣分</span></li>
-          <li><code>风险敞口</code> <span>评估个股集中度，单只股票占比超过25%视为高风险</span></li>
-          <li><code>现金配置</code> <span>对比用户设定的目标现金比例，偏离度越大扣分越多</span></li>
-          <li><code>盈利能力</code> <span>持仓整体盈亏状态，浮亏超过10%开始影响得分</span></li>
+          <li><code>多元化得分(20%)</code> <span>基于行业分散度计算，单一行业占比超过40%开始扣分</span></li>
+          <li><code>风险敞口(20%)</code> <span>评估个股集中度，单只股票占比超过25%视为高风险</span></li>
+          <li><code>现金配置(15%)</code> <span>对比用户设定的目标现金比例，偏离度越大扣分越多</span></li>
+          <li><code>盈利能力(15%)</code> <span>持仓整体盈亏状态，浮亏超过10%开始影响得分</span></li>
+          <li><code>估值健康度(15%)</code> <span>持仓整体估值水平，PE/PB偏离历史均值的程度</span></li>
+          <li><code>趋势一致性(15%)</code> <span>持仓与长期趋势的匹配度，逆周期持仓扣分</span></li>
         </ul>
         
         <div class="example-box">
-          <h5><i class="fa fa-calculator"></i> 计算示例</h5>
-          <p>多元化 85分(权重25%) + 风险敞口 70分(权重25%) + 现金配置 90分(权重25%) + 盈利能力 80分(权重25%)</p>
-          <p>综合得分 = 85×0.25 + 70×0.25 + 90×0.25 + 80×0.25 = <strong>81.25分</strong></p>
+          <h5><i class="fa fa-calculator"></i> 综合评分计算示例</h5>
+          <p>多元化 85分(20%) + 风险敞口 70分(20%) + 现金配置 90分(15%) + 盈利能力 80分(15%) + 估值健康 75分(15%) + 趋势一致性 85分(15%)</p>
+          <p>综合得分 = 85×0.20 + 70×0.20 + 90×0.15 + 80×0.15 + 75×0.15 + 85×0.15 = <strong>80.5分</strong></p>
         </div>
       </div>
     </section>

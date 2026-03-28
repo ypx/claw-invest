@@ -123,32 +123,48 @@ const generateToken = (user) => {
 
 /**
  * 开发环境模拟用户（用于测试）
+ * 优先使用JWT token中的真实用户信息，如果没有token则使用默认用户
  */
 const mockAuthenticate = (req, res, next) => {
-  // 优先读取真实 JWT token（如果有）
+  // 首先尝试读取 JWT token（如果有）
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const decoded = require('jsonwebtoken').verify(token, config.jwt.secret);
-      req.user = { id: decoded.id, email: decoded.email, role: decoded.role || 'user' };
+      const decoded = jwt.verify(token, config.jwt.secret);
+      req.user = { 
+        id: decoded.id, 
+        email: decoded.email, 
+        role: decoded.role || 'user' 
+      };
+      logger.debug('开发环境使用JWT认证', { userId: decoded.id, email: decoded.email });
       return next();
     } catch (e) {
-      // token 无效，继续用 mock
+      // token 无效，继续用默认 mock 用户
+      logger.debug('JWT验证失败，使用默认mock用户', { error: e.message });
     }
   }
 
-  // 开发环境 mock：使用数据库中真实的 Z 用户
+  // 开发环境：没有有效token时使用默认mock用户
   if (config.app.env === 'development') {
+    // 检查是否是访问 admin 路由，如果是则使用 admin 角色
+    const isAdminRoute = req.originalUrl?.includes('/admin') || req.path?.includes('/admin');
     req.user = {
-      id: '5d67698d-132f-48f1-9e0c-fab1c4fa4479',  // Z 用户真实 ID
-      email: 'z@claw.app',
-      role: 'user',
-      name: 'Z',
+      id: isAdminRoute ? 'admin-mock-id' : '5d67698d-132f-48f1-9e0c-fab1c4fa4479',
+      email: isAdminRoute ? 'admin@claw.app' : 'z@claw.app',
+      role: isAdminRoute ? 'admin' : 'user',
+      name: isAdminRoute ? 'Admin' : 'Z',
     };
-    logger.debug('使用开发环境模拟认证 (Z用户)', { userId: req.user.id, ip: req.ip });
+    logger.debug(`使用开发环境默认mock用户 (${isAdminRoute ? 'Admin' : 'Z用户'})`, { userId: req.user.id, ip: req.ip });
+    return next();
   }
-  next();
+
+  // 生产环境：没有token则拒绝访问
+  return res.status(401).json({
+    success: false,
+    error: '未授权',
+    message: '需要有效的Bearer token',
+  });
 };
 
 module.exports = {

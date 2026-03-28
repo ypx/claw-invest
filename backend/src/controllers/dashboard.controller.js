@@ -229,7 +229,7 @@ class DashboardController {
       const totalCost = portfolioHoldings.reduce((sum, h) => sum + (h.avg_cost * h.shares), 0);
       const totalGainLoss = investedValue - totalCost;
       const totalGainLossPct = totalCost > 0 ? (totalGainLoss / totalCost * 100) : 0;
-      const cash = parseFloat(userProfile.cash || 50000);
+      const cash = parseFloat(userProfile.cash || 0);
       const targetCashRatio = parseFloat(userProfile.target_cash_ratio || 35);
       const totalValue = investedValue + cash;
       const cashRatio = totalValue > 0 ? (cash / totalValue * 100) : 0;

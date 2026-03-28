@@ -113,6 +113,12 @@
     <a class="nav-item" onclick="showAdminPage('users')" href="#">
       <i class="fa fa-users"></i> 用户管理
     </a>
+    <a class="nav-item" onclick="showAdminPage('holdings')" href="#">
+      <i class="fa fa-chart-pie"></i> 持仓管理
+    </a>
+    <a class="nav-item" onclick="showAdminPage('options')" href="#">
+      <i class="fa fa-file-contract"></i> 期权管理
+    </a>
     <a class="nav-item" onclick="showAdminPage('password')" href="#">
       <i class="fa fa-key"></i> 重置密码
     </a>
@@ -272,6 +278,116 @@
       </div>
     </div>
 
+    <!-- ═══ PAGE: HOLDINGS ═══ -->
+    <div class="page" id="admin-page-holdings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">持仓管理</div>
+          <div class="page-subtitle">管理所有用户的股票持仓（增删改查）</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-action" onclick="loadAdminHoldings()"><i class="fa fa-rotate"></i> 刷新</button>
+          <button class="btn-action" onclick="openHoldingModal()" style="background:#c0622a;color:#fff;border-color:#c0622a"><i class="fa fa-plus"></i> 添加持仓</button>
+        </div>
+      </div>
+      <div class="section">
+        <div id="alert-holdings" class="alert"></div>
+        <!-- 筛选栏 -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <select id="holdings-filter-user" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;min-width:140px">
+            <option value="">所有用户</option>
+          </select>
+          <input type="text" id="holdings-filter-symbol" placeholder="股票代码筛选" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;width:140px">
+          <select id="holdings-filter-sector" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;min-width:120px">
+            <option value="">所有行业</option>
+            <option value="科技">科技</option>
+            <option value="金融">金融</option>
+            <option value="医疗">医疗</option>
+            <option value="消费">消费</option>
+            <option value="能源">能源</option>
+            <option value="工业">工业</option>
+            <option value="其他">其他</option>
+          </select>
+          <button class="btn-action" onclick="applyHoldingsFilter()" style="background:#4a7c59;color:#fff;border-color:#4a7c59"><i class="fa fa-filter"></i> 筛选</button>
+          <button class="btn-action" onclick="clearHoldingsFilter()" style="background:#5c4a3d;color:#fff;border-color:#5c4a3d"><i class="fa fa-times"></i> 清除</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>股票代码</th>
+              <th>股数</th>
+              <th>成本价</th>
+              <th>行业</th>
+              <th>备注</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-tbody">
+            <tr><td colspan="8" style="text-align:center;color:#a89a90;padding:24px"><i class="fa fa-circle-notch spin"></i> 加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: OPTIONS ═══ -->
+    <div class="page" id="admin-page-options">
+      <div class="page-header">
+        <div>
+          <div class="page-title">期权管理</div>
+          <div class="page-subtitle">管理所有用户的期权持仓（增删改查）</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-action" onclick="loadAdminOptions()"><i class="fa fa-rotate"></i> 刷新</button>
+          <button class="btn-action" onclick="openOptionModal()" style="background:#c0622a;color:#fff;border-color:#c0622a"><i class="fa fa-plus"></i> 添加期权</button>
+        </div>
+      </div>
+      <div class="section">
+        <div id="alert-options" class="alert"></div>
+        <!-- 筛选栏 -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <select id="options-filter-user" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;min-width:140px">
+            <option value="">所有用户</option>
+          </select>
+          <input type="text" id="options-filter-symbol" placeholder="标的代码筛选" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;width:140px">
+          <select id="options-filter-status" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;min-width:100px">
+            <option value="">所有状态</option>
+            <option value="open">持仓中</option>
+            <option value="closed">已平仓</option>
+            <option value="expired">已到期</option>
+            <option value="assigned">已行权</option>
+          </select>
+          <select id="options-filter-type" style="padding:8px 12px;border-radius:6px;border:1px solid #3d342b;background:#252017;color:#e8dfd1;min-width:100px">
+            <option value="">所有类型</option>
+            <option value="put">Put</option>
+            <option value="call">Call</option>
+          </select>
+          <button class="btn-action" onclick="applyOptionsFilter()" style="background:#4a7c59;color:#fff;border-color:#4a7c59"><i class="fa fa-filter"></i> 筛选</button>
+          <button class="btn-action" onclick="clearOptionsFilter()" style="background:#5c4a3d;color:#fff;border-color:#5c4a3d"><i class="fa fa-times"></i> 清除</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>标的</th>
+              <th>类型</th>
+              <th>方向</th>
+              <th>行权价</th>
+              <th>到期日</th>
+              <th>张数</th>
+              <th>权利金</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="options-tbody">
+            <tr><td colspan="10" style="text-align:center;color:#a89a90;padding:24px"><i class="fa fa-circle-notch spin"></i> 加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ═══ PAGE: LOGS ═══ -->
     <div class="page" id="admin-page-logs">
       <div class="page-header">
@@ -290,6 +406,135 @@
 
   </div><!-- /content -->
 </div><!-- /shell -->
+
+<!-- ═══ MODAL: 持仓表单 ═══ -->
+<div id="holding-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:90%;max-width:480px;max-height:90vh;overflow:auto;padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px;font-weight:700" id="holding-modal-title">添加持仓</h3>
+      <button onclick="closeHoldingModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#a89a90">&times;</button>
+    </div>
+    <div id="alert-holding-modal" class="alert"></div>
+    <input type="hidden" id="holding-id">
+    <div class="form-group">
+      <label>选择用户 <span style="color:#d94f2a">*</span></label>
+      <select id="holding-user-select">
+        <option value="">— 选择用户 —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>股票代码 <span style="color:#d94f2a">*</span></label>
+      <input type="text" id="holding-symbol" placeholder="如: TSLA" style="text-transform:uppercase">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>股数 <span style="color:#d94f2a">*</span></label>
+        <input type="number" id="holding-shares" placeholder="100" min="1">
+      </div>
+      <div class="form-group">
+        <label>成本价 <span style="color:#d94f2a">*</span></label>
+        <input type="number" id="holding-avg-cost" placeholder="250.00" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>行业分类</label>
+      <select id="holding-sector">
+        <option value="">— 选择行业 —</option>
+        <option value="technology">科技</option>
+        <option value="consumer_cyclical">消费周期</option>
+        <option value="communication_services">通信服务</option>
+        <option value="industrials">工业</option>
+        <option value="financials">金融</option>
+        <option value="healthcare">医疗</option>
+        <option value="energy">能源</option>
+        <option value="consumer_defensive">必需消费</option>
+        <option value="materials">原材料</option>
+        <option value="utilities">公用事业</option>
+        <option value="real_estate">房地产</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <input type="text" id="holding-notes" placeholder="可选">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn-action" onclick="closeHoldingModal()">取消</button>
+      <button class="btn-primary" onclick="saveHolding()" id="btn-save-holding"><i class="fa fa-save"></i> 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: 期权表单 ═══ -->
+<div id="option-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:90%;max-width:520px;max-height:90vh;overflow:auto;padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px;font-weight:700" id="option-modal-title">添加期权</h3>
+      <button onclick="closeOptionModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#a89a90">&times;</button>
+    </div>
+    <div id="alert-option-modal" class="alert"></div>
+    <input type="hidden" id="option-id">
+    <div class="form-group">
+      <label>选择用户 <span style="color:#d94f2a">*</span></label>
+      <select id="option-user-select">
+        <option value="">— 选择用户 —</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>标的代码 <span style="color:#d94f2a">*</span></label>
+        <input type="text" id="option-symbol" placeholder="如: TSLA" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>期权类型 <span style="color:#d94f2a">*</span></label>
+        <select id="option-type">
+          <option value="put">Put</option>
+          <option value="call">Call</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>方向 <span style="color:#d94f2a">*</span></label>
+        <select id="option-direction">
+          <option value="sell">Sell (卖出)</option>
+          <option value="buy">Buy (买入)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>行权价 <span style="color:#d94f2a">*</span></label>
+        <input type="number" id="option-strike" placeholder="250" step="0.01" min="0">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>到期日 <span style="color:#d94f2a">*</span></label>
+        <input type="date" id="option-expiration">
+      </div>
+      <div class="form-group">
+        <label>张数 <span style="color:#d94f2a">*</span></label>
+        <input type="number" id="option-contracts" placeholder="1" min="1">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>权利金/股 <span style="color:#d94f2a">*</span></label>
+        <input type="number" id="option-premium" placeholder="5.00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>正股成本价</label>
+        <input type="number" id="option-open-price" placeholder="可选" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <input type="text" id="option-note" placeholder="可选">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn-action" onclick="closeOptionModal()">取消</button>
+      <button class="btn-primary" onclick="saveOption()" id="btn-save-option"><i class="fa fa-save"></i> 保存</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const API = '';
@@ -322,6 +567,8 @@ function showAdminPage(page) {
   if (page === 'dashboard') { loadAll(); }
   if (page === 'users') { loadUsers(); }
   if (page === 'system') { loadHealth(); }
+  if (page === 'holdings') { loadAdminHoldings(); }
+  if (page === 'options') { loadAdminOptions(); }
 }
 
 function showAlert(id, msg, type='error') {
@@ -455,6 +702,422 @@ async function doResetPw() {
 }
 
 function loadAll() { loadHealth(); loadUsers(); }
+
+// ═══════════════════════════════════════════════════════════════
+// 持仓管理功能
+// ═══════════════════════════════════════════════════════════════
+
+let allUsers = [];
+let adminHoldings = [];
+let adminOptions = [];
+
+// 加载持仓列表
+async function loadAdminHoldings() {
+  try {
+    const r = await fetch(API + '/api/admin/holdings', { headers: authH() });
+    if (r.status === 401) { location.href = '/login'; return; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const { holdings } = await r.json();
+    adminHoldings = holdings;
+    renderHoldingsTable(holdings);
+    // 更新用户筛选下拉框
+    updateUserFilter('holdings-filter-user', holdings);
+  } catch (e) {
+    const tbody = document.getElementById('holdings-tbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#d94f2a;padding:24px">加载失败: ${e.message}</td></tr>`;
+  }
+}
+
+// 应用持仓筛选
+function applyHoldingsFilter() {
+  const userFilter = document.getElementById('holdings-filter-user')?.value || '';
+  const symbolFilter = document.getElementById('holdings-filter-symbol')?.value?.toUpperCase() || '';
+  const sectorFilter = document.getElementById('holdings-filter-sector')?.value || '';
+  
+  let filtered = adminHoldings;
+  
+  if (userFilter) {
+    filtered = filtered.filter(h => h.user_id === userFilter || h.username === userFilter);
+  }
+  if (symbolFilter) {
+    filtered = filtered.filter(h => h.symbol?.toUpperCase().includes(symbolFilter));
+  }
+  if (sectorFilter) {
+    filtered = filtered.filter(h => h.sector === sectorFilter);
+  }
+  
+  renderHoldingsTable(filtered);
+}
+
+// 清除持仓筛选
+function clearHoldingsFilter() {
+  document.getElementById('holdings-filter-user').value = '';
+  document.getElementById('holdings-filter-symbol').value = '';
+  document.getElementById('holdings-filter-sector').value = '';
+  renderHoldingsTable(adminHoldings);
+}
+
+// 更新用户筛选下拉框选项
+function updateUserFilter(selectId, data) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  
+  // 获取唯一的用户列表
+  const users = [...new Map(data.map(item => [item.user_id, { id: item.user_id, name: item.username }])).values()];
+  
+  // 保存当前选中值
+  const currentValue = select.value;
+  
+  // 重建选项（保留"所有用户"）
+  select.innerHTML = '<option value="">所有用户</option>';
+  users.forEach(u => {
+    const option = document.createElement('option');
+    option.value = u.id;
+    option.textContent = u.name || u.id;
+    select.appendChild(option);
+  });
+  
+  // 恢复选中值（如果还存在）
+  if (currentValue) select.value = currentValue;
+}
+
+// 渲染持仓表格
+function renderHoldingsTable(holdings) {
+  const tbody = document.getElementById('holdings-tbody');
+  if (!tbody) return;
+  if (!holdings || holdings.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#a89a90;padding:40px">暂无持仓记录</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = holdings.map(h => `
+    <tr>
+      <td><strong>${h.username || '未知用户'}</strong></td>
+      <td><span style="font-weight:700;color:#c0622a">${h.symbol}</span></td>
+      <td>${h.shares}</td>
+      <td>$${parseFloat(h.avg_cost).toFixed(2)}</td>
+      <td><span class="badge badge-blue">${h.sector || '—'}</span></td>
+      <td style="color:#7a6a60;font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis">${h.notes || '—'}</td>
+      <td style="color:#a89a90;font-size:12px">${h.updated_at ? new Date(h.updated_at).toLocaleString('zh-CN') : '—'}</td>
+      <td>
+        <button onclick="editHolding('${h.id}')" style="padding:4px 8px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid rgba(42,122,184,.3);background:transparent;color:#2a7ab8;margin-right:4px"><i class="fa fa-pen"></i></button>
+        <button onclick="deleteHolding('${h.id}', '${h.symbol}')" style="padding:4px 8px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid rgba(217,79,42,.3);background:transparent;color:#d94f2a"><i class="fa fa-trash"></i></button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// 打开持仓弹窗
+async function openHoldingModal(holdingId = null) {
+  // 加载用户列表
+  await loadUserSelectForModal();
+  
+  document.getElementById('holding-modal-title').textContent = holdingId ? '编辑持仓' : '添加持仓';
+  document.getElementById('holding-id').value = holdingId || '';
+  document.getElementById('alert-holding-modal').className = 'alert';
+  
+  if (holdingId) {
+    const h = adminHoldings.find(x => x.id === holdingId);
+    if (h) {
+      document.getElementById('holding-user-select').value = h.user_id;
+      document.getElementById('holding-symbol').value = h.symbol;
+      document.getElementById('holding-shares').value = h.shares;
+      document.getElementById('holding-avg-cost').value = h.avg_cost;
+      document.getElementById('holding-sector').value = h.sector || '';
+      document.getElementById('holding-notes').value = h.notes || '';
+    }
+  } else {
+    document.getElementById('holding-user-select').value = '';
+    document.getElementById('holding-symbol').value = '';
+    document.getElementById('holding-shares').value = '';
+    document.getElementById('holding-avg-cost').value = '';
+    document.getElementById('holding-sector').value = '';
+    document.getElementById('holding-notes').value = '';
+  }
+  
+  document.getElementById('holding-modal').style.display = 'flex';
+}
+
+function closeHoldingModal() {
+  document.getElementById('holding-modal').style.display = 'none';
+}
+
+function editHolding(id) {
+  openHoldingModal(id);
+}
+
+// 保存持仓
+async function saveHolding() {
+  clearAlert('alert-holding-modal');
+  const id = document.getElementById('holding-id').value;
+  const userId = document.getElementById('holding-user-select').value;
+  const symbol = document.getElementById('holding-symbol').value.trim().toUpperCase();
+  const shares = parseInt(document.getElementById('holding-shares').value);
+  const avgCost = parseFloat(document.getElementById('holding-avg-cost').value);
+  const sector = document.getElementById('holding-sector').value;
+  const notes = document.getElementById('holding-notes').value.trim();
+  
+  if (!userId) return showAlert('alert-holding-modal', '请选择用户');
+  if (!symbol) return showAlert('alert-holding-modal', '请输入股票代码');
+  if (!shares || shares < 1) return showAlert('alert-holding-modal', '请输入有效股数');
+  if (isNaN(avgCost) || avgCost < 0) return showAlert('alert-holding-modal', '请输入有效成本价');
+  
+  const btn = document.getElementById('btn-save-holding');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> 保存中…';
+  
+  try {
+    const url = id ? API + `/api/admin/holdings/${id}` : API + '/api/admin/holdings';
+    const method = id ? 'PATCH' : 'POST';
+    const body = id 
+      ? JSON.stringify({ symbol, shares, avg_cost: avgCost, sector, notes })
+      : JSON.stringify({ user_id: userId, symbol, shares, avg_cost: avgCost, sector, notes });
+    
+    const r = await fetch(url, { method, headers: authH(), body });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || d.error || '保存失败');
+    
+    showAlert('alert-holding-modal', '✅ 保存成功', 'success');
+    setTimeout(() => {
+      closeHoldingModal();
+      loadAdminHoldings();
+    }, 1000);
+  } catch (e) {
+    showAlert('alert-holding-modal', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-save"></i> 保存';
+  }
+}
+
+// 删除持仓
+async function deleteHolding(id, symbol) {
+  if (!confirm(`确定删除持仓 ${symbol} 吗？此操作不可恢复。`)) return;
+  try {
+    const r = await fetch(API + `/api/admin/holdings/${id}`, { method: 'DELETE', headers: authH() });
+    if (!r.ok) throw new Error((await r.json()).detail || '删除失败');
+    showAlert('alert-holdings', '✅ 持仓已删除', 'success');
+    setTimeout(() => { clearAlert('alert-holdings'); loadAdminHoldings(); }, 1500);
+  } catch (e) {
+    showAlert('alert-holdings', e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 期权管理功能
+// ═══════════════════════════════════════════════════════════════
+
+// 加载期权列表
+async function loadAdminOptions() {
+  try {
+    const r = await fetch(API + '/api/admin/options', { headers: authH() });
+    if (r.status === 401) { location.href = '/login'; return; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const { positions } = await r.json();
+    adminOptions = positions;
+    renderOptionsTable(positions);
+    // 更新用户筛选下拉框
+    updateUserFilter('options-filter-user', positions);
+  } catch (e) {
+    const tbody = document.getElementById('options-tbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#d94f2a;padding:24px">加载失败: ${e.message}</td></tr>`;
+  }
+}
+
+// 应用期权筛选
+function applyOptionsFilter() {
+  const userFilter = document.getElementById('options-filter-user')?.value || '';
+  const symbolFilter = document.getElementById('options-filter-symbol')?.value?.toUpperCase() || '';
+  const statusFilter = document.getElementById('options-filter-status')?.value || '';
+  const typeFilter = document.getElementById('options-filter-type')?.value || '';
+  
+  let filtered = adminOptions;
+  
+  if (userFilter) {
+    filtered = filtered.filter(o => o.user_id === userFilter || o.username === userFilter);
+  }
+  if (symbolFilter) {
+    filtered = filtered.filter(o => o.symbol?.toUpperCase().includes(symbolFilter));
+  }
+  if (statusFilter) {
+    filtered = filtered.filter(o => o.status === statusFilter);
+  }
+  if (typeFilter) {
+    filtered = filtered.filter(o => o.option_type === typeFilter);
+  }
+  
+  renderOptionsTable(filtered);
+}
+
+// 清除期权筛选
+function clearOptionsFilter() {
+  document.getElementById('options-filter-user').value = '';
+  document.getElementById('options-filter-symbol').value = '';
+  document.getElementById('options-filter-status').value = '';
+  document.getElementById('options-filter-type').value = '';
+  renderOptionsTable(adminOptions);
+}
+
+// 渲染期权表格
+function renderOptionsTable(positions) {
+  const tbody = document.getElementById('options-tbody');
+  if (!tbody) return;
+  if (!positions || positions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#a89a90;padding:40px">暂无期权记录</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = positions.map(p => {
+    const statusBadge = p.status === 'open' 
+      ? '<span class="badge badge-green">持仓中</span>' 
+      : p.status === 'expired' 
+        ? '<span class="badge badge-gray">已到期</span>'
+        : p.status === 'assigned'
+          ? '<span class="badge badge-blue">已行权</span>'
+          : '<span class="badge badge-gray">已平仓</span>';
+    return `
+    <tr>
+      <td><strong>${p.username || '未知用户'}</strong></td>
+      <td><span style="font-weight:700;color:#c0622a">${p.symbol}</span></td>
+      <td><span class="badge ${p.option_type==='call'?'badge-blue':'badge-red'}">${p.option_type.toUpperCase()}</span></td>
+      <td>${p.direction === 'buy' ? '买入' : '卖出'}</td>
+      <td>$${parseFloat(p.strike_price).toFixed(2)}</td>
+      <td>${p.expiration}</td>
+      <td>${p.contracts}</td>
+      <td>$${parseFloat(p.premium).toFixed(2)}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <button onclick="editOption('${p.id}')" style="padding:4px 8px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid rgba(42,122,184,.3);background:transparent;color:#2a7ab8;margin-right:4px"><i class="fa fa-pen"></i></button>
+        <button onclick="deleteOption('${p.id}', '${p.symbol}')" style="padding:4px 8px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid rgba(217,79,42,.3);background:transparent;color:#d94f2a"><i class="fa fa-trash"></i></button>
+      </td>
+    </tr>
+  `}).join('');
+}
+
+// 打开期权弹窗
+async function openOptionModal(optionId = null) {
+  await loadUserSelectForModal('option-user-select');
+  
+  document.getElementById('option-modal-title').textContent = optionId ? '编辑期权' : '添加期权';
+  document.getElementById('option-id').value = optionId || '';
+  document.getElementById('alert-option-modal').className = 'alert';
+  
+  if (optionId) {
+    const p = adminOptions.find(x => x.id === optionId);
+    if (p) {
+      document.getElementById('option-user-select').value = p.user_id;
+      document.getElementById('option-symbol').value = p.symbol;
+      document.getElementById('option-type').value = p.option_type;
+      document.getElementById('option-direction').value = p.direction || 'sell';
+      document.getElementById('option-strike').value = p.strike_price;
+      document.getElementById('option-expiration').value = p.expiration;
+      document.getElementById('option-contracts').value = p.contracts;
+      document.getElementById('option-premium').value = p.premium;
+      document.getElementById('option-open-price').value = p.open_price || '';
+      document.getElementById('option-note').value = p.note || '';
+    }
+  } else {
+    document.getElementById('option-user-select').value = '';
+    document.getElementById('option-symbol').value = '';
+    document.getElementById('option-type').value = 'put';
+    document.getElementById('option-direction').value = 'sell';
+    document.getElementById('option-strike').value = '';
+    document.getElementById('option-expiration').value = '';
+    document.getElementById('option-contracts').value = '1';
+    document.getElementById('option-premium').value = '';
+    document.getElementById('option-open-price').value = '';
+    document.getElementById('option-note').value = '';
+  }
+  
+  document.getElementById('option-modal').style.display = 'flex';
+}
+
+function closeOptionModal() {
+  document.getElementById('option-modal').style.display = 'none';
+}
+
+function editOption(id) {
+  openOptionModal(id);
+}
+
+// 保存期权
+async function saveOption() {
+  clearAlert('alert-option-modal');
+  const id = document.getElementById('option-id').value;
+  const userId = document.getElementById('option-user-select').value;
+  const symbol = document.getElementById('option-symbol').value.trim().toUpperCase();
+  const optionType = document.getElementById('option-type').value;
+  const direction = document.getElementById('option-direction').value;
+  const strikePrice = parseFloat(document.getElementById('option-strike').value);
+  const expiration = document.getElementById('option-expiration').value;
+  const contracts = parseInt(document.getElementById('option-contracts').value);
+  const premium = parseFloat(document.getElementById('option-premium').value);
+  const openPrice = document.getElementById('option-open-price').value;
+  const note = document.getElementById('option-note').value.trim();
+  
+  if (!userId) return showAlert('alert-option-modal', '请选择用户');
+  if (!symbol) return showAlert('alert-option-modal', '请输入标的代码');
+  if (!expiration) return showAlert('alert-option-modal', '请选择到期日');
+  if (!contracts || contracts < 1) return showAlert('alert-option-modal', '请输入有效张数');
+  if (isNaN(strikePrice) || strikePrice <= 0) return showAlert('alert-option-modal', '请输入有效行权价');
+  if (isNaN(premium) || premium < 0) return showAlert('alert-option-modal', '请输入有效权利金');
+  
+  const btn = document.getElementById('btn-save-option');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch spin"></i> 保存中…';
+  
+  try {
+    const url = id ? API + `/api/admin/options/${id}` : API + '/api/admin/options';
+    const method = id ? 'PATCH' : 'POST';
+    const body = id 
+      ? JSON.stringify({ symbol, option_type: optionType, direction, strike_price: strikePrice, expiration, contracts, premium, note })
+      : JSON.stringify({ user_id: userId, symbol, option_type: optionType, direction, strike_price: strikePrice, expiration, contracts, premium, open_price: openPrice || null, note });
+    
+    const r = await fetch(url, { method, headers: authH(), body });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || d.error || '保存失败');
+    
+    showAlert('alert-option-modal', '✅ 保存成功', 'success');
+    setTimeout(() => {
+      closeOptionModal();
+      loadAdminOptions();
+    }, 1000);
+  } catch (e) {
+    showAlert('alert-option-modal', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-save"></i> 保存';
+  }
+}
+
+// 删除期权
+async function deleteOption(id, symbol) {
+  if (!confirm(`确定删除期权 ${symbol} 吗？此操作不可恢复。`)) return;
+  try {
+    const r = await fetch(API + `/api/admin/options/${id}`, { method: 'DELETE', headers: authH() });
+    if (!r.ok) throw new Error((await r.json()).detail || '删除失败');
+    showAlert('alert-options', '✅ 期权已删除', 'success');
+    setTimeout(() => { clearAlert('alert-options'); loadAdminOptions(); }, 1500);
+  } catch (e) {
+    showAlert('alert-options', e.message);
+  }
+}
+
+// 加载用户选择列表（用于弹窗）
+async function loadUserSelectForModal(selectId = 'holding-user-select') {
+  try {
+    const r = await fetch(API + '/api/admin/users', { headers: authH() });
+    if (!r.ok) return;
+    const { users } = await r.json();
+    allUsers = users;
+    const sel = document.getElementById(selectId);
+    if (sel) {
+      sel.innerHTML = '<option value="">— 选择用户 —</option>' + users.map(u =>
+        `<option value="${u.id}">${u.username} (${u.email || '无邮箱'})</option>`
+      ).join('');
+    }
+  } catch (e) {
+    console.error('加载用户列表失败', e);
+  }
+}
 
 // 初始化
 loadAll();

@@ -115,7 +115,7 @@
       color: white;
     }
     
-    .logo-text { font-weight: 600; font-size: 18px; }
+    .logo-text { font-weight: 600; font-size: 15px; }
     
     .logo-badge {
       margin-left: auto;
@@ -1537,7 +1537,7 @@
 <nav id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">C</div>
-    <span class="logo-text">Claw</span>
+    <span class="logo-text">Claw Advisor</span>
     <span class="logo-badge">BETA</span>
   </div>
 
@@ -1927,7 +1927,7 @@
   <div class="page" id="page-health">
     <div class="section-header">
       <div class="section-title"><i class="fa fa-heart-pulse"></i> 投资组合健康评估</div>
-      <span class="chip green">综合评分 81.2</span>
+      <span class="chip green" id="health-chip-score">综合评分 —</span>
     </div>
     <p class="page-subtitle">基于分散度、风险控制、现金管理等6个维度的综合评估。</p>
 
@@ -3745,10 +3745,15 @@ function buildSectorChart() {
 // ═══════════════════════════════════════════════
 function renderHealth() {
   const h = dashData.portfolio_health;
-  document.getElementById('health-score-big').textContent = h.overall_score;
+  const score = h?.overall_score || dashData?.portfolio_summary?.health_score || 0;
+  
+  // 更新综合评分显示
+  document.getElementById('health-score-big').textContent = score;
+  const chipScore = document.getElementById('health-chip-score');
+  if (chipScore) chipScore.textContent = `综合评分 ${score}`;
 
   // Health ring
-  buildHealthRing(h.overall_score);
+  buildHealthRing(score);
 
   // Chips
   const chipsEl = document.getElementById('health-chips');
@@ -4202,14 +4207,23 @@ function manualRefresh() {
 function renderTsla() {
   const holdings = dashData.portfolio_holdings || [];
   const tsla = holdings.find(h => h.symbol === 'TSLA');
-  if (!tsla) return;
-
-  document.getElementById('tsla-price').textContent = fmt$(tsla.current_price);
-  document.getElementById('tsla-value').textContent = fmt$(tsla.current_value);
-  document.getElementById('tsla-shares-info').innerHTML = `<i class="fa fa-layer-group"></i> ${tsla.shares || 0} 股`;
-  const chgEl = document.getElementById('tsla-price-chg');
-  chgEl.className = 'kpi-change ' + updown(tsla.gain_loss_percent);
-  chgEl.innerHTML = `<i class="fa fa-arrow-${tsla.gain_loss_percent>=0?'up':'down'}"></i> ${fmtPct(tsla.gain_loss_percent)}`;
+  
+  if (!tsla) {
+    // 用户没有 TSLA 持仓，显示无持仓状态
+    document.getElementById('tsla-price').textContent = '—';
+    document.getElementById('tsla-value').textContent = '—';
+    document.getElementById('tsla-shares-info').innerHTML = '<i class="fa fa-layer-group"></i> 无持仓';
+    const chgEl = document.getElementById('tsla-price-chg');
+    chgEl.className = 'kpi-change neutral';
+    chgEl.innerHTML = '<i class="fa fa-minus"></i> —';
+  } else {
+    document.getElementById('tsla-price').textContent = fmt$(tsla.current_price);
+    document.getElementById('tsla-value').textContent = fmt$(tsla.current_value);
+    document.getElementById('tsla-shares-info').innerHTML = `<i class="fa fa-layer-group"></i> ${tsla.shares || 0} 股`;
+    const chgEl = document.getElementById('tsla-price-chg');
+    chgEl.className = 'kpi-change ' + updown(tsla.gain_loss_percent);
+    chgEl.innerHTML = `<i class="fa fa-arrow-${tsla.gain_loss_percent>=0?'up':'down'}"></i> ${fmtPct(tsla.gain_loss_percent)}`;
+  }
 
   // TSLA put option from strategy data
   const opts = dashData.option_strategies || [];
