@@ -266,6 +266,9 @@ class DashboardController {
       // ─── 11. 组合健康度 ───
       const portfolioHealth = this._calcPortfolioHealth(cashRatio, targetCashRatio, portfolioHoldings, totalValue);
 
+      // ─── 12. 行业分布（基于持仓计算）───
+      const industryDistribution = this._calcIndustryDistribution(portfolioHoldings, totalValue);
+
       // ─── 返回完整数据 ───
       res.json({
         user: {
@@ -296,6 +299,7 @@ class DashboardController {
         market_status: marketStatus,
         risk_alerts: riskAlerts,
         portfolio_health: portfolioHealth,
+        industry_distribution: industryDistribution,
         live_prices: prices,
         news: this._buildNewsFeed(portfolioHoldings),
         _fetched_at: new Date().toISOString(),
@@ -702,6 +706,100 @@ class DashboardController {
         '定期检视核心持仓基本面',
         '关注AI/量子计算赛道新机会',
       ],
+    };
+  }
+
+  /**
+   * 计算行业分布
+   * 基于持仓股票的 sector 字段，按市值加权计算各行业占比
+   */
+  _calcIndustryDistribution(holdings, totalValue) {
+    // 行业映射表（股票代码 -> 行业）
+    const sectorMap = {
+      // 科技
+      'NVDA': 'technology', 'AAPL': 'technology', 'MSFT': 'technology', 'AMD': 'technology',
+      'INTC': 'technology', 'TSM': 'technology', 'AVGO': 'technology', 'QCOM': 'technology',
+      'IONQ': 'technology', 'PLTR': 'technology', 'SNOW': 'technology', 'CRM': 'technology',
+      // 消费周期
+      'TSLA': 'consumer_cyclical', 'AMZN': 'consumer_cyclical', 'NFLX': 'consumer_cyclical',
+      'HD': 'consumer_cyclical', 'LOW': 'consumer_cyclical', 'TJX': 'consumer_cyclical',
+      'MCD': 'consumer_cyclical', 'SBUX': 'consumer_cyclical', 'NKE': 'consumer_cyclical',
+      // 通信服务
+      'GOOGL': 'communication_services', 'GOOG': 'communication_services', 'META': 'communication_services',
+      'DIS': 'communication_services', 'VZ': 'communication_services', 'T': 'communication_services',
+      // 工业
+      'CAT': 'industrials', 'BA': 'industrials', 'GE': 'industrials', 'HON': 'industrials',
+      'UPS': 'industrials', 'FDX': 'industrials', 'LMT': 'industrials', 'RTX': 'industrials',
+      // 金融
+      'JPM': 'financials', 'BAC': 'financials', 'WFC': 'financials', 'GS': 'financials',
+      'MS': 'financials', 'V': 'financials', 'MA': 'financials', 'AXP': 'financials',
+      // 医疗
+      'JNJ': 'healthcare', 'UNH': 'healthcare', 'PFE': 'healthcare', 'ABBV': 'healthcare',
+      'MRK': 'healthcare', 'LLY': 'healthcare', 'TMO': 'healthcare', 'ABT': 'healthcare',
+      // 能源
+      'XOM': 'energy', 'CVX': 'energy', 'COP': 'energy', 'EOG': 'energy',
+      'SLB': 'energy', 'OXY': 'energy', 'MPC': 'energy', 'VLO': 'energy',
+      // 必需消费
+      'PG': 'consumer_defensive', 'KO': 'consumer_defensive', 'PEP': 'consumer_defensive',
+      'WMT': 'consumer_defensive', 'COST': 'consumer_defensive', 'PM': 'consumer_defensive',
+      // 原材料
+      'LIN': 'materials', 'APD': 'materials', 'SHW': 'materials', 'FCX': 'materials',
+      'NEM': 'materials', 'DOW': 'materials', 'DD': 'materials',
+      // 公用事业
+      'NEE': 'utilities', 'DUK': 'utilities', 'SO': 'utilities', 'D': 'utilities',
+      'AEP': 'utilities', 'EXC': 'utilities', 'SRE': 'utilities',
+      // 房地产
+      'AMT': 'real_estate', 'PLD': 'real_estate', 'CCI': 'real_estate', 'EQIX': 'real_estate',
+      'PSA': 'real_estate', 'O': 'real_estate', 'SPG': 'real_estate',
+    };
+
+    const investedValue = holdings.reduce((sum, h) => sum + h.current_value, 0);
+    if (investedValue === 0 || holdings.length === 0) {
+      return {
+        technology: 0,
+        consumer_cyclical: 0,
+        communication_services: 0,
+        industrials: 0,
+        financials: 0,
+        healthcare: 0,
+        energy: 0,
+        consumer_defensive: 0,
+        materials: 0,
+        utilities: 0,
+        real_estate: 0,
+        others: 0,
+      };
+    }
+
+    // 按行业汇总市值
+    const sectorValues = {};
+    let othersValue = 0;
+
+    for (const h of holdings) {
+      const sector = sectorMap[h.symbol] || 'others';
+      if (sector === 'others') {
+        othersValue += h.current_value;
+      } else {
+        sectorValues[sector] = (sectorValues[sector] || 0) + h.current_value;
+      }
+    }
+
+    // 计算占比（基于投资市值，不含现金）
+    const toPct = (val) => parseFloat(((val / investedValue) * 100).toFixed(1));
+
+    return {
+      technology: toPct(sectorValues.technology || 0),
+      consumer_cyclical: toPct(sectorValues.consumer_cyclical || 0),
+      communication_services: toPct(sectorValues.communication_services || 0),
+      industrials: toPct(sectorValues.industrials || 0),
+      financials: toPct(sectorValues.financials || 0),
+      healthcare: toPct(sectorValues.healthcare || 0),
+      energy: toPct(sectorValues.energy || 0),
+      consumer_defensive: toPct(sectorValues.consumer_defensive || 0),
+      materials: toPct(sectorValues.materials || 0),
+      utilities: toPct(sectorValues.utilities || 0),
+      real_estate: toPct(sectorValues.real_estate || 0),
+      others: toPct(othersValue),
     };
   }
 
