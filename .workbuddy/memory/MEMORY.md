@@ -100,6 +100,130 @@ _最后更新：2026-03-23_
 - 技术栈：FastAPI（Python）后端 + 原生 HTML/JS 前端 + SQLite（开发）/ PostgreSQL（生产）
 - 服务入口：`/Users/nn/WorkBuddy/Claw/frontend/`，启动命令 `python start_dashboard.py`，端口 8000
 
+## 已知问题与修复模式
+
+### SPA 路由刷新问题（2026-03-31 修复）
+
+**问题**：页面刷新后总是跳转到默认页面（投资总览），但地址栏URL保持不变
+
+**根本原因**：路由初始化函数引用了未定义的路由映射变量
+
+**修复模式**：
+```javascript
+// 错误方式：引用未定义的映射对象
+function getHashPage() {
+  const hash = location.hash.replace('#/', '').split('?')[0];
+  return PAGE_TITLES[hash] ? hash : 'overview';  // PAGE_TITLES 未定义
+}
+
+// 正确方式：直接检查DOM元素
+function getHashPage() {
+  const hash = location.hash.replace('#/', '').split('?')[0];
+  return document.getElementById('page-' + hash) ? hash : 'overview';
+}
+```
+
+**应用场景**：单页应用（SPA）的浏览器刷新、前进/后退按钮
+
+---
+
+### JavaScript 变量未定义错误（2026-03-31 修复）
+
+**问题**：期权持仓表格无法渲染，显示为空
+
+**根本原因**：模板字符串中使用了未定义的变量 `pnlVal`，导致 JavaScript 运行时错误，阻止了后续代码执行
+
+**错误示例**：
+```javascript
+// pnlVal 变量未定义
+const pnl = isOpen ? (p.total_premium_received || 0) : (p.realized_pnl || 0);
+const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+// ...
+${pnlVal>=0?'+':''}$${Math.abs(pnlVal).toFixed(2)}  // ❌ ReferenceError: pnlVal is not defined
+```
+
+**正确写法**：
+```javascript
+const pnl = isOpen ? (p.total_premium_received || 0) : (p.realized_pnl || 0);
+const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+// ...
+${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}  // ✅ 使用正确的变量名
+```
+
+**调试方法**：
+1. 打开浏览器开发者工具（F12）
+2. 查看 Console 面板中的错误信息
+3. 定位到具体行数和错误类型（ReferenceError）
+
+**应用场景**：动态渲染表格、列表等复杂 DOM 结构时
+
+---
+
+### 后端生成内容的国际化（2026-03-31 修复）
+
+**问题**：后端返回的中文文本在英文模式下仍显示中文
+
+**根本原因**：后端API返回的文本是中文，前端缺少完整的翻译映射机制
+
+**修复模式**：
+
+#### 方案A：扩展翻译映射表
+为后端返回的所有中文文本创建映射字典：
+```javascript
+const _healthTextMap = {
+  '现金比例过高': 'health.txt.weaknessCashHigh',
+  '科技股集中度过高': 'health.txt.weaknessTech',
+  // ... 添加所有可能的中文文本
+};
+
+function translateHealthText(text) {
+  const key = _healthTextMap[text];
+  return key ? t(key, text) : text;
+}
+```
+
+#### 方案B：TSLA页面的翻译实现
+创建专门的TSLA内容翻译映射：
+```javascript
+const _tslaTextMap = {
+  // 护城河
+  '品牌与用户忠诚度': 'tsla.moatTitle1',
+  '特斯拉车主复购率高达 70%...': 'tsla.moatDetail1',
+  '全球电动车市占率 20%，美国 50%': 'tsla.moatData1',
+  // ... 更多映射
+};
+
+function translateTslaText(text) {
+  const key = _tslaTextMap[text];
+  return key ? t(key, text) : text;
+}
+```
+
+#### 方案C：更新渲染函数
+在渲染时使用翻译函数：
+```javascript
+// 健康评估
+h.strengths.forEach(s => {
+  strEl.innerHTML += `<span>${translateHealthText(s)}</span>`;
+});
+
+// TSLA页面
+grid.innerHTML = moat.map(m => `
+  <span>${translateTslaText(m.title)}</span>
+  <p>${translateTslaText(m.detail)}</p>
+  <div>${translateTslaText(m.data_point)}</div>
+`).join('');
+```
+
+**应用场景**：
+- 后端返回的动态生成的文本内容
+- 数据库中存储的多语言内容
+- API返回的国际化数据
+
+---
+
+### i18n 国际化系统（2026-03-30 完成）
+
 ---
 
 ## 项目文档
@@ -108,6 +232,36 @@ _最后更新：2026-03-23_
   - 包含：产品概述、现有功能清单、18项功能缺口、竞品对比（Empower/Sharesight/Kubera/Delta）、4阶段路线图、上线方案
   - 生成时间：2026-03-24
 - **Mike报告**：`/Users/nn/WorkBuddy/Claw/mike_investment_report.html` 和 `.pdf`
+
+## i18n 国际化系统（2026-03-30 完成）
+
+### 系统架构
+- 翻译文件：`/Users/nn/WorkBuddy/Claw/frontend/i18n/en.json` 和 `zh.json`
+- 核心库：`/Users/nn/WorkBuddy/Claw/frontend/i18n/i18n.js`
+- 使用方式：
+  - HTML: `data-i18n="key.path"` 属性
+  - JavaScript: `t('key.path')` 函数
+
+### 已知问题与修复模式
+**问题1：硬编码中文文本**
+- 现象：英文模式下仍显示中文
+- 修复：添加 `data-i18n` 属性并补充翻译键到 en.json
+
+**问题2：翻译键不一致**
+- 现象：JavaScript使用 `options.ratio`，HTML期望 `dashboard.ratio`
+- 修复：统一使用 `dashboard.ratio`（3处JS代码修复）
+
+**问题3：缓存问题**
+- 现象：修复后用户看到"未更改"
+- 解决方案：必须清除浏览器缓存（Ctrl+Shift+R / Cmd+Shift+R）
+
+### 最近修复汇总（2026-03-30）
+1. **登录/注册页面**：补充 `clawLogin.*` 系列翻译键
+2. **个人中心页面**：修复"算法解释"按钮、"账户统计"区域
+3. **Dashboard页面**：修复现金比例显示、期权统计标签
+4. **TSLA页面**：补充护城河描述翻译
+
+---
 
 ## 已完成功能（2026-03-24）
 

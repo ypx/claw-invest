@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claw 投资决策中心 · PRD 产品需求文档</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2230;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --blue: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --purple: #bc8cff;
+    --orange: #f0883e;
+    --teal: #39c5cf;
+    --accent: #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── 顶部导航 ── */
+  .top-nav {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(13,17,23,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .nav-logo {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #388bfd 0%, #bc8cff 100%);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 13px; color: #fff;
+  }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    padding: 5px 10px; border-radius: 6px; font-size: 13px;
+    transition: all .2s;
+  }
+  .nav-links a:hover { background: var(--bg3); color: var(--text); }
+  .nav-badge {
+    background: var(--accent); color: #fff;
+    font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 600;
+  }
+
+  /* ── 布局 ── */
+  .layout { display: flex; }
+  .sidebar {
+    width: 260px; min-height: calc(100vh - 52px);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky; top: 52px;
+    height: calc(100vh - 52px); overflow-y: auto;
+    padding: 20px 0; flex-shrink: 0;
+  }
+  .sidebar-section { margin-bottom: 8px; }
+  .sidebar-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .8px; color: var(--muted);
+    padding: 6px 20px 4px;
+  }
+  .sidebar a {
+    display: block; padding: 7px 20px;
+    color: var(--muted); text-decoration: none; font-size: 13.5px;
+    border-left: 2px solid transparent;
+    transition: all .15s;
+  }
+  .sidebar a:hover { color: var(--text); background: var(--bg3); border-left-color: var(--accent); }
+  .sidebar a.active { color: var(--blue); background: rgba(56,139,253,.1); border-left-color: var(--blue); }
+  .content { flex: 1; padding: 40px 48px; max-width: 900px; }
+
+  /* ── 通用元素 ── */
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 40px 0 16px; padding-top: 20px; border-top: 1px solid var(--border); }
+  h2:first-of-type { border-top: none; margin-top: 0; }
+  h3 { font-size: 16px; font-weight: 600; margin: 24px 0 10px; color: var(--blue); }
+  h4 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; color: var(--text); }
+  p { margin-bottom: 12px; color: #c9d1d9; }
+  ul, ol { margin: 8px 0 12px 20px; }
+  li { margin-bottom: 5px; color: #c9d1d9; }
+  strong { color: var(--text); font-weight: 600; }
+  code {
+    background: var(--bg3); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12.5px; color: var(--orange);
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── 卡片 ── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; margin-bottom: 16px;
+  }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .metric-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .metric-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .metric-value { font-size: 22px; font-weight: 700; }
+  .metric-desc { font-size: 12px; color: var(--muted); }
+
+  /* ── 表格 ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--bg3); color: var(--muted);
+    font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+    padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: #c9d1d9; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+
+  /* ── 徽章/标签 ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11.5px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .badge-blue { background: rgba(56,139,253,.15); color: var(--blue); border: 1px solid rgba(56,139,253,.3); }
+  .badge-green { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+  .badge-red { background: rgba(248,81,73,.15); color: var(--red); border: 1px solid rgba(248,81,73,.3); }
+  .badge-yellow { background: rgba(210,153,34,.15); color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
+  .badge-purple { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  .badge-teal { background: rgba(57,197,207,.15); color: var(--teal); border: 1px solid rgba(57,197,207,.3); }
+  .badge-orange { background: rgba(240,136,62,.15); color: var(--orange); border: 1px solid rgba(240,136,62,.3); }
+
+  /* ── 优先级标 ── */
+  .p0 { color: var(--red); font-weight: 700; }
+  .p1 { color: var(--orange); font-weight: 600; }
+  .p2 { color: var(--yellow); }
+  .p3 { color: var(--muted); }
+
+  /* ── 状态标 ── */
+  .status-done { color: var(--green); }
+  .status-partial { color: var(--yellow); }
+  .status-todo { color: var(--muted); }
+  .status-wip { color: var(--blue); }
+
+  /* ── 提示块 ── */
+  .callout {
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13.5px;
+  }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-info { background: rgba(56,139,253,.1); border: 1px solid rgba(56,139,253,.25); }
+  .callout-warn { background: rgba(210,153,34,.1); border: 1px solid rgba(210,153,34,.25); }
+  .callout-tip { background: rgba(63,185,80,.1); border: 1px solid rgba(63,185,80,.25); }
+  .callout-danger { background: rgba(248,81,73,.1); border: 1px solid rgba(248,81,73,.25); }
+
+  /* ── 功能区块 ── */
+  .feature-block {
+    border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; margin-bottom: 16px;
+  }
+  .feature-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--bg3); border-bottom: 1px solid var(--border);
+  }
+  .feature-title { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .feature-body { padding: 16px 18px; }
+  .feature-items { display: flex; flex-direction: column; gap: 8px; }
+  .feature-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 10px; border-radius: 6px;
+    font-size: 13.5px;
+  }
+  .feature-item:hover { background: rgba(255,255,255,.03); }
+  .fi-icon { flex-shrink: 0; margin-top: 2px; }
+  .fi-content { flex: 1; }
+  .fi-title { font-weight: 500; color: var(--text); }
+  .fi-desc { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  /* ── 路线图时间线 ── */
+  .timeline { margin: 0; padding: 0; list-style: none; position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; left: 16px; top: 0; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .timeline-item { display: flex; gap: 16px; margin-bottom: 28px; position: relative; }
+  .timeline-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 14px; font-weight: 700;
+    position: relative; z-index: 1; border: 2px solid var(--border);
+  }
+  .dot-done { background: rgba(63,185,80,.2); border-color: var(--green); color: var(--green); }
+  .dot-now { background: rgba(56,139,253,.2); border-color: var(--blue); color: var(--blue); }
+  .dot-next { background: rgba(210,153,34,.2); border-color: var(--yellow); color: var(--yellow); }
+  .dot-future { background: var(--bg3); border-color: var(--border); color: var(--muted); }
+  .timeline-content { flex: 1; padding-top: 5px; }
+  .timeline-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .timeline-desc { font-size: 13.5px; color: var(--muted); margin-bottom: 8px; }
+  .timeline-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── 竞品对比 ── */
+  .compare-dot-yes { color: var(--green); }
+  .compare-dot-no { color: var(--border); }
+  .compare-dot-partial { color: var(--yellow); }
+  .highlight-row { background: rgba(56,139,253,.06); }
+  .highlight-row td { font-weight: 600; }
+
+  /* ── 英雄区 ── */
+  .hero {
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; margin-bottom: 24px; }
+  .hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+  .hero-stat { text-align: center; padding: 14px; background: var(--bg3); border-radius: 8px; border: 1px solid var(--border); }
+  .hero-stat-num { font-size: 24px; font-weight: 700; }
+  .hero-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── 移动端适配 ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 24px 20px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 17px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
+  }
+
+  /* ── 打印 ── */
+  @media print {
+    .top-nav, .sidebar { display: none; }
+    .content { max-width: 100%; padding: 20px; }
+    body { background: #fff; color: #000; }
+  }
+
+  /* ── 锚点偏移 ── */
+  .anchor { display: block; height: 72px; margin-top: -72px; visibility: hidden; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-logo">C</div>
+    <span>Claw 投资决策中心</span>
+    <span class="nav-badge">PRD v1.0</span>
+  </div>
+  <div class="nav-links">
+    <a href="#overview">产品概述</a>
+    <a href="#current">现有功能</a>
+    <a href="#gap">功能缺口</a>
+    <a href="#compete">竞品分析</a>
+    <a href="#roadmap">路线图</a>
+    <a href="#tech">技术架构</a>
+    <a href="#deploy">上线方案</a>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- 侧边导航 -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">文档信息</div>
+      <a href="#meta">版本 &amp; 修订历史</a>
+      <a href="#overview">产品定位</a>
+      <a href="#user-profile">目标用户</a>
+      <a href="#core-value">核心价值</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">功能现状</div>
+      <a href="#current">现有功能清单</a>
+      <a href="#current-auth">· 用户体系</a>
+      <a href="#current-portfolio">· 持仓管理</a>
+      <a href="#current-analysis">· 分析功能</a>
+      <a href="#current-tsla">· TSLA 监控</a>
+      <a href="#current-options">· 期权策略</a>
+      <a href="#current-admin">· 管理后台</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">问题与缺口</div>
+      <a href="#gap">功能缺口分析</a>
+      <a href="#issues">已知问题</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">市场研究</div>
+      <a href="#compete">竞品对比</a>
+      <a href="#benchmark">功能对标</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">规划</div>
+      <a href="#roadmap">产品路线图</a>
+      <a href="#phase1">Phase 1（当前）</a>
+      <a href="#phase2">Phase 2（近期）</a>
+      <a href="#phase3">Phase 3（中期）</a>
+      <a href="#phase4">Phase 4（长期）</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">工程</div>
+      <a href="#tech">技术架构</a>
+      <a href="#api">API 设计</a>
+      <a href="#deploy">上线方案</a>
+      <a href="#ops">运维建议</a>
+    </div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="content">
+
+    <!-- ══ 英雄区 ══ -->
+    <span class="anchor" id="meta"></span>
+    <div class="hero">
+      <h1>🦅 Claw 投资决策中心</h1>
+      <p style="font-size:16px; color:var(--muted); max-width:620px;">
+        面向个人美股投资者的全栈投资管理平台——持仓追踪、风险监控、期权策略、AI 顾问四合一。
+      </p>
+      <div class="hero-meta">
+        <span class="badge badge-blue">PRD v1.0</span>
+        <span class="badge badge-teal">2026-03-24</span>
+        <span class="badge badge-purple">作者：Z</span>
+        <span class="badge badge-green">状态：开发中</span>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num" style="color:var(--green);">已完成</div>
+          <div class="hero-stat-label">核心框架</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" style="color:var(--blue);">6 大</div>
+          <div class="hero-stat-label">功能模块</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" style="color:var(--yellow);">18 项</div>
+          <div class="hero-stat-label">待补全功能</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" style="color:var(--purple);">4 阶段</div>
+          <div class="hero-stat-label">发布路线图</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 产品概述 ══ -->
+    <span class="anchor" id="overview"></span>
+    <h2>① 产品概述</h2>
+
+    <span class="anchor" id="user-profile"></span>
+    <h3>目标用户</h3>
+    <div class="card">
+      <p><strong>主用户：Z</strong>（也可开放给更多个人投资者）</p>
+      <ul>
+        <li>个人美股投资者，保守型，长期持有 AI / 科技 / 太空方向正股</li>
+        <li>保留大量现金仓位（约 59%），偶尔做 Sell Put 期权（尤其是 TSLA）</li>
+        <li>使用老虎证券作为主要券商</li>
+        <li>无代码经验，会 Excel 公式，需要 <strong>直观、中文、手机可用</strong> 的界面</li>
+        <li>参考 Mike是麥克（YouTube @mike1111）的投资逻辑框架作决策辅助</li>
+      </ul>
+    </div>
+
+    <span class="anchor" id="core-value"></span>
+    <h3>核心价值主张</h3>
+    <div class="card-grid">
+      <div class="metric-card">
+        <div class="metric-label">一屏掌握</div>
+        <div class="metric-value" style="font-size:16px; color:var(--blue);">全局持仓状态</div>
+        <div class="metric-desc">总资产、盈亏、现金比例、行业分布，一个仪表盘全看完</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">主动提醒</div>
+        <div class="metric-value" style="font-size:16px; color:var(--yellow);">风险自动预警</div>
+        <div class="metric-desc">现金超目标、集中度过高、VIX 异常，智能触发通知</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">期权辅助</div>
+        <div class="metric-value" style="font-size:16px; color:var(--green);">Sell Put 策略</div>
+        <div class="metric-desc">推荐高概率 Put 合约，追踪期权收入历史</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">随时随地</div>
+        <div class="metric-value" style="font-size:16px; color:var(--purple);">手机/电脑通用</div>
+        <div class="metric-desc">响应式设计，PWA 支持，离线可查看缓存数据</div>
+      </div>
+    </div>
+
+    <!-- ══ 现有功能 ══ -->
+    <span class="anchor" id="current"></span>
+    <h2>② 现有功能清单（已实现）</h2>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div>以下功能已在当前版本（v3.0）中实现，基于 FastAPI 后端 + 原生 HTML/JS 前端 + SQLite 数据库。</div>
+    </div>
+
+    <span class="anchor" id="current-auth"></span>
+    <div class="feature-block">
+      <div class="feature-header">
+        <div class="feature-title">🔐 用户认证体系</div>
+        <span class="badge badge-green">✓ 已实现</span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-items">
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">邮箱 / 用户名注册 + 登录</div>
+              <div class="fi-desc">JWT Token 认证，24h 有效期，bcrypt + SHA-256 双重哈希密码</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">多用户数据隔离</div>
+              <div class="fi-desc">每个用户的持仓、设置完全独立，管理员可查看所有用户</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">用户角色（user / admin）</div>
+              <div class="fi-desc">管理员专属接口，普通用户只能操作自己的数据</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">Hash 路由（URL 持久化）</div>
+              <div class="fi-desc">刷新页面不回首页，URL hash 记录当前页面状态</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="anchor" id="current-portfolio"></span>
+    <div class="feature-block">
+      <div class="feature-header">
+        <div class="feature-title">📊 持仓管理</div>
+        <span class="badge badge-green">✓ 已实现</span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-items">
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">持仓 CRUD（增删改查）</div>
+              <div class="fi-desc">POST / DELETE / GET /api/portfolio/holdings，数据写入 SQLite，刷新不丢失</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">持仓盈亏计算</div>
+              <div class="fi-desc">实时计算每只持仓的盈亏金额和盈亏百分比</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">现金仓位设置</div>
+              <div class="fi-desc">可设置现金金额和目标现金比例，保存至用户 profile</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">CSV 批量导入</div>
+              <div class="fi-desc">支持上传 CSV 文件批量导入持仓数据</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-partial">⚡</span>
+            <div class="fi-content">
+              <div class="fi-title">持仓健康评分（部分实现）</div>
+              <div class="fi-desc">目前为静态评分（0-100），尚未实现动态计算逻辑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="anchor" id="current-analysis"></span>
+    <div class="feature-block">
+      <div class="feature-header">
+        <div class="feature-title">📈 投资分析仪表盘</div>
+        <span class="badge badge-yellow">⚡ 部分实现</span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-items">
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">资产总览卡片</div>
+              <div class="fi-desc">总资产、投资市值、现金、总盈亏、健康评分</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">行业分布饼图</div>
+              <div class="fi-desc">科技、消费、通信等行业占比可视化</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">市场情绪指标</div>
+              <div class="fi-desc">标普500、纳斯达克、VIX 实时数据展示（目前为模拟数据）</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">风险警报系统</div>
+              <div class="fi-desc">现金比例、集中度、宏观风险三类预警</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-partial">⚡</span>
+            <div class="fi-content">
+              <div class="fi-title">资产历史曲线（未实现）</div>
+              <div class="fi-desc">当前无历史净值/收益曲线，缺少时序数据存储</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-todo">○</span>
+            <div class="fi-content">
+              <div class="fi-title">实时股价对接（未实现）</div>
+              <div class="fi-desc">Alpha Vantage API Key 已获取（OH7TPNSBQONIAGBG）但尚未接入</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="anchor" id="current-tsla"></span>
+    <div class="feature-block">
+      <div class="feature-header">
+        <div class="feature-title">🚗 TSLA 专项监控</div>
+        <span class="badge badge-green">✓ 已实现</span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-items">
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">TSLA 价格 K 线 + 指标</div>
+              <div class="fi-desc">TSLA 专属监控页面，包含 RSI、支撑/压力位（模拟数据）</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">Sell Put 最优合约推荐</div>
+              <div class="fi-desc">推荐行权价 $380 等合约，显示权利金、概率、年化收益</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="anchor" id="current-options"></span>
+    <div class="feature-block">
+      <div class="feature-header">
+        <div class="feature-title">⚙️ 期权策略中心</div>
+        <span class="badge badge-yellow">⚡ 部分实现</span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-items">
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">Sell Put 策略推荐列表</div>
+              <div class="fi-desc">TSLA / NVDA / AAPL 三档策略展示（静态数据）</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-todo">○</span>
+            <div class="fi-content">
+              <div class="fi-title">期权持仓记录（未实现）</div>
+              <div class="fi-desc">无法记录已开仓的期权合约及到期跟踪</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-todo">○</span>
+            <div class="fi-content">
+              <div class="fi-title">期权收益统计（未实现）</div>
+              <div class="fi-desc">历史权利金收入汇总、月度收益报表缺失</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="anchor" id="current-admin"></span>
+    <div class="feature-block">
+      <div class="feature-header">
+        <div class="feature-title">🛠️ 管理后台</div>
+        <span class="badge badge-green">✓ 已实现</span>
+      </div>
+      <div class="feature-body">
+        <div class="feature-items">
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">用户管理（启用/禁用/查看）</div>
+              <div class="fi-desc">管理员可查看所有用户信息，修改账号状态，数据持久化至数据库</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="fi-icon status-done">✓</span>
+            <div class="fi-content">
+              <div class="fi-title">操作审计日志</div>
+              <div class="fi-desc">audit_log 表记录登录、添加持仓、删除等所有关键操作</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 功能缺口 ══ -->
+    <span class="anchor" id="gap"></span>
+    <h2>③ 功能缺口分析（待实现）</h2>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div>以下功能是让系统从"可用"升级为"好用"的关键。优先级分为 <span class="p0">P0（必做）</span>、<span class="p1">P1（重要）</span>、<span class="p2">P2（锦上添花）</span>。</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>优先级</th>
+            <th>功能名称</th>
+            <th>描述</th>
+            <th>影响</th>
+            <th>难度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="p0">P0</span></td>
+            <td><strong>实时股价接入</strong></td>
+            <td>对接 Alpha Vantage API，自动更新每只持仓的 current_price</td>
+            <td>核心数据准确性</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p0">P0</span></td>
+            <td><strong>净值历史曲线</strong></td>
+            <td>每日存储一次快照，展示资产净值走势图（月/季/年）</td>
+            <td>直观看懂投资表现</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p0">P0</span></td>
+            <td><strong>期权持仓管理</strong></td>
+            <td>可添加/追踪 Sell Put 合约（行权价、到期日、权利金、开仓价格）</td>
+            <td>核心业务场景</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p1">P1</span></td>
+            <td><strong>加密资产追踪</strong></td>
+            <td>支持 BTC/ETH 持仓录入，接入 CoinGecko 实时价格</td>
+            <td>覆盖完整资产</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p1">P1</span></td>
+            <td><strong>定投计划管理</strong></td>
+            <td>记录每月定投计划（标的 + 金额），追踪执行情况</td>
+            <td>辅助纪律执行</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p1">P1</span></td>
+            <td><strong>移动端推送通知</strong></td>
+            <td>重要风险警报（VIX 异常、持仓大跌）推送到手机</td>
+            <td>及时响应市场</td>
+            <td><span class="badge badge-red">高</span></td>
+          </tr>
+          <tr>
+            <td><span class="p1">P1</span></td>
+            <td><strong>交易记录日志</strong></td>
+            <td>手动记录买入/卖出操作，自动更新持仓成本和数量</td>
+            <td>成本基础准确</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p1">P1</span></td>
+            <td><strong>密码修改 + 个人设置</strong></td>
+            <td>用户可自行修改密码、昵称、显示货币、时区等</td>
+            <td>基础账户体验</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p1">P1</span></td>
+            <td><strong>数据导出（CSV/PDF）</strong></td>
+            <td>导出持仓明细、交易历史，方便税务申报和备份</td>
+            <td>实用性</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>AI 投资顾问对话</strong></td>
+            <td>接入 LLM，用户可问"TSLA 现在适合 Sell Put 吗"，基于持仓上下文回答</td>
+            <td>差异化竞争力</td>
+            <td><span class="badge badge-red">高</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>收益率对比基准</strong></td>
+            <td>将组合表现与 SPY / QQQ 对比，直观看是否跑赢大盘</td>
+            <td>投资成效评估</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>股息追踪</strong></td>
+            <td>记录持仓股的股息发放记录和预期年化股息收益</td>
+            <td>收益完整性</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>分享报告（只读链接）</strong></td>
+            <td>生成可分享的持仓报告链接（不含成本价，保护隐私）</td>
+            <td>社交分享</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>黑暗/明亮主题切换</strong></td>
+            <td>当前仅有暗色模式，添加亮色模式</td>
+            <td>使用舒适度</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>PWA 离线支持</strong></td>
+            <td>添加 Service Worker，离线可查看上次缓存的数据</td>
+            <td>移动端体验</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>多账户聚合</strong></td>
+            <td>支持老虎、富途等多个券商账户独立管理后汇总</td>
+            <td>未来扩展性</td>
+            <td><span class="badge badge-red">高</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>目标持仓规划</strong></td>
+            <td>设置理想仓位比例，自动计算距离目标差多少钱</td>
+            <td>辅助决策</td>
+            <td><span class="badge badge-green">低</span></td>
+          </tr>
+          <tr>
+            <td><span class="p2">P2</span></td>
+            <td><strong>新闻实时推送</strong></td>
+            <td>对接 Finnhub / NewsAPI，自动推送持仓相关新闻</td>
+            <td>信息聚合</td>
+            <td><span class="badge badge-yellow">中</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <span class="anchor" id="issues"></span>
+    <h3>已知技术问题</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>编号</th><th>问题描述</th><th>严重程度</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BUG-01</td>
+            <td>股票价格全部为手动录入的静态值，没有实时更新机制</td>
+            <td><span class="badge badge-red">严重</span></td>
+            <td><span class="status-todo">待修复</span></td>
+          </tr>
+          <tr>
+            <td>BUG-02</td>
+            <td>风险警报、期权策略、新闻全部是硬编码的假数据</td>
+            <td><span class="badge badge-yellow">中</span></td>
+            <td><span class="status-todo">待修复</span></td>
+          </tr>
+          <tr>
+            <td>BUG-03</td>
+            <td>Token 过期后前端无优雅提示，直接报 401 错误</td>
+            <td><span class="badge badge-yellow">中</span></td>
+            <td><span class="status-todo">待修复</span></td>
+          </tr>
+          <tr>
+            <td>BUG-04</td>
+            <td>缺乏输入校验：持仓数量/价格可以填入负数或极端值</td>
+            <td><span class="badge badge-yellow">中</span></td>
+            <td><span class="status-todo">待修复</span></td>
+          </tr>
+          <tr>
+            <td>BUG-05</td>
+            <td>SQLite 不适合多用户并发，生产环境需迁移至 PostgreSQL</td>
+            <td><span class="badge badge-blue">低（当前单用户）</span></td>
+            <td><span class="status-wip">规划中</span></td>
+          </tr>
+          <tr>
+            <td>BUG-06</td>
+            <td>SECRET_KEY 硬编码在代码中，生产部署前必须通过环境变量注入</td>
+            <td><span class="badge badge-red">安全</span></td>
+            <td><span class="status-todo">待修复</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 竞品分析 ══ -->
+    <span class="anchor" id="compete"></span>
+    <h2>④ 竞品分析</h2>
+
+    <span class="anchor" id="benchmark"></span>
+    <h3>功能对标表</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>Empower (免费)</th>
+            <th>Sharesight ($216/年)</th>
+            <th>Kubera ($249/年)</th>
+            <th>Delta (免费)</th>
+            <th class="highlight-row">Claw (当前)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>多账户同步</td>
+            <td><span class="compare-dot-yes">✓</span> 自动</td>
+            <td><span class="compare-dot-yes">✓</span> 200+ 券商</td>
+            <td><span class="compare-dot-yes">✓</span> 3万机构</td>
+            <td><span class="compare-dot-yes">✓</span> 手动</td>
+            <td class="highlight-row"><span class="compare-dot-partial">△</span> 手动录入</td>
+          </tr>
+          <tr>
+            <td>实时股价</td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td class="highlight-row"><span class="compare-dot-no">✗</span> 待接入</td>
+          </tr>
+          <tr>
+            <td>净值历史曲线</td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td class="highlight-row"><span class="compare-dot-no">✗</span> 待开发</td>
+          </tr>
+          <tr>
+            <td>加密资产追踪</td>
+            <td><span class="compare-dot-partial">△</span> 手动</td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span> 专业</td>
+            <td class="highlight-row"><span class="compare-dot-no">✗</span> 待开发</td>
+          </tr>
+          <tr>
+            <td>税务报告</td>
+            <td><span class="compare-dot-partial">△</span></td>
+            <td><span class="compare-dot-yes">✓</span> 核心功能</td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td class="highlight-row"><span class="compare-dot-no">✗</span> 待开发</td>
+          </tr>
+          <tr>
+            <td>期权追踪</td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-partial">△</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td class="highlight-row"><span class="compare-dot-partial">△</span> 推荐，无记录</td>
+          </tr>
+          <tr>
+            <td>中文界面</td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-partial">△</span> 有限</td>
+            <td class="highlight-row"><span class="compare-dot-yes">✓</span> 全中文</td>
+          </tr>
+          <tr>
+            <td>老虎证券适配</td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td class="highlight-row"><span class="compare-dot-partial">△</span> CSV 导入</td>
+          </tr>
+          <tr>
+            <td>AI 投资顾问</td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td class="highlight-row"><span class="compare-dot-partial">△</span> 规划中</td>
+          </tr>
+          <tr>
+            <td>Sell Put 策略推荐</td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-partial">△</span></td>
+            <td class="highlight-row"><span class="compare-dot-yes">✓</span> 独有功能</td>
+          </tr>
+          <tr>
+            <td>完全私有化部署</td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td class="highlight-row"><span class="compare-dot-yes">✓</span> 完全可控</td>
+          </tr>
+          <tr>
+            <td>风险预警 / VIX 监控</td>
+            <td><span class="compare-dot-partial">△</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td><span class="compare-dot-no">✗</span></td>
+            <td class="highlight-row"><span class="compare-dot-yes">✓</span> 已有框架</td>
+          </tr>
+          <tr>
+            <td>免费使用</td>
+            <td><span class="compare-dot-yes">✓</span></td>
+            <td><span class="compare-dot-no">✗</span> $216/年</td>
+            <td><span class="compare-dot-no">✗</span> $249/年</td>
+            <td><span class="compare-dot-yes">✓</span> 基础免费</td>
+            <td class="highlight-row"><span class="compare-dot-yes">✓</span> 自部署</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div><strong>差异化核心优势：</strong>现有竞品都是英文且面向全球市场，没有一款针对「中文用户 + 老虎证券 + Sell Put 期权策略 + Mike是麥克投资逻辑」的定制化产品。Claw 的护城河就是这种深度个性化。</div>
+    </div>
+
+    <!-- ══ 路线图 ══ -->
+    <span class="anchor" id="roadmap"></span>
+    <h2>⑤ 产品路线图</h2>
+
+    <ul class="timeline">
+      <!-- Phase 1 -->
+      <li class="timeline-item">
+        <span class="anchor" id="phase1"></span>
+        <div class="timeline-dot dot-done">✓</div>
+        <div class="timeline-content">
+          <div class="timeline-title" style="color:var(--green);">Phase 1 · 核心框架 <span style="font-size:12px; color:var(--muted);">（已完成）</span></div>
+          <div class="timeline-desc">搭建完整前后端架构，实现用户认证、持仓 CRUD、基础仪表盘、管理后台</div>
+          <div class="timeline-tags">
+            <span class="badge badge-green">✓ 用户注册/登录</span>
+            <span class="badge badge-green">✓ JWT 认证</span>
+            <span class="badge badge-green">✓ 持仓管理</span>
+            <span class="badge badge-green">✓ 盈亏计算</span>
+            <span class="badge badge-green">✓ Hash 路由</span>
+            <span class="badge badge-green">✓ 管理后台</span>
+            <span class="badge badge-green">✓ TSLA 监控页</span>
+            <span class="badge badge-green">✓ 期权推荐展示</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Phase 2 -->
+      <li class="timeline-item">
+        <span class="anchor" id="phase2"></span>
+        <div class="timeline-dot dot-now">2</div>
+        <div class="timeline-content">
+          <div class="timeline-title" style="color:var(--blue);">Phase 2 · 数据真实化 <span style="font-size:12px; color:var(--muted);">（建议下一步，2-3 周）</span></div>
+          <div class="timeline-desc">让所有数据从"假数据"变成真实数据，产品才真正可用</div>
+          <div class="timeline-tags">
+            <span class="badge badge-blue">Alpha Vantage 实时股价</span>
+            <span class="badge badge-blue">CoinGecko 加密价格</span>
+            <span class="badge badge-blue">净值历史快照（每日定时）</span>
+            <span class="badge badge-blue">净值曲线图</span>
+            <span class="badge badge-blue">期权持仓记录</span>
+            <span class="badge badge-blue">BUG 修复（6项）</span>
+            <span class="badge badge-blue">密码修改</span>
+            <span class="badge badge-blue">输入校验加强</span>
+          </div>
+          <div style="margin-top:10px; font-size:13px; color:var(--muted);">
+            <strong style="color:var(--text);">关键技术任务：</strong><br/>
+            1. 每小时轮询 Alpha Vantage 更新 holdings.current_price<br/>
+            2. 每天 00:00 存一行 portfolio_snapshots 记录（总净值 + 现金）<br/>
+            3. 新建 option_positions 表，前端添加期权仓位管理页
+          </div>
+        </div>
+      </li>
+
+      <!-- Phase 3 -->
+      <li class="timeline-item">
+        <span class="anchor" id="phase3"></span>
+        <div class="timeline-dot dot-next">3</div>
+        <div class="timeline-content">
+          <div class="timeline-title" style="color:var(--yellow);">Phase 3 · 智能分析 <span style="font-size:12px; color:var(--muted);">（1-2 月后）</span></div>
+          <div class="timeline-desc">从数据展示升级为真正的决策辅助工具</div>
+          <div class="timeline-tags">
+            <span class="badge badge-yellow">AI 顾问对话窗口</span>
+            <span class="badge badge-yellow">收益率对比 SPY/QQQ</span>
+            <span class="badge badge-yellow">定投计划追踪</span>
+            <span class="badge badge-yellow">交易记录日志</span>
+            <span class="badge badge-yellow">VIX 自动预警</span>
+            <span class="badge badge-yellow">数据导出 CSV/PDF</span>
+            <span class="badge badge-yellow">股息追踪</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Phase 4 -->
+      <li class="timeline-item">
+        <span class="anchor" id="phase4"></span>
+        <div class="timeline-dot dot-future">4</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Phase 4 · 平台化 <span style="font-size:12px; color:var(--muted);">（3-6 月后）</span></div>
+          <div class="timeline-desc">考虑开放给更多投资者使用，或接入老虎证券 OpenAPI</div>
+          <div class="timeline-tags">
+            <span class="badge badge-teal">老虎证券 API 直连</span>
+            <span class="badge badge-teal">PWA 离线支持</span>
+            <span class="badge badge-teal">手机推送通知</span>
+            <span class="badge badge-teal">多账户聚合</span>
+            <span class="badge badge-teal">分享报告链接</span>
+            <span class="badge badge-teal">多语言支持</span>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <!-- ══ 技术架构 ══ -->
+    <span class="anchor" id="tech"></span>
+    <h2>⑥ 技术架构</h2>
+
+    <div class="card-grid">
+      <div class="metric-card">
+        <div class="metric-label">前端</div>
+        <div class="metric-value" style="font-size:15px; color:var(--blue);">原生 HTML / JS</div>
+        <div class="metric-desc">无框架依赖，Chart.js 可视化，Font Awesome 图标，响应式布局</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">后端</div>
+        <div class="metric-value" style="font-size:15px; color:var(--green);">FastAPI + Python</div>
+        <div class="metric-desc">高性能异步框架，自动生成 OpenAPI 文档，Uvicorn ASGI 服务器</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">数据库</div>
+        <div class="metric-value" style="font-size:15px; color:var(--yellow);">SQLite → PostgreSQL</div>
+        <div class="metric-desc">开发用 SQLite，生产环境迁移至 PostgreSQL，支持并发</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">认证</div>
+        <div class="metric-value" style="font-size:15px; color:var(--purple);">JWT + bcrypt</div>
+        <div class="metric-desc">OAuth2 Bearer Token，SHA-256 预哈希 + bcrypt 存储密码</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">部署</div>
+        <div class="metric-value" style="font-size:15px; color:var(--teal);">Docker / VPS</div>
+        <div class="metric-desc">支持 Docker 容器化，Nginx 反代，也可直接部署到云服务器</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">数据 API</div>
+        <div class="metric-value" style="font-size:15px; color:var(--orange);">Alpha Vantage</div>
+        <div class="metric-desc">API Key 已获取，支持股价、财报、新闻等多种数据类型</div>
+      </div>
+    </div>
+
+    <span class="anchor" id="api"></span>
+    <h3>现有 API 接口清单</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>方法</th><th>路径</th><th>描述</th><th>权限</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/auth/register</code></td><td>用户注册</td><td>公开</td></tr>
+          <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/auth/login</code></td><td>用户登录，返回 JWT Token</td><td>公开</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/auth/me</code></td><td>获取当前用户信息</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/dashboard</code></td><td>完整仪表盘数据</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/portfolio/summary</code></td><td>持仓摘要</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/portfolio/holdings</code></td><td>持仓列表</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/portfolio/holdings</code></td><td>添加/更新持仓</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-red">DELETE</span></td><td><code>/api/portfolio/holdings/{symbol}</code></td><td>删除持仓</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-yellow">PATCH</span></td><td><code>/api/user/profile</code></td><td>更新用户设置（现金/目标比例）</td><td>用户</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/admin/users</code></td><td>获取所有用户列表</td><td>管理员</td></tr>
+          <tr><td><span class="badge badge-yellow">PATCH</span></td><td><code>/api/admin/users/{uid}</code></td><td>修改用户状态/角色</td><td>管理员</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/docs</code></td><td>Swagger API 文档</td><td>公开</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>待新增 API 接口（Phase 2）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>方法</th><th>路径</th><th>描述</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/market/price/{symbol}</code></td><td>从 Alpha Vantage 获取实时价格</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/portfolio/history</code></td><td>获取净值历史曲线数据</td></tr>
+          <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/options/positions</code></td><td>记录期权持仓</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/options/positions</code></td><td>获取期权持仓列表</td></tr>
+          <tr><td><span class="badge badge-blue">POST</span></td><td><code>/api/trades</code></td><td>记录交易操作</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/trades</code></td><td>获取交易历史</td></tr>
+          <tr><td><span class="badge badge-yellow">PATCH</span></td><td><code>/api/user/password</code></td><td>修改密码</td></tr>
+          <tr><td><span class="badge badge-green">GET</span></td><td><code>/api/portfolio/export</code></td><td>导出持仓数据为 CSV</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 上线方案 ══ -->
+    <span class="anchor" id="deploy"></span>
+    <h2>⑦ 完整上线方案</h2>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">🎯</span>
+      <div>目标：<strong>随时随地通过手机/电脑访问</strong>，无需开着本地电脑。以下是三种方案，按推荐程度排序。</div>
+    </div>
+
+    <h3>方案 A：云服务器部署（推荐）</h3>
+    <div class="card">
+      <p><strong>原理：</strong>租一台境外 VPS，把 Claw 跑在上面，绑定域名，手机/电脑通过 HTTPS 访问。</p>
+      <h4>推荐配置</h4>
+      <ul>
+        <li><strong>服务器：</strong>腾讯云 / 阿里云轻量应用服务器，<code>2核 2GB</code>，约 ¥50-100/月</li>
+        <li><strong>系统：</strong>Ubuntu 22.04 LTS</li>
+        <li><strong>域名：</strong>可注册一个 <code>claw.投资.com</code>，或直接用 IP</li>
+        <li><strong>HTTPS：</strong>Let's Encrypt 免费证书，Nginx 反向代理</li>
+      </ul>
+      <h4>部署步骤概述</h4>
+      <ol>
+        <li>SSH 登录服务器，安装 Python 3.11 + Docker</li>
+        <li>上传代码，修改 <code>CLAW_SECRET</code>、<code>DB_PATH</code> 环境变量</li>
+        <li>将数据库从 SQLite 迁移至 PostgreSQL（Phase 2）</li>
+        <li>配置 Nginx 反代，申请 SSL 证书</li>
+        <li>用 systemd 或 PM2 保持进程持久运行</li>
+      </ol>
+      <div class="callout callout-tip" style="margin-top:12px; margin-bottom:0;">
+        <span class="callout-icon">💡</span>
+        <div>域名 + 服务器 + SSL 全部搞定后，访问地址就是 <code>https://claw.你的域名.com</code>，手机加书签就像 App 一样。</div>
+      </div>
+    </div>
+
+    <h3>方案 B：Railway / Render 免费托管</h3>
+    <div class="card">
+      <p>适合测试阶段，<strong>免费</strong>，无需运维，但有一定限制（如冷启动延迟）。</p>
+      <ul>
+        <li><strong>Railway.app：</strong>直接从 GitHub 部署 FastAPI，自动处理 HTTPS，有免费额度</li>
+        <li><strong>Render.com：</strong>类似 Railway，免费版有休眠机制（15 分钟无请求后关闭）</li>
+        <li><strong>数据库：</strong>可使用 Railway 提供的 PostgreSQL 插件</li>
+        <li><strong>缺点：</strong>免费版冷启动慢（约 30 秒），不适合生产使用</li>
+      </ul>
+    </div>
+
+    <h3>方案 C：本地 + 内网穿透（应急）</h3>
+    <div class="card">
+      <p>如果不想花钱，可用 <strong>Cloudflare Tunnel</strong> 或 <strong>ngrok</strong> 将本地服务暴露到公网。</p>
+      <ul>
+        <li>Cloudflare Tunnel：完全免费，稳定，有公网域名，推荐</li>
+        <li>缺点：依赖本地 Mac 必须开机，不适合长期使用</li>
+      </ul>
+    </div>
+
+    <span class="anchor" id="ops"></span>
+    <h3>生产环境安全清单</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>检查项</th><th>当前状态</th><th>处理方式</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SECRET_KEY 保密</td>
+            <td><span class="badge badge-red">危险（硬编码）</span></td>
+            <td>改为 <code>os.getenv("CLAW_SECRET")</code> 并在服务器设置环境变量</td>
+          </tr>
+          <tr>
+            <td>HTTPS 加密</td>
+            <td><span class="badge badge-yellow">本地没有</span></td>
+            <td>部署时用 Nginx + Let's Encrypt，所有流量走 HTTPS</td>
+          </tr>
+          <tr>
+            <td>数据库备份</td>
+            <td><span class="badge badge-red">无</span></td>
+            <td>每天定时备份 SQLite 文件或 PostgreSQL dump 到云存储</td>
+          </tr>
+          <tr>
+            <td>速率限制</td>
+            <td><span class="badge badge-red">无</span></td>
+            <td>添加 SlowAPI 限流，防止暴力破解登录接口</td>
+          </tr>
+          <tr>
+            <td>CORS 白名单</td>
+            <td><span class="badge badge-yellow">当前 <code>*</code></span></td>
+            <td>生产环境改为只允许你的域名</td>
+          </tr>
+          <tr>
+            <td>日志监控</td>
+            <td><span class="badge badge-yellow">仅控制台</span></td>
+            <td>配置文件日志 + 错误邮件告警（或接入 Sentry）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ 页脚 ══ -->
+    <div style="margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 13px;">
+      <p>Claw 投资决策中心 · PRD v1.0 · 2026-03-24</p>
+      <p style="margin-top:4px;">本文档随产品迭代更新。如需修改，告诉我，我来更新。</p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // 侧边栏高亮当前锚点
+  const anchors = document.querySelectorAll('.anchor');
+  const links = document.querySelectorAll('.sidebar a');
+
+  function getAnchorId(el) {
+    return el.id;
+  }
+
+  function updateActive() {
+    let current = '';
+    anchors.forEach(a => {
+      if (window.scrollY + 80 >= a.offsetTop) {
+        current = a.id;
+      }
+    });
+    links.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+
+  // 顶部导航也高亮
+  const navLinks = document.querySelectorAll('.nav-links a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      navLinks.forEach(l => l.style.color = '');
+      this.style.color = 'var(--blue)';
+    });
+  });
+</script>
+</body>
+</html>

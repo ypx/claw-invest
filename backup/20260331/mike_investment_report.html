@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mike是麥克 — 投资理念深度分析报告</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0a0e1a;
+    color: #e0e6f0;
+    line-height: 1.7;
+  }
+  .hero {
+    background: linear-gradient(135deg, #0d1b35 0%, #1a2a4a 50%, #0d1b35 100%);
+    border-bottom: 1px solid #1e3a5f;
+    padding: 60px 40px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(30,90,180,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,200,50,0.12);
+    border: 1px solid rgba(255,200,50,0.3);
+    color: #ffc832;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+  .hero h1 span { color: #4da6ff; }
+  .hero p {
+    color: #7a9bc8;
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; color: #4da6ff; }
+  .stat-label { font-size: 13px; color: #5a7a9a; margin-top: 4px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  .section {
+    margin: 40px auto;
+    max-width: 1100px;
+    padding: 0 24px;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .icon { font-size: 24px; }
+  .section-subtitle {
+    color: #5a7a9a;
+    font-size: 14px;
+    margin-bottom: 24px;
+    padding-left: 34px;
+  }
+
+  .card {
+    background: #111827;
+    border: 1px solid #1e3a5f;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: #2a5a9f; }
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #4da6ff;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #1e3a5f;
+  }
+  .card p { color: #b0c4de; font-size: 15px; margin-bottom: 8px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .principle-card {
+    background: #111827;
+    border: 1px solid #1e3a5f;
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .principle-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .principle-card.blue::before { background: linear-gradient(90deg, #1e6fff, #4da6ff); }
+  .principle-card.gold::before { background: linear-gradient(90deg, #c8941e, #ffc832); }
+  .principle-card.green::before { background: linear-gradient(90deg, #1e8f4e, #36d178); }
+  .principle-card.purple::before { background: linear-gradient(90deg, #6e1ea0, #b24eff); }
+  .principle-card.red::before { background: linear-gradient(90deg, #a01e2a, #ff4e6a); }
+  .principle-card.teal::before { background: linear-gradient(90deg, #1e8fa0, #4effec); }
+  .principle-num {
+    font-size: 42px;
+    font-weight: 800;
+    opacity: 0.07;
+    position: absolute;
+    top: 10px; right: 18px;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .principle-card h3 { font-size: 16px; font-weight: 700; color: #ffffff; margin-bottom: 10px; }
+  .principle-card p { font-size: 14px; color: #7a9bc8; line-height: 1.6; }
+
+  /* Stocks table */
+  .stocks-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .stock-card {
+    background: #111827;
+    border: 1px solid #1e3a5f;
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .stock-ticker {
+    background: linear-gradient(135deg, #1a3a6a, #0d2040);
+    border: 1px solid #2a5a9f;
+    color: #4da6ff;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 8px 12px;
+    border-radius: 8px;
+    min-width: 72px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .stock-ticker.btc { background: linear-gradient(135deg, #3a2a00, #1a1200); border-color: #6b4800; color: #ffc832; }
+  .stock-ticker.eth { background: linear-gradient(135deg, #1a1a3a, #0d0d1e); border-color: #3a3a6b; color: #8080ff; }
+  .stock-ticker.crypto { background: linear-gradient(135deg, #1a3a1a, #0d200d); border-color: #2a6b2a; color: #36d178; }
+  .stock-info h4 { color: #e0e6f0; font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+  .stock-info p { color: #5a7a9a; font-size: 13px; }
+  .stock-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+  .tag-core { background: rgba(77,166,255,0.12); color: #4da6ff; border: 1px solid rgba(77,166,255,0.2); }
+  .tag-growth { background: rgba(54,209,120,0.12); color: #36d178; border: 1px solid rgba(54,209,120,0.2); }
+  .tag-speculative { background: rgba(255,200,50,0.12); color: #ffc832; border: 1px solid rgba(255,200,50,0.2); }
+  .tag-hedge { background: rgba(178,78,255,0.12); color: #b24eff; border: 1px solid rgba(178,78,255,0.2); }
+
+  /* Sectors */
+  .sectors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .sector-card {
+    background: #111827;
+    border: 1px solid #1e3a5f;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .sector-icon { font-size: 32px; margin-bottom: 10px; }
+  .sector-name { font-size: 15px; font-weight: 700; color: #e0e6f0; margin-bottom: 6px; }
+  .sector-desc { font-size: 13px; color: #5a7a9a; }
+  .sector-priority {
+    margin-top: 10px;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  .priority-1 { background: rgba(255,78,106,0.15); color: #ff4e6a; border: 1px solid rgba(255,78,106,0.25); }
+  .priority-2 { background: rgba(255,200,50,0.12); color: #ffc832; border: 1px solid rgba(255,200,50,0.2); }
+  .priority-3 { background: rgba(77,166,255,0.1); color: #4da6ff; border: 1px solid rgba(77,166,255,0.15); }
+
+  /* Timeline / Logic flow */
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #1e6fff, #4da6ff, #36d178);
+    border-radius: 2px;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+    padding-left: 24px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    background: #4da6ff;
+    border-radius: 50%;
+    border: 2px solid #0a0e1a;
+  }
+  .timeline-item h4 { color: #ffffff; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .timeline-item p { color: #7a9bc8; font-size: 14px; }
+
+  /* Warn / Tips box */
+  .warn-box {
+    background: rgba(255,200,50,0.06);
+    border: 1px solid rgba(255,200,50,0.2);
+    border-left: 4px solid #ffc832;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+  .warn-box h4 { color: #ffc832; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .warn-box p { color: #b0a060; font-size: 14px; }
+
+  .info-box {
+    background: rgba(77,166,255,0.06);
+    border: 1px solid rgba(77,166,255,0.18);
+    border-left: 4px solid #4da6ff;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+  .info-box h4 { color: #4da6ff; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .info-box p { color: #7a9bc8; font-size: 14px; line-height: 1.7; }
+
+  /* Quote */
+  .quote {
+    border-left: 4px solid #4da6ff;
+    padding: 16px 22px;
+    background: rgba(77,166,255,0.05);
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+    font-style: italic;
+    color: #7a9bc8;
+    font-size: 15px;
+  }
+  .quote strong { color: #4da6ff; font-style: normal; }
+
+  /* Video list */
+  .video-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .video-item {
+    background: #111827;
+    border: 1px solid #1e3a5f;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #7a9bc8;
+    transition: all 0.2s;
+  }
+  .video-item:hover { border-color: #2a5a9f; color: #b0c4de; }
+  .video-item span { color: #4da6ff; margin-right: 6px; }
+
+  footer {
+    text-align: center;
+    padding: 40px;
+    color: #2a4a6a;
+    font-size: 13px;
+    border-top: 1px solid #1e3a5f;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 24px; }
+    .hero-stats { gap: 24px; }
+    .principles-grid, .stocks-container, .sectors-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">YouTube 频道深度分析 · 2026.03</div>
+  <h1><span>Mike是麥克</span> 投资理念深度分析报告</h1>
+  <p>基于频道770+视频的内容分析，提炼创作者核心投资原则、逻辑体系与重点关注标的</p>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">770+</div>
+      <div class="stat-label">视频总数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">20.1万</div>
+      <div class="stat-label">频道订阅者</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">300+</div>
+      <div class="stat-label">本次分析视频数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">25</div>
+      <div class="stat-label">深度分析视频</div>
+    </div>
+  </div>
+</div>
+
+<!-- 关于创作者 -->
+<div class="section">
+  <div class="section-title"><span class="icon">👤</span> 创作者背景</div>
+  <div class="section-subtitle">了解 Mike 的身份背景，有助于理解其投资视角</div>
+  <div class="card">
+    <p>Mike（麥克）是一位<strong style="color:#4da6ff">美籍华裔财经作家</strong>，旅居世界各地（曾旅居美国、日本、新加坡等多地）。他出版了财经书籍《破局致富》，在海外华人投资社群中有较高知名度。</p>
+    <p>其视角融合了<strong style="color:#ffc832">美国本土金融视野</strong>与<strong style="color:#ffc832">华人普通家庭财富增值需求</strong>，主要面向海外华人及对美股感兴趣的中文受众。他坦言自己分享的是个人操作逻辑，不构成投资建议，并一再强调"我不推荐股票，我只分享我自己的操作"。</p>
+  </div>
+</div>
+
+<!-- 核心投资原则 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🏛️</span> 核心投资原则</div>
+  <div class="section-subtitle">从大量视频内容中提炼的 Mike 反复强调的投资底层原则</div>
+  <div class="principles-grid">
+
+    <div class="principle-card blue">
+      <div class="principle-num">1</div>
+      <h3>🇺🇸 只投美股，远离A股</h3>
+      <p>Mike 明确表示只关注美股，不投A股。他认为："A股的作用就是让你成为百万富翁，如果你本来是千万富豪的话。" 美股是普通人实现财富自由的最佳途径，过去15年标普500年均涨幅14.6%，远超任何银行存款或储蓄保险回报。</p>
+    </div>
+
+    <div class="principle-card gold">
+      <div class="principle-num">2</div>
+      <h3>⏳ 长期主义 + 定投策略</h3>
+      <p>Mike 是典型的长期价值投资者，反对短线投机，强调"不做投机人，All in All out是最危险的"。他主张对优质资产进行长期定投，特别是对NVDA、GOOGL、AMZN等核心持仓。他管理6个账户，长短线和退休账户分开操作。</p>
+    </div>
+
+    <div class="principle-card green">
+      <div class="principle-num">3</div>
+      <h3>🌊 跟随宏观趋势布局</h3>
+      <p>Mike 高度重视宏观叙事（Macro Narrative）：地缘政治、美元周期、能源转型、AI革命等大背景。他认为"未来十年最大的财富来源不是技术，而是地缘政治+能源+AI的三重叠加。懂得美国战略，就懂得资本未来往哪里流。"</p>
+    </div>
+
+    <div class="principle-card purple">
+      <div class="principle-num">4</div>
+      <h3>⚖️ 仓位管理是核心</h3>
+      <p>Mike 反复强调仓位管理的重要性。他明确说："重仓不是all in，也不是无脑买入，买卖的时间点、仓位的管理、资金的控制都非常重要。如果你看完我的影片就全仓猛干一只股票，那么你这是投机不是投资。" 他从不all-in单一标的。</p>
+    </div>
+
+    <div class="principle-card red">
+      <div class="principle-num">5</div>
+      <h3>📉 危机即机会，但需等底部</h3>
+      <p>Mike 对市场恐慌有独特判断：VIX涨到30并不是抄底信号，历史上真正的底部往往在VIX 40~60时出现。地缘政治危机（如伊朗战争）反而是布局美股和军工股的机会，历史数据显示美股在14次地缘政治事件中保持了极强韧性。</p>
+    </div>
+
+    <div class="principle-card teal">
+      <div class="principle-num">6</div>
+      <h3>🔄 分散 + 核心持仓结合</h3>
+      <p>Mike 的投资组合由核心持仓（NVDA/GOOGL/AMZN等科技巨头）+ 成长赛道（量子计算、太空能源、加密货币）+ 防御资产（BTC、稳定币）构成。核心仓位长期持有，同时保留小仓位参与高风险高回报赛道。</p>
+    </div>
+
+    <div class="principle-card blue">
+      <div class="principle-num">7</div>
+      <h3>🛡️ 美元贬值周期下的资产配置</h3>
+      <p>Mike 认为美元正处于"第三次大幅贬值周期"，弱美元时代对资产配置有深远影响。在此背景下，他主张增配：比特币（数字黄金）、美股科技（美元计价资产）、能源相关资产，规避纯现金持有风险。</p>
+    </div>
+
+    <div class="principle-card gold">
+      <div class="principle-num">8</div>
+      <h3>💡 国家战略即投资风向标</h3>
+      <p>Mike 将美国的国家战略（AI主权、能源独立、格陵兰战略、创世使命等）视为最重要的投资信号。他认为白宫的政策方向决定了资本流向，"懂政治的人才能在金融市场赚到大钱"，这是他区别于纯技术分析者的核心差异。</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- 投资逻辑体系 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🧠</span> 投资逻辑体系</div>
+  <div class="section-subtitle">Mike 分析市场和做出投资决策的思维框架</div>
+
+  <div class="card">
+    <div class="card-title">宏观分析框架：地缘政治 → 资本流向 → 行业赛道 → 个股</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>第一层：判断全球权力格局</h4>
+        <p>分析美国、中国、日本等主要势力的战略博弈。美国的扩张意图（格陵兰、巴拿马运河）、能源战略、科技主权战略是最高级别的投资信号。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>第二层：判断货币周期</h4>
+        <p>观察美元指数、美联储政策、美债走向。弱美元时代 → 大宗商品、比特币、美股科技同步受益。强美元时代 → 谨慎持有风险资产。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>第三层：确定核心赛道</h4>
+        <p>在国家战略框架下找到2-5年内确定性最高的赛道：AI基础设施、量子计算、太空能源、加密货币金融化、军工/国防。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>第四层：选择赛道内龙头</h4>
+        <p>在每个赛道内优选龙头公司（NVDA/AI、IONQ/量子、MARA/矿企、CMBT等），以及相关ETF（QQQ、SMH、ARKB等）降低个股风险。</p>
+      </div>
+      <div class="timeline-item">
+        <h4>第五层：时间点与仓位控制</h4>
+        <p>利用VIX恐慌指数判断市场情绪，在VIX高位（40-60）逐步建仓，在回调时加仓，保持流动性以应对更大幅度下跌。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h4>安装期理论（Installation Period Theory）</h4>
+    <p>Mike 多次引用技术革命"安装期"概念解释当前AI投资逻辑：当年电信公司的破产带来了廉价宽带，诞生了YouTube和Netflix。今天AI基础设施的"过剩"投入（微软、Meta、Google疯狂囤积算力）将在未来3-5年带来廉价的AI基础设施，从而催生下一代杀手级应用。现在买入AI基础设施股票，就是提前投资这个周期。</p>
+  </div>
+
+  <div class="info-box">
+    <h4>比特币的"主权货币"逻辑</h4>
+    <p>Mike 认为比特币不只是投机品，而是"货币主权争夺战"的核心战场。美国政府、深层政府、科技巨头的博弈，最终会通过比特币来决出胜负。川普政府的加密友好政策是国家级别的信号，机构资金通过ARKB等ETF大规模流入，意味着BTC正在从"投机品"升级为"数字黄金"和储备资产。</p>
+  </div>
+</div>
+
+<!-- 重点关注股票 -->
+<div class="section">
+  <div class="section-title"><span class="icon">📊</span> 重点关注股票与资产</div>
+  <div class="section-subtitle">Mike 视频中明确提及并分析的持仓或关注标的</div>
+
+  <div style="margin-bottom:16px;color:#5a7a9a;font-size:13px;">
+    ⚠️ 以下为 Mike 个人分享内容的整理，不构成投资建议。请结合自身情况独立判断。
+  </div>
+
+  <div class="stocks-container">
+
+    <div class="stock-card">
+      <div class="stock-ticker">NVDA</div>
+      <div class="stock-info">
+        <h4>英伟达 Nvidia</h4>
+        <p>Mike最核心的长期持仓之一。AI算力基础设施的绝对霸主，视为"AI时代的铲子"。明确表示会持续定投，即便短期有10%~20%的回调也不会卖出。</p>
+        <span class="stock-tag tag-core">核心持仓</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">GOOGL</div>
+      <div class="stock-info">
+        <h4>谷歌 Alphabet</h4>
+        <p>核心持仓之一。Mike认为谷歌在AI搜索、云计算、自动驾驶（Waymo）三条赛道都有极强护城河，估值相对合理，长期定投逻辑清晰。</p>
+        <span class="stock-tag tag-core">核心持仓</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">AMZN</div>
+      <div class="stock-info">
+        <h4>亚马逊 Amazon</h4>
+        <p>核心持仓之一。AWS云计算业务+AI基础设施布局+电商护城河，Mike将其视为受益AI革命最确定的大型科技股之一。持续定投。</p>
+        <span class="stock-tag tag-core">核心持仓</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">META</div>
+      <div class="stock-info">
+        <h4>Meta Platforms</h4>
+        <p>Mike专门分析过Meta与BlackRock、Blue Owl合作270亿美元建超大型数据中心，认为这是Meta在AI战争中的关键布局，视为"未来5年暴富机会"。</p>
+        <span class="stock-tag tag-growth">重点成长</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker btc">BTC</div>
+      <div class="stock-info">
+        <h4>比特币 Bitcoin</h4>
+        <p>Mike的重要持仓。视为数字黄金和货币主权博弈工具。2025年BTC新周期来临，川普政府加密友好、机构通过ETF大规模买入。低成本参与可通过ARKB。他已持有多年，多次谈及个人比特币持仓。</p>
+        <span class="stock-tag tag-hedge">对冲资产</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker eth">ETH</div>
+      <div class="stock-info">
+        <h4>以太坊 Ethereum</h4>
+        <p>Mike持有ETH并参与质押（Staking）获取被动收益。他认为以太坊质押是相对稳定的加密收益方式，并谈及自己通过以太坊赚了50万的经历。</p>
+        <span class="stock-tag tag-growth">成长资产</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">IONQ</div>
+      <div class="stock-info">
+        <h4>IonQ 量子计算</h4>
+        <p>Mike称其为"量子界的NVIDIA"，专题分析其"量子计算即服务（QCaaS）"模式，类比当年AWS让所有人能租到服务器。视为前沿科技投机仓位，高风险高回报。</p>
+        <span class="stock-tag tag-speculative">高风险成长</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">ARKB</div>
+      <div class="stock-info">
+        <h4>ARK Bitcoin ETF</h4>
+        <p>Mike推荐通过ARKB这类比特币ETF低成本参与BTC上涨，而非直接持有比特币，适合不方便直接持有加密货币的普通投资者。</p>
+        <span class="stock-tag tag-hedge">BTC替代品</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker crypto">MARA</div>
+      <div class="stock-info">
+        <h4>Marathon Digital（矿企）</h4>
+        <p>Mike分析比特币矿企逻辑大转向：矿企从单纯挖矿转向AI算力+BTC双赛道，是BTC + AI双主题的放大器。重点布局了部分BTC矿企股。</p>
+        <span class="stock-tag tag-speculative">高风险成长</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">CMBT</div>
+      <div class="stock-info">
+        <h4>CMBT（未具名）</h4>
+        <p>Mike专门发布"买入这只股CMBT"视频，但未在公开内容中详细说明原因（可能为会员内容）。从标题判断应为其某个重仓标的。</p>
+        <span class="stock-tag tag-speculative">重点关注</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker">TSLA</div>
+      <div class="stock-info">
+        <h4>特斯拉 Tesla</h4>
+        <p>Mike频道多次讨论特斯拉，曾分析巴菲特为何不投特斯拉、FSD体验、特斯拉走势预测等。其网友中有多人坚定持有特斯拉，Mike本人对特斯拉的FSD自动驾驶技术评价正面。</p>
+        <span class="stock-tag tag-growth">关注标的</span>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="stock-ticker crypto">Circle</div>
+      <div class="stock-info">
+        <h4>Circle（USDC稳定币）</h4>
+        <p>Mike专门分析Circle的IPO和稳定币革命，认为"美元链上霸权2.0"是下一个重大主题。Circle作为USDC发行方，是美元数字化、链上金融大变革的直接受益者。</p>
+        <span class="stock-tag tag-growth">IPO关注</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 重点关注行业 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🚀</span> 重点关注行业与赛道</div>
+  <div class="section-subtitle">Mike 认为2026-2030年最具投资价值的行业方向</div>
+  <div class="sectors-grid">
+
+    <div class="sector-card">
+      <div class="sector-icon">🤖</div>
+      <div class="sector-name">AI基础设施</div>
+      <div class="sector-desc">算力、数据中心、AI芯片是未来10年最确定的赛道，类比互联网时代的基础设施铺设</div>
+      <div class="sector-priority priority-1">最高优先级</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">₿</div>
+      <div class="sector-name">加密货币 / Web3</div>
+      <div class="sector-desc">BTC、ETH、稳定币，以及比特币矿企股、BTC ETF，是货币主权博弈的核心战场</div>
+      <div class="sector-priority priority-1">最高优先级</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">⚛️</div>
+      <div class="sector-name">量子计算</div>
+      <div class="sector-desc">IONQ等公司正处于"量子霸权前夜"，量子计算即服务（QCaaS）是高风险高回报的前沿赛道</div>
+      <div class="sector-priority priority-2">重点关注</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">🛰️</div>
+      <div class="sector-name">太空能源/电网</div>
+      <div class="sector-desc">太空发电（SBSP）已进入工程验证阶段，Mike认为这是能源革命的下一阶段，2026年开始布局</div>
+      <div class="sector-priority priority-2">重点关注</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">🪖</div>
+      <div class="sector-name">军工/国防</div>
+      <div class="sector-desc">伊朗战争持续、亚洲地缘危机升温，美国军工股在地缘政治危机中保持强韧性，是对冲持仓</div>
+      <div class="sector-priority priority-2">重点关注</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">💎</div>
+      <div class="sector-name">稳定币/链上金融</div>
+      <div class="sector-desc">Circle、香港稳定币等，美元链上化是美元霸权的延伸。Mike认为这是"美元2.0"的核心布局</div>
+      <div class="sector-priority priority-2">重点关注</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">📈</div>
+      <div class="sector-name">美股宽基ETF</div>
+      <div class="sector-desc">QQQ（纳指）、SPY（标普500）等宽基ETF是Mike给普通人的保底建议，长期定投稳定复利</div>
+      <div class="sector-priority priority-3">基础配置</div>
+    </div>
+
+    <div class="sector-card">
+      <div class="sector-icon">🏗️</div>
+      <div class="sector-name">美国战略收购</div>
+      <div class="sector-desc">2026-2030"美帝大收购时代"——格陵兰、巴拿马运河等战略资产布局，受益于能源+稀土相关标的</div>
+      <div class="sector-priority priority-3">中期关注</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 操作风格与心态 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🎯</span> 操作风格与投资心态</div>
+  <div class="section-subtitle">理解 Mike 的操作节奏和心态，是参考其策略的关键</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="warn-box">
+      <h4>⚠️ 明确反对的做法</h4>
+      <p>• All in / All out（满仓进出）<br>
+      • 看标题就全仓买入<br>
+      • A股长期投资<br>
+      • 无计划的短线投机<br>
+      • VIX 30就急着抄底<br>
+      • 恐慌性卖出（恰恰是买入时机）</p>
+    </div>
+    <div class="info-box">
+      <h4>✅ Mike 推崇的做法</h4>
+      <p>• 长期定投优质美股科技<br>
+      • 多账户分散管理<br>
+      • 宏观判断先于个股选择<br>
+      • 危机/恐慌时逐步建仓<br>
+      • BTC作为长期对冲资产持有<br>
+      • ETF降低个股风险</p>
+    </div>
+  </div>
+
+  <div class="quote">
+    <strong>巴菲特说</strong>，只有当潮水退去时，你才会发现谁在裸泳。<br>
+    Mike的核心操作哲学是：在别人恐慌时贪婪，在市场疯狂时保持清醒，以宏观视角做长期布局。
+  </div>
+
+  <div class="card">
+    <div class="card-title">百万美金公开持仓计划（重要参考）</div>
+    <p>Mike 曾公开宣布一个"百万美金公开持仓计划"，用100万美金进行公开透明的实盘操作，分多期视频记录。这是他个人投资理念最直接的体现：</p>
+    <p>• 核心标的：AI科技巨头（NVDA、GOOGL、AMZN）+ BTC相关资产</p>
+    <p>• 策略：分批建仓，不追高，利用市场波动加仓</p>
+    <p>• 时间框架：2026-2030年中长期持有</p>
+    <p>• 仓位控制：无单只股票超过30%重仓的说法，强调分散</p>
+  </div>
+</div>
+
+<!-- 重要提醒 -->
+<div class="section">
+  <div class="section-title"><span class="icon">⚡</span> 重要参考视频清单</div>
+  <div class="section-subtitle">如果你想深入了解 Mike 的投资体系，以下是最值得观看的视频</div>
+  <div class="video-list">
+    <div class="video-item"><span>🎯</span> 乾貨分享，建立你自己的投資組合策略</div>
+    <div class="video-item"><span>🎯</span> 繼續買入NVDA/GOOGL/AMZN 長期定投邏輯</div>
+    <div class="video-item"><span>🎯</span> 2026-2030美國戰略投資機會版圖</div>
+    <div class="video-item"><span>🎯</span> 美元第三次崩潰 弱美元時代的資產配置邏輯</div>
+    <div class="video-item"><span>🎯</span> 美股AI主權陰謀 重磅投資策略</div>
+    <div class="video-item"><span>🎯</span> 百萬美金公開持倉計劃</div>
+    <div class="video-item"><span>🎯</span> 首度公開我的ETF操作思路</div>
+    <div class="video-item"><span>🎯</span> Vix恐慌指数飙升 如何判断买入机会</div>
+    <div class="video-item"><span>🎯</span> 比特幣礦企邏輯大轉向</div>
+    <div class="video-item"><span>🎯</span> 太空電網時代投資邏輯</div>
+    <div class="video-item"><span>🎯</span> IONQ量子霸权的前夜</div>
+    <div class="video-item"><span>🎯</span> 重仓这只股 仓位管理重要性</div>
+    <div class="video-item"><span>🎯</span> circle 穩定幣革命 美元鏈上霸權</div>
+    <div class="video-item"><span>🎯</span> 伊朗戰爭持續必買股票清單</div>
+    <div class="video-item"><span>🎯</span> 不是世界末日 但危險將至 別亂抄底</div>
+  </div>
+</div>
+
+<!-- 综合评价与注意事项 -->
+<div class="section">
+  <div class="section-title"><span class="icon">🔍</span> 综合评价与独立思考建议</div>
+  <div class="section-subtitle">客观看待 Mike 的内容，做出适合自己的判断</div>
+
+  <div class="card">
+    <div class="card-title">✅ Mike 内容的价值所在</div>
+    <p>• 宏观视野开阔：将地缘政治与投资机会结合的视角，在中文投资频道中相对稀缺</p>
+    <p>• 信息量大：覆盖AI、量子计算、加密货币、能源等多个前沿赛道的分析</p>
+    <p>• 操作透明：百万美金公开持仓计划等内容有一定参考价值</p>
+    <p>• 风险意识：反复强调仓位管理和不要all-in，态度负责</p>
+  </div>
+
+  <div class="warn-box">
+    <h4>⚠️ 需要注意的局限性</h4>
+    <p>• <strong>有商业利益</strong>：Mike 是 moomoo 等券商的付费推广者，部分内容与商业合作绑定<br>
+    • <strong>风格偏激进</strong>：关注"暴富"、"十倍股"等高风险机会，适合风险承受能力强的投资者<br>
+    • <strong>预测不一定准确</strong>：宏观叙事很精彩，但具体买点和价格预测未必准确<br>
+    • <strong>会员内容门槛</strong>：最核心的持仓细节在会员频道（付费），公开内容相对有限<br>
+    • <strong>不适合保守型投资者</strong>：Mike 的策略明显偏向成长型/进攻型，风险较大</p>
+  </div>
+</div>
+
+<footer>
+  本报告基于 YouTube 频道 @mike1111（Mike是麥克）公开视频内容的自动化分析整理 · 仅供参考，不构成投资建议<br>
+  生成时间：2026年3月23日 · 分析视频数：300+（标题）/ 25（详细内容）
+</footer>
+
+</body>
+</html>

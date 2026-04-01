@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>CLAW 投资策略模块 PRD</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        h1 { color: #1a1a2e; border-bottom: 3px solid #4a90d9; padding-bottom: 10px; }
+        h2 { color: #2d3436; margin-top: 30px; border-left: 4px solid #4a90d9; padding-left: 12px; }
+        h3 { color: #636e72; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; }
+        th, td { border: 1px solid #dfe6e9; padding: 12px; text-align: left; }
+        th { background: #74b9ff; color: white; }
+        .feature-list { background: white; padding: 20px; border-radius: 8px; margin: 10px 0; }
+        .tag { display: inline-block; background: #e17055; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; }
+        .tag.new { background: #00b894; }
+        .tag.core { background: #6c5ce7; }
+        code { background: #dfe6e9; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+        .chapter { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .highlight { background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<h1>📈 CLAW 投资策略模块 - 产品需求文档</h1>
+<p><strong>版本：</strong> v1.0 | <strong>日期：</strong> 2026-03-26 | <strong>状态：</strong> 规划中</p>
+
+<div class="chapter">
+<h2>1. 产品概述</h2>
+<p><strong>目标：</strong> 为用户提供个性化的投资策略推荐，基于用户画像（资金规模、风险偏好、投资目标、经验水平）智能匹配适合的投资策略组合。</p>
+<p><strong>定位：</strong> 现有期权策略的升级版，从单一期权策略扩展为完整的投资策略体系，包含保守型、稳健型、平衡型、进取型等多种策略。</p>
+</div>
+
+<div class="chapter">
+<h2>2. 核心概念</h2>
+
+<h3>2.1 用户画像 (UserProfile)</h3>
+<table>
+    <tr><th>维度</th><th>选项</th><th>说明</th></tr>
+    <tr><td>capital_scale</td><td>小资金 / 中等 / 大资金</td><td>5万以下 / 5-50万 / 50万+</td></tr>
+    <tr><td>risk_tolerance</td><td>保守 / 稳健 / 平衡 / 激进</td><td>可接受的最大亏损程度</td></tr>
+    <tr><td>investment_goal</td><td>保值 / 增值 / 增长 / 高回报</td><td>投资目标</td></tr>
+    <tr><td>experience_level</td><td>小白 / 有经验 / 专业</td><td>投资经验水平</td></tr>
+    <tr><td>time_horizon</td><td>短期 / 中期 / 长期</td><td>投资周期</td></tr>
+</table>
+
+<h3>2.2 投资策略 (Strategy)</h3>
+<table>
+    <tr><th>维度</th><th>说明</th></tr>
+    <tr><td>id</td><td>策略唯一标识</td></tr>
+    <tr><td>name</td><td>策略名称</td></tr>
+    <tr><td>description</td><td>策略简要说明</td></tr>
+    <tr><td>risk_level</td><td>风险等级 1-5（1=极保守，5=激进）</td></tr>
+    <tr><td>min_capital</td><td>建议最低资金门槛</td></tr>
+    <tr><td>expected_return</td><td>预期收益范围（如 8-12%）</td></tr>
+    <tr><td>suitable_profiles</td><td>匹配的画像标签组合</td></tr>
+    <tr><td>allocations</td><td>资产配置建议列表</td></tr>
+    <tr><td>tags</td><td>策略标签（ETF、期权、加密等）</td></tr>
+</table>
+</div>
+
+<div class="chapter">
+<h2>3. 功能清单</h2>
+
+<h3>3.1 新功能模块</h3>
+<table>
+    <tr><th>功能</th><th>优先级</th><th>说明</th></tr>
+    <tr><td>风险测评引导</td><td class="tag new">P0</td><td>新用户引导完成5道题问卷，生成用户画像</td></tr>
+    <tr><td>画像管理</td><td class="tag new">P0</td><td>查看/修改个人画像，重新测评</td></tr>
+    <tr><td>个性化推荐</td><td class="tag new">P0</td><td>基于用户画像推荐最匹配的策略（匹配度展示）</td></tr>
+    <tr><td>策略广场</td><td class="tag core">P1</td><td>全部策略列表，支持按风险/资金/类型筛选</td></tr>
+    <tr><td>策略详情页</td><td class="tag core">P1</td><td>配置建议、标的示例、策略说明、订阅/自选</td></tr>
+    <tr><td>策略订阅</td><td class="tag">P2</td><td>订阅策略后，相关标的进入自选监控</td></tr>
+    <tr><td>画像修改入口</td><td class="tag">P2</td><td>个人中心增加"修改投资画像"入口</td></tr>
+</table>
+
+<h3>3.2 与现有系统整合</h3>
+<table>
+    <tr><th>整合点</th><th>说明</th></tr>
+    <tr><td>导航栏入口</td><td>新增"投资策略"入口（独立于期权策略）</td></tr>
+    <tr><td>个人中心</td><td>投资偏好页增加画像维护功能</td></tr>
+    <tr><td>持仓管理</td><td>持仓可关联策略标签</td></tr>
+    <tr><td>数据打通</td><td>复用现有行情数据、持仓数据</td></tr>
+</table>
+</div>
+
+<div class="chapter">
+<h2>4. 用户交互流程</h2>
+
+<h3>4.1 首次访问流程</h3>
+<pre style="background:#2d3436;color:#dfe6e9;padding:15px;border-radius:6px;">
+┌─────────────────┐
+│  投资策略首页   │ ← 点击"投资策略"入口
+│  (未完成画像)   │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  引导页：欢迎   │
+│  开始风险测评   │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  问卷页 1/5     │
+│  资金规模       │
+└────────┬────────┘
+         ↓ ... (共5题)
+         ↓
+┌─────────────────┐
+│  结果页：画像   │
+│  + 推荐策略     │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  策略详情页     │
+│  或返回首页     │
+└─────────────────┘
+</pre>
+
+<h3>4.2 日常使用流程</h3>
+<pre style="background:#2d3436;color:#dfe6e9;padding:15px;border-radius:6px;">
+┌─────────────────┐
+│  投资策略首页   │
+│  (已有画像)     │
+├─────────────────┤
+│ 👤 画像信息     │
+│                 │
+│ 📌 为您推荐     │ ← 个性化推荐区（匹配度展示）
+│ [策略A] [策略B] │
+│                 │
+│ 📚 全部策略     │ ← 可自由浏览
+│ [筛选] [搜索]   │
+└─────────────────┘
+</pre>
+</div>
+
+<div class="chapter">
+<h2>5. 数据库设计</h2>
+
+<h3>5.1 新增表：user_profiles</h3>
+<pre style="background:#dfe6e9;padding:15px;border-radius:6px;">
+id: INTEGER PRIMARY KEY
+user_id: INTEGER (外键)
+capital_scale: TEXT (小资金/中等/大资金)
+risk_tolerance: TEXT (保守/稳健/平衡/激进)
+investment_goal: TEXT (保值/增值/增长/高回报)
+experience_level: TEXT (小白/有经验/专业)
+time_horizon: TEXT (短期/中期/长期)
+is_completed: BOOLEAN (是否完成测评)
+created_at: TIMESTAMP
+updated_at: TIMESTAMP
+</pre>
+
+<h3>5.2 新增表：strategies (预置策略)</h3>
+<pre style="background:#dfe6e9;padding:15px;border-radius:6px;">
+id: INTEGER PRIMARY KEY
+name: TEXT (策略名称)
+description: TEXT (策略说明)
+risk_level: INTEGER (1-5)
+min_capital: TEXT (资金门槛描述)
+expected_return: TEXT (收益范围)
+suitable_profiles: TEXT (JSON数组，匹配的画像)
+allocations: TEXT (JSON数组，配置建议)
+tags: TEXT (JSON数组，策略标签)
+is_active: BOOLEAN (是否启用)
+</pre>
+
+<h3>5.3 新增表：user_strategy_subscriptions</h3>
+<pre style="background:#dfe6e9;padding:15px;border-radius:6px;">
+id: INTEGER PRIMARY KEY
+user_id: INTEGER
+strategy_id: INTEGER (外键)
+subscribed_at: TIMESTAMP
+</pre>
+</div>
+
+<div class="chapter">
+<h2>6. API 设计</h2>
+
+<table>
+    <tr><th>接口</th><th>方法</th><th>说明</th></tr>
+    <tr><td>/api/strategy/profile</td><td>GET</td><td>获取当前用户画像</td></tr>
+    <tr><td>/api/strategy/profile</td><td>POST</td><td>提交问卷答案，生成/更新画像</td></tr>
+    <tr><td>/api/strategy/recommend</td><td>GET</td><td>获取个性化推荐（基于画像）</td></tr>
+    <tr><td>/api/strategy/list</td><td>GET</td><td>获取全部策略（支持筛选）</td></tr>
+    <tr><td>/api/strategy/{id}</td><td>GET</td><td>获取策略详情</td></tr>
+    <tr><td>/api/strategy/{id}/subscribe</td><td>POST</td><td>订阅策略</td></tr>
+    <tr><td>/api/strategy/subscriptions</td><td>GET</td><td>获取用户订阅的策略</td></tr>
+</table>
+</div>
+
+<div class="chapter">
+<h2>7. 预置策略数据</h2>
+
+<h3>7.1 保守型策略</h3>
+<table>
+    <tr><th>策略名</th><th>风险</th><th>资金</th><th>收益</th><th>配置建议</th></tr>
+    <tr><td>大盘ETF定投</td><td>1</td><td>任意</td><td>5-8%</td><td>70% VOO/SPY + 20% BND + 10% 现金</td></tr>
+    <tr><td>红利收益策略</td><td>2</td><td>5万+</td><td>6-10%</td><td>50% SCHD/VYM + 30% VOO + 20% 现金</td></tr>
+</table>
+
+<h3>7.2 稳健型策略</h3>
+<table>
+    <tr><th>策略名</th><th>风险</th><th>资金</th><th>收益</th><th>配置建议</th></tr>
+    <tr><td>核心+卫星</td><td>2</td><td>10万+</td><td>8-12%</td><td>50% 大盘ETF + 25% 成长股 + 15% 债券 + 10% 现金</td></tr>
+    <tr><td>稳健增值</td><td>2</td><td>10万+</td><td>8-12%</td><td>40% VOO + 20% SCHD + 20% GOOGL/AMZN + 20% 现金</td></tr>
+</table>
+
+<h3>7.3 平衡型策略</h3>
+<table>
+    <tr><th>策略名</th><th>风险</th><th>资金</th><th>收益</th><th>配置建议</th></tr>
+    <tr><td>成长积累</td><td>3</td><td>10万+</td><td>12-18%</td><td>30% NVDA + 25% GOOGL + 20% VOO + 15% 期权 + 10% 现金</td></tr>
+    <tr><td>AI赛道配置</td><td>3</td><td>15万+</td><td>15-25%</td><td>35% NVDA + 20% GOOGL + 15% MSFT + 20% ARKB + 10% 现金</td></tr>
+</table>
+
+<h3>7.4 激进型策略</h3>
+<table>
+    <tr><th>策略名</th><th>风险</th><th>资金</th><th>收益</th><th>配置建议</th></tr>
+    <tr><td>期权增益</td><td>4</td><td>20万+</td><td>15-25%</td><td>50% 正股底仓 + 40% sell put + 10% 现金</td></tr>
+    <tr><td>加密财富</td><td>5</td><td>20万+</td><td>高波动</td><td>40% BTC/ETH + 30% ARKB + 20% 成长股 + 10% 现金</td></tr>
+    <tr><td>量子前沿</td><td>4</td><td>20万+</td><td>高风险高回报</td><td>30% IONQ + 30% NVDA + 20% 加密 + 20% 现金</td></tr>
+</table>
+</div>
+
+<div class="chapter">
+<h2>8. 界面原型</h2>
+
+<h3>8.1 投资策略首页（有画像）</h3>
+<pre style="background:#dfe6e9;padding:15px;border-radius:6px;">
+┌────────────────────────────────────────────────────────────┐
+│  ← 投资策略                              [修改画像]         │
+├────────────────────────────────────────────────────────────┤
+│  👤 您的画像: 稳健型 | 20万预算 | 有经验 | 长期投资者      │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  📌 为您推荐                                               │
+│  ┌────────────────────┐  ┌────────────────────┐            │
+│  │  稳健增值策略     │  │  核心+卫星配置     │            │
+│  │  预期收益 8-12%  │  │  预期收益 8-12%  │            │
+│  │  匹配度 95% ⭐   │  │  匹配度 90%      │            │
+│  └────────────────────┘  └────────────────────┘            │
+│                                                            │
+│  ─────────────────────────────────────────────────────────│
+│                                                            │
+│  📚 全部策略                                               │
+│  筛选: [风险等级▼] [资金要求▼] [类型▼]                    │
+│                                                            │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐       │
+│  │ 保守型      │ │ 稳健型      │ │ 平衡型      │       │
+│  │ 5万起       │ │ 10万起      │ │ 10万起      │       │
+│  └──────────────┘ └──────────────┘ └──────────────┘       │
+│  ┌──────────────┐ ┌──────────────┐                        │
+│  │ 激进型      │ │ 期权策略    │                        │
+│  │ 20万起      │ │ 20万起      │                        │
+│  └──────────────┘ └──────────────┘                        │
+└────────────────────────────────────────────────────────────┘
+</pre>
+
+<h3>8.2 策略详情页</h3>
+<pre style="background:#dfe6e9;padding:15px;border-radius:6px;">
+┌────────────────────────────────────────────────────────────┐
+│  ← 返回  稳健增值策略                    [关联我的画像]   │
+├────────────────────────────────────────────────────────────┤
+│  📊 策略概览                                               │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 风险等级 │ 保守  │  建议资金 │ 10万+                 │ │
+│  │ 预期收益 │ 8-12% │  投资周期 │ 长期（1年+）          │ │
+│  │ 适用画像 │ 稳健型、有经验、长期投资者                │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  🎯 配置建议                                               │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 资产类型   │ 配置比例 │ 标的示例                     │ │
+│  │ ───────────┼──────────┼────────────                │ │
+│  │ 大盘ETF    │   40%   │ VOO, SPY, VTI               │ │
+│  │ 红利ETF    │   20%   │ SCHD, VYM, DGRO             │ │
+│  │ 科技成长   │   25%   │ GOOGL, AMZN, MSFT           │ │
+│  │ 期权增强   │   10%   │ TSLA sell put               │ │
+│  │ 现金管理   │    5%   │ SHV, SGOV                   │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  📝 策略说明                                               │
+│  以低波动ETF为核心仓位，获取稳健的市场beta收益...         │
+│                                                            │
+│  [开始跟踪]  [添加自选]  [分享]                           │
+└────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<div class="chapter">
+<h2>9. 开发计划</h2>
+
+<h3>阶段一：基础功能</h3>
+<ul>
+    <li>数据库建表（user_profiles, strategies, subscriptions）</li>
+    <li>策略数据初始化（预置12-15个策略）</li>
+    <li>后端 API 开发</li>
+</ul>
+
+<h3>阶段二：前端页面</h3>
+<ul>
+    <li>投资策略首页（推荐区 + 策略广场）</li>
+    <li>策略详情页</li>
+    <li>问卷引导页（5道题）</li>
+</ul>
+
+<h3>阶段三：整合与优化</h3>
+<ul>
+    <li>导航栏入口整合</li>
+    <li>个人中心画像入口</li>
+    <li>策略订阅功能</li>
+    <li>持仓关联策略标签</li>
+</ul>
+</div>
+
+<div class="highlight">
+<strong>备注：</strong> 本需求文档基于用户讨论结果生成，期权策略模块保持不变，作为策略广场中的一个分类存在。
+</div>
+
+</body>
+</html>
